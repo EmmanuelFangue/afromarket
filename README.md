@@ -1,2 +1,9 @@
-# afromarket
-AfroMarket est un annuaire géolocalisé avec recherche par mots‑clés, facettes (catégories, villes…) et carte. Des commerçants s’inscrivent et proposent leurs commerces ; un administrateur modère et publie.  La priorité absolue est la recherche rapide et pertinente (full‑text + géo),, de la modération et de la qualité des données.
+
+# AfroMarket
+
+Annuaire géolocalisé de commerces africains — Stack: Next.js 15 + React 19 + TS · .NET 10 microservices · OpenSearch · PostgreSQL+PostGIS · Keycloak · Kafka.
+
+## Démarrage
+- Voir `docs/architecture.md`
+- Créer issues via `.github/ISSUE_TEMPLATE/*`
+- Configurer Projects (voir `PROJECTS.md`)
