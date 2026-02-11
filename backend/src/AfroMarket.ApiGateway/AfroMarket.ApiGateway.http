@@ -1,0 +1,6 @@
+@AfroMarket.ApiGateway_HostAddress = http://localhost:5128
+
+GET {{AfroMarket.ApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
