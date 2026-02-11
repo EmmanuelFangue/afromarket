@@ -1,0 +1,45 @@
+# Frontend
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/build
+frontend/.DS_Store
+frontend/*.log
+frontend/.env
+frontend/.env.local
+frontend/.env.production.local
+frontend/.env.development.local
+frontend/.turbo
+
+# Backend
+backend/bin
+backend/obj
+backend/**/bin
+backend/**/obj
+backend/.vs
+backend/.vscode
+backend/*.suo
+backend/*.user
+backend/*.userosscache
+backend/*.sln.docstates
+backend/*.dll
+backend/*.exe
+backend/*.pdb
+
+# Docker
+*.log
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/

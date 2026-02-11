@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AfroMarket.AdminService/AfroMarket.AdminService.csproj" />
+    <Project Path="src/AfroMarket.ApiGateway/AfroMarket.ApiGateway.csproj" />
+    <Project Path="src/AfroMarket.MerchantService/AfroMarket.MerchantService.csproj" />
+    <Project Path="src/AfroMarket.SearchService/AfroMarket.SearchService.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,6 @@
+@AfroMarket.AdminService_HostAddress = http://localhost:5056
+
+GET {{AfroMarket.AdminService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
