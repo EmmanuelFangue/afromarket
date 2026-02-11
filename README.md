@@ -174,7 +174,7 @@ dotnet build
 
 - **OpenSearch**: Moteur de recherche pour recherche full-text et géographique
 - **React 19**: Dernière version avec améliorations de performance
-- **Next.js 15+**: App Router, Server Components
+- **Next.js 16**: App Router, Server Components, Turbopack
 - **.NET 10**: Performance améliorée, minimal APIs
 - **Docker**: Containerisation pour déploiement facile
 
