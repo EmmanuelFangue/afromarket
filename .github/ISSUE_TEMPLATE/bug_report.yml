@@ -1,0 +1,34 @@
+
+name: "Bug"
+description: "Signaler un bug"
+title: "BUG: {Résumé bref}"
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Décris le problème observé
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: 1) ... 2) ... 3) ...
+  - type: input
+    id: expected
+    attributes:
+      label: Comportement attendu
+  - type: input
+    id: env
+    attributes:
+      label: Contexte (env/versions/navigateur)
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Sévérité
+      options: ["S1 - critique", "S2 - majeur", "S3 - mineur"]
+    validations:
+      required: true

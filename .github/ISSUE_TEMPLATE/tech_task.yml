@@ -1,0 +1,23 @@
+
+name: "Tech Task"
+description: "Créer une tâche technique (refactor, config, CI/CD, perf...)"
+title: "TECH: {Résumé bref}"
+labels: ["tech-task"]
+assignees: []
+body:
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope technique
+      placeholder: Décris la tâche technique
+    validations:
+      required: true
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done (DoD)
+      options:
+        - label: Tests (unitaires/integration) mis à jour
+        - label: Observabilité (logs/metrics/traces)
+        - label: Docs technique à jour
+        - label: Pas de régression (CI verte)

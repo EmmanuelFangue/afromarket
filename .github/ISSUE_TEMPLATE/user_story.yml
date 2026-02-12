@@ -1,0 +1,75 @@
+
+name: "User Story"
+description: "Créer une User Story (fonctionnelle) avec critères d'acceptation"
+title: "US: {Résumé bref}"
+labels: ["user-story", "needs-estimate"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Format attendu
+        **En tant que** [rôle], **je veux** [action], **afin de** [bénéfice].
+
+  - type: input
+    id: role
+    attributes:
+      label: Rôle
+      placeholder: ex. Utilisateur anonyme, Commerçant, Admin
+    validations:
+      required: true
+
+  - type: textarea
+    id: intent
+    attributes:
+      label: Intention (action & bénéfice)
+      placeholder: En tant que ..., je veux ..., afin de ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critères d'acceptation (Gherkin)
+      description: Utilise Given/When/Then (FR ou EN)
+      placeholder: |
+        Étant donné ...
+        Quand ...
+        Alors ...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done (DoD)
+      options:
+        - label: Tests unitaires / intégration ajoutés
+        - label: Couverture ≥ 80% sur le périmètre
+        - label: Logs/metrics/traces observables
+        - label: Validation sécurité (input, authZ, rate-limit)
+        - label: Documentation mise à jour (README/ADR/API)
+        - label: Demo/PO validée
+    validations:
+      required: true
+
+  - type: dropdown
+    id: epic
+    attributes:
+      label: Epic
+      options:
+        - EPIC: Recherche
+        - EPIC: Fiche Commerce
+        - EPIC: Marchand & Marchandises
+        - EPIC: Admin & Modération
+        - EPIC: Ingestion
+        - EPIC: Messagerie
+        - EPIC: Auth & Compte
+    validations:
+      required: true
+
+  - type: input
+    id: estimate
+    attributes:
+      label: Estimation (story points)
+      placeholder: ex. 3, 5, 8
