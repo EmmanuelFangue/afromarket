@@ -13,9 +13,14 @@ builder.Services.AddSwaggerGen();
 var openSearchUrl = builder.Configuration["OpenSearch:Uri"] ?? "http://localhost:9200";
 var settings = new ConnectionSettings(new Uri(openSearchUrl))
     .DefaultIndex("businesses")
-    .EnableDebugMode()
     .PrettyJson()
     .RequestTimeout(TimeSpan.FromMinutes(2));
+
+// Enable debug mode only in Development
+if (builder.Environment.IsDevelopment())
+{
+    settings.EnableDebugMode();
+}
 
 builder.Services.AddSingleton<IOpenSearchClient>(new OpenSearchClient(settings));
 builder.Services.AddScoped<ISearchService, OpenSearchService>();
@@ -39,8 +44,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
-app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthorization();
 app.MapControllers();

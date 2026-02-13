@@ -28,6 +28,7 @@ backend/*.pdb
 
 # Docker
 *.log
+.env
 
 # IDE
 .idea

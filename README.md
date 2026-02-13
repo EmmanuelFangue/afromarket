@@ -11,7 +11,7 @@ AfroMarket est un annuaire géolocalisé avec recherche par mots‑clés, facett
 - **Tailwind CSS** - Framework CSS utility-first
 
 ### Backend
-- **.NET 10** - Framework backend Microsoft
+- **.NET 8** - Framework backend Microsoft
 - **Architecture microservices**:
   - **API Gateway** - Point d'entrée unique
   - **Search Service** - Service de recherche avec OpenSearch
@@ -39,7 +39,7 @@ afromarket/
 │   │   ├── AfroMarket.SearchService/    # Service de recherche
 │   │   ├── AfroMarket.MerchantService/  # Gestion commerçants
 │   │   └── AfroMarket.AdminService/     # Administration
-│   └── AfroMarket.sln
+│   └── AfroMarket.slnx
 └── docker-compose.yml       # Configuration Docker
 ```
 
@@ -48,7 +48,7 @@ afromarket/
 ### Prérequis
 - Docker et Docker Compose
 - Node.js 20+ (pour développement local)
-- .NET 10 SDK (pour développement local)
+- .NET 8 SDK (pour développement local)
 
 ### Lancer l'application avec Docker
 
@@ -175,7 +175,7 @@ dotnet build
 - **OpenSearch**: Moteur de recherche pour recherche full-text et géographique
 - **React 19**: Dernière version avec améliorations de performance
 - **Next.js 16**: App Router, Server Components, Turbopack
-- **.NET 10**: Performance améliorée, minimal APIs
+- **.NET 8**: Framework backend performant et mature
 - **Docker**: Containerisation pour déploiement facile
 
 ## License

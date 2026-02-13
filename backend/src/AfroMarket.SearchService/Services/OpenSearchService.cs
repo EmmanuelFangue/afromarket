@@ -25,10 +25,14 @@ public class OpenSearchService : ISearchService
 
     public async Task<SearchResponse> SearchBusinessesAsync(BusinessSearchRequest request)
     {
+        // Validate and clamp pagination parameters
+        var page = Math.Max(1, request.Page);
+        var pageSize = Math.Max(1, Math.Min(100, request.PageSize)); // Max 100 results per page
+
         var searchDescriptor = new SearchDescriptor<Business>()
             .Index(IndexName)
-            .From((request.Page - 1) * request.PageSize)
-            .Size(request.PageSize)
+            .From((page - 1) * pageSize)
+            .Size(pageSize)
             .Query(q => BuildQuery(q, request))
             .Aggregations(a => BuildAggregations(a));
 
@@ -44,8 +48,8 @@ public class OpenSearchService : ISearchService
         {
             Results = response.Documents.ToList(),
             TotalResults = response.Total,
-            Page = request.Page,
-            PageSize = request.PageSize,
+            Page = page,
+            PageSize = pageSize,
             Facets = ExtractFacets(response.Aggregations)
         };
     }
@@ -70,7 +74,7 @@ public class OpenSearchService : ISearchService
         }
 
         // Category filter
-        if (request.Categories.Any())
+        if (request.Categories?.Any() == true)
         {
             queries.Add(q.Terms(t => t
                 .Field(b => b.Category)
@@ -79,7 +83,7 @@ public class OpenSearchService : ISearchService
         }
 
         // City filter
-        if (request.Cities.Any())
+        if (request.Cities?.Any() == true)
         {
             queries.Add(q.Terms(t => t
                 .Field(b => b.City)

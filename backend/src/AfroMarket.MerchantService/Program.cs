@@ -30,19 +30,25 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Initialize database with seed data
+// Initialize database with migrations and seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<MerchantDbContext>();
-        DbInitializer.Initialize(context);
+
+        // Apply migrations on startup (only in Development)
+        if (app.Environment.IsDevelopment())
+        {
+            context.Database.Migrate();
+            DbInitializer.Initialize(context);
+        }
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding the database.");
+        logger.LogError(ex, "An error occurred while initializing the database.");
     }
 }
 
@@ -52,9 +58,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();

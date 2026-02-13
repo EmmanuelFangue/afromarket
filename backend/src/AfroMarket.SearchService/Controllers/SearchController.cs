@@ -27,8 +27,9 @@ public class SearchController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error performing search");
-            return StatusCode(500, new { error = "Search failed", message = ex.Message });
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error performing search. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = "An error occurred while searching", correlationId });
         }
     }
 
@@ -46,8 +47,9 @@ public class SearchController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error indexing business");
-            return StatusCode(500, new { error = "Index failed", message = ex.Message });
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error indexing business. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = "An error occurred while indexing", correlationId });
         }
     }
 
@@ -65,8 +67,9 @@ public class SearchController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting business");
-            return StatusCode(500, new { error = "Delete failed", message = ex.Message });
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error deleting business. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = "An error occurred while deleting", correlationId });
         }
     }
 }
