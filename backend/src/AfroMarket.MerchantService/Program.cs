@@ -1,4 +1,5 @@
 using AfroMarket.MerchantService.Data;
+using AfroMarket.MerchantService.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,9 @@ builder.Services.AddSwaggerGen();
 // Configure DbContext
 builder.Services.AddDbContext<MerchantDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register application services
+builder.Services.AddScoped<IBusinessService, BusinessService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
