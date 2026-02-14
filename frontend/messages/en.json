@@ -1,0 +1,46 @@
+{
+  "common": {
+    "language": "Language",
+    "french": "Français",
+    "english": "English",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "notFound": "Not Found"
+  },
+  "home": {
+    "title": "Geolocated Directory",
+    "subtitle": "Discover African businesses and services near you",
+    "searchPlaceholder": "Search for businesses, products or services..."
+  },
+  "business": {
+    "name": "Business Name",
+    "description": "Description",
+    "category": "Category",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "status": {
+      "draft": "Draft",
+      "pendingValidation": "Pending Validation",
+      "published": "Published",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    }
+  },
+  "item": {
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "currency": "Currency",
+    "sku": "SKU",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "suspended": "Suspended"
+    }
+  }
+}
