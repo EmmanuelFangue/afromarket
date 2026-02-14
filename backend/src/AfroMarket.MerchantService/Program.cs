@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +20,25 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IItemService, ItemService>();
+
+// Configure Localization
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "fr-CA", "en-CA" };
+    options.DefaultRequestCulture = new RequestCulture("fr-CA");
+    options.SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+    options.SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList();
+
+    // Support Accept-Language header
+    options.RequestCultureProviders = new List<IRequestCultureProvider>
+    {
+        new AcceptLanguageHeaderRequestCultureProvider(),
+        new QueryStringRequestCultureProvider(), // Fallback: ?culture=en-CA
+        new CookieRequestCultureProvider()
+    };
+});
 
 // Configure Keycloak Authentication
 builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, options =>
@@ -90,6 +111,9 @@ else
 }
 
 app.UseCors("AllowFrontend");
+
+// Request Localization middleware
+app.UseRequestLocalization();
 
 // ADD Authentication & Authorization middleware
 app.UseAuthentication();

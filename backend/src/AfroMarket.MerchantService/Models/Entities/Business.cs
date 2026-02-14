@@ -1,4 +1,6 @@
 using AfroMarket.MerchantService.Models.Enums;
+using System.Text.Json;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AfroMarket.MerchantService.Models.Entities;
 
@@ -6,8 +8,17 @@ public class Business
 {
     public Guid Id { get; set; }
     public Guid OwnerId { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Nom du commerce en JSON multilingue: {"fr": "...", "en": "..."}
+    /// </summary>
+    public string NameTranslations { get; set; } = "{\"fr\":\"\",\"en\":\"\"}";
+
+    /// <summary>
+    /// Description en JSON multilingue: {"fr": "...", "en": "..."}
+    /// </summary>
+    public string DescriptionTranslations { get; set; } = "{\"fr\":\"\",\"en\":\"\"}";
+
     public BusinessStatus Status { get; set; } = BusinessStatus.Draft;
     public Guid CategoryId { get; set; }
     public Guid AddressId { get; set; }
@@ -26,4 +37,48 @@ public class Business
     public Address Address { get; set; } = null!;
     public ICollection<Message> Messages { get; set; } = new List<Message>();
     public ICollection<Item> Items { get; set; } = new List<Item>();
+
+    // Propriétés de commodité (non mappées) pour rétrocompatibilité
+    [NotMapped]
+    public string Name
+    {
+        get => GetTranslation(NameTranslations, "fr");
+        set => NameTranslations = SetTranslation(NameTranslations, "fr", value);
+    }
+
+    [NotMapped]
+    public string Description
+    {
+        get => GetTranslation(DescriptionTranslations, "fr");
+        set => DescriptionTranslations = SetTranslation(DescriptionTranslations, "fr", value);
+    }
+
+    // Helpers pour JSON
+    private static string GetTranslation(string json, string lang)
+    {
+        try
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+            return dict?.GetValueOrDefault(lang) ?? "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    private static string SetTranslation(string json, string lang, string value)
+    {
+        try
+        {
+            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
+                       ?? new Dictionary<string, string>();
+            dict[lang] = value;
+            return JsonSerializer.Serialize(dict);
+        }
+        catch
+        {
+            return "{\"fr\":\"\",\"en\":\"\"}";
+        }
+    }
 }
