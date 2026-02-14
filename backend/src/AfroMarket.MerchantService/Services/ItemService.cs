@@ -2,7 +2,9 @@ using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;
+using AfroMarket.MerchantService.Resources;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 
 namespace AfroMarket.MerchantService.Services;
 
@@ -10,12 +12,17 @@ public class ItemService : IItemService
 {
     private readonly MerchantDbContext _context;
     private readonly ILogger<ItemService> _logger;
+    private readonly IStringLocalizer<SharedResources> _localizer;
     private static readonly string[] SupportedCurrencies = { "CAD", "USD", "EUR", "XOF", "XAF" };
 
-    public ItemService(MerchantDbContext context, ILogger<ItemService> logger)
+    public ItemService(
+        MerchantDbContext context,
+        ILogger<ItemService> logger,
+        IStringLocalizer<SharedResources> localizer)
     {
         _context = context;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<ItemResponse> CreateItemAsync(CreateItemRequest request, Guid ownerId)
@@ -26,30 +33,30 @@ public class ItemService : IItemService
 
         if (business == null)
         {
-            throw new KeyNotFoundException($"Business with ID {request.BusinessId} not found");
+            throw new KeyNotFoundException(string.Format(_localizer["Error.BusinessNotFound"].Value, request.BusinessId));
         }
 
         if (business.OwnerId != ownerId)
         {
-            throw new UnauthorizedAccessException("You do not own this business");
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
         // Validate media
         if (request.Media == null || request.Media.Count == 0)
         {
-            throw new ArgumentException("At least one media item is required");
+            throw new ArgumentException(_localizer["Error.MediaRequired"].Value);
         }
 
         // Validate price
         if (request.Price <= 0)
         {
-            throw new ArgumentException("Price must be greater than 0");
+            throw new ArgumentException(_localizer["Error.PricePositive"].Value);
         }
 
         // Validate currency
         if (!SupportedCurrencies.Contains(request.Currency))
         {
-            throw new ArgumentException($"Invalid currency code. Supported: {string.Join(", ", SupportedCurrencies)}");
+            throw new ArgumentException(string.Format(_localizer["Error.InvalidCurrency"].Value, string.Join(", ", SupportedCurrencies)));
         }
 
         // Create item

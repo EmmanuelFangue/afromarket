@@ -1,32 +1,33 @@
 using System.ComponentModel.DataAnnotations;
+using AfroMarket.MerchantService.Resources;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
 public class CreateBusinessRequest
 {
-    [Required(ErrorMessage = "Le nom du commerce est requis")]
-    [StringLength(200, MinimumLength = 2, ErrorMessage = "Le nom doit contenir entre 2 et 200 caractères")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Name.Required")]
+    [StringLength(200, MinimumLength = 2, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Name.Length")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La description est requise")]
-    [StringLength(2000, MinimumLength = 10, ErrorMessage = "La description doit contenir entre 10 et 2000 caractères")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Description.Required")]
+    [StringLength(2000, MinimumLength = 10, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Description.Length")]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La catégorie est requise")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Category.Required")]
     public Guid CategoryId { get; set; }
 
     [Required(ErrorMessage = "L'adresse est requise")]
     public AddressDto Address { get; set; } = null!;
 
-    [Phone(ErrorMessage = "Le numéro de téléphone n'est pas valide")]
+    [Phone(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Phone.Invalid")]
     [StringLength(50)]
     public string? Phone { get; set; }
 
-    [EmailAddress(ErrorMessage = "L'adresse email n'est pas valide")]
+    [EmailAddress(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Email.Invalid")]
     [StringLength(255)]
     public string? Email { get; set; }
 
-    [Url(ErrorMessage = "Le site web n'est pas une URL valide")]
+    [Url(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Website.Invalid")]
     [StringLength(500)]
     public string? Website { get; set; }
 
