@@ -1,0 +1,46 @@
+{
+  "common": {
+    "language": "Langue",
+    "french": "Français",
+    "english": "English",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "notFound": "Non trouvé"
+  },
+  "home": {
+    "title": "Annuaire géolocalisé",
+    "subtitle": "Découvrez les commerces et services africains près de chez vous",
+    "searchPlaceholder": "Rechercher des commerces, produits ou services..."
+  },
+  "business": {
+    "name": "Nom du commerce",
+    "description": "Description",
+    "category": "Catégorie",
+    "address": "Adresse",
+    "phone": "Téléphone",
+    "email": "Email",
+    "website": "Site web",
+    "status": {
+      "draft": "Brouillon",
+      "pendingValidation": "En attente de validation",
+      "published": "Publié",
+      "rejected": "Rejeté",
+      "suspended": "Suspendu"
+    }
+  },
+  "item": {
+    "title": "Titre",
+    "description": "Description",
+    "price": "Prix",
+    "currency": "Devise",
+    "sku": "SKU",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "status": {
+      "draft": "Brouillon",
+      "active": "Actif",
+      "suspended": "Suspendu"
+    }
+  }
+}

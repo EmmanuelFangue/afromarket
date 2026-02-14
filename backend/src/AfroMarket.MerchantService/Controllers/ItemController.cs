@@ -1,7 +1,9 @@
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Enums;
 using AfroMarket.MerchantService.Services;
+using AfroMarket.MerchantService.Resources;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace AfroMarket.MerchantService.Controllers;
 
@@ -11,11 +13,16 @@ public class ItemController : ControllerBase
 {
     private readonly IItemService _itemService;
     private readonly ILogger<ItemController> _logger;
+    private readonly IStringLocalizer<SharedResources> _localizer;
 
-    public ItemController(IItemService itemService, ILogger<ItemController> logger)
+    public ItemController(
+        IItemService itemService,
+        ILogger<ItemController> logger,
+        IStringLocalizer<SharedResources> localizer)
     {
         _itemService = itemService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     /// <summary>
@@ -61,7 +68,7 @@ public class ItemController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating item");
-            return StatusCode(500, new { error = "An error occurred while creating the item" });
+            return StatusCode(500, new { error = _localizer["Error.CreateItem"].Value });
         }
     }
 
@@ -110,7 +117,7 @@ public class ItemController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating item {ItemId}", id);
-            return StatusCode(500, new { error = "An error occurred while updating the item" });
+            return StatusCode(500, new { error = _localizer["Error.UpdateItem"].Value });
         }
     }
 
@@ -138,7 +145,7 @@ public class ItemController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving item {ItemId}", id);
-            return StatusCode(500, new { error = "An error occurred while retrieving the item" });
+            return StatusCode(500, new { error = _localizer["Error.RetrieveItem"].Value });
         }
     }
 
@@ -173,7 +180,7 @@ public class ItemController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving items for business {BusinessId}", businessId);
-            return StatusCode(500, new { error = "An error occurred while retrieving items" });
+            return StatusCode(500, new { error = _localizer["Error.RetrieveItems"].Value });
         }
     }
 
@@ -215,7 +222,7 @@ public class ItemController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting item {ItemId}", id);
-            return StatusCode(500, new { error = "An error occurred while deleting the item" });
+            return StatusCode(500, new { error = _localizer["Error.DeleteItem"].Value });
         }
     }
 }

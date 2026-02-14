@@ -16,11 +16,11 @@ public static class DbInitializer
         // Créer les catégories
         var categories = new[]
         {
-            new Category { Id = Guid.NewGuid(), Name = "Restaurant africain", Slug = "restaurant-africain" },
-            new Category { Id = Guid.NewGuid(), Name = "Épicerie africaine", Slug = "epicerie-africaine" },
-            new Category { Id = Guid.NewGuid(), Name = "Coiffure afro", Slug = "coiffure-afro" },
-            new Category { Id = Guid.NewGuid(), Name = "Vêtements africains", Slug = "vetements-africains" },
-            new Category { Id = Guid.NewGuid(), Name = "Services traiteur", Slug = "services-traiteur" }
+            new Category { Id = Guid.NewGuid(), NameTranslations = "{\"fr\":\"Restaurant africain\",\"en\":\"African Restaurant\"}", Slug = "restaurant-africain" },
+            new Category { Id = Guid.NewGuid(), NameTranslations = "{\"fr\":\"Épicerie africaine\",\"en\":\"African Grocery\"}", Slug = "epicerie-africaine" },
+            new Category { Id = Guid.NewGuid(), NameTranslations = "{\"fr\":\"Coiffure afro\",\"en\":\"Afro Hairstyling\"}", Slug = "coiffure-afro" },
+            new Category { Id = Guid.NewGuid(), NameTranslations = "{\"fr\":\"Vêtements africains\",\"en\":\"African Clothing\"}", Slug = "vetements-africains" },
+            new Category { Id = Guid.NewGuid(), NameTranslations = "{\"fr\":\"Services traiteur\",\"en\":\"Catering Services\"}", Slug = "services-traiteur" }
         };
         context.Categories.AddRange(categories);
         context.SaveChanges();
@@ -122,8 +122,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 OwnerId = merchantUser.Id,
-                Name = "Chez Fatou Restaurant",
-                Description = "Restaurant sénégalais authentique proposant thiéboudienne, mafé et yassa poulet dans une ambiance chaleureuse.",
+                NameTranslations = "{\"fr\":\"Chez Fatou Restaurant\",\"en\":\"Chez Fatou Restaurant\"}",
+                DescriptionTranslations = "{\"fr\":\"Restaurant sénégalais authentique proposant thiéboudienne, mafé et yassa poulet dans une ambiance chaleureuse.\",\"en\":\"Authentic Senegalese restaurant offering thiéboudienne, mafé and yassa chicken in a warm atmosphere.\"}",
                 Status = BusinessStatus.Published,
                 CategoryId = categories[0].Id,
                 AddressId = addresses[0].Id,
@@ -139,8 +139,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 OwnerId = merchantUser.Id,
-                Name = "Marché Africain Adama",
-                Description = "Épicerie africaine offrant produits d'Afrique de l'Ouest, viandes halal, poissons fumés et épices authentiques.",
+                NameTranslations = "{\"fr\":\"Marché Africain Adama\",\"en\":\"Adama African Market\"}",
+                DescriptionTranslations = "{\"fr\":\"Épicerie africaine offrant produits d'Afrique de l'Ouest, viandes halal, poissons fumés et épices authentiques.\",\"en\":\"African grocery offering West African products, halal meats, smoked fish and authentic spices.\"}",
                 Status = BusinessStatus.Published,
                 CategoryId = categories[1].Id,
                 AddressId = addresses[1].Id,
@@ -156,8 +156,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 OwnerId = merchantUser.Id,
-                Name = "Salon Afro Beauté",
-                Description = "Salon de coiffure spécialisé en tresses, locks, tissages et soins capillaires pour cheveux afro.",
+                NameTranslations = "{\"fr\":\"Salon Afro Beauté\",\"en\":\"Afro Beauty Salon\"}",
+                DescriptionTranslations = "{\"fr\":\"Salon de coiffure spécialisé en tresses, locks, tissages et soins capillaires pour cheveux afro.\",\"en\":\"Hair salon specializing in braids, locks, weaves and hair care for afro hair.\"}",
                 Status = BusinessStatus.Published,
                 CategoryId = categories[2].Id,
                 AddressId = addresses[2].Id,
@@ -173,8 +173,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 OwnerId = merchantUser.Id,
-                Name = "Lagos Kitchen Toronto",
-                Description = "Cuisine nigériane authentique - jollof rice, suya, egusi soup, pounded yam et plus encore.",
+                NameTranslations = "{\"fr\":\"Lagos Kitchen Toronto\",\"en\":\"Lagos Kitchen Toronto\"}",
+                DescriptionTranslations = "{\"fr\":\"Cuisine nigériane authentique - jollof rice, suya, egusi soup, pounded yam et plus encore.\",\"en\":\"Authentic Nigerian cuisine - jollof rice, suya, egusi soup, pounded yam and more.\"}",
                 Status = BusinessStatus.Published,
                 CategoryId = categories[0].Id,
                 AddressId = addresses[3].Id,
@@ -190,8 +190,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 OwnerId = merchantUser.Id,
-                Name = "Wax & Pagne Boutique",
-                Description = "Boutique de vêtements et tissus africains - wax, pagne, boubous, dashikis sur mesure.",
+                NameTranslations = "{\"fr\":\"Wax & Pagne Boutique\",\"en\":\"Wax & Pagne Boutique\"}",
+                DescriptionTranslations = "{\"fr\":\"Boutique de vêtements et tissus africains - wax, pagne, boubous, dashikis sur mesure.\",\"en\":\"African clothing and fabric boutique - wax, pagne, boubous, custom dashikis.\"}",
                 Status = BusinessStatus.PendingValidation,
                 CategoryId = categories[3].Id,
                 AddressId = addresses[4].Id,
@@ -215,8 +215,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
-                Title = "Thiéboudienne traditionnel",
-                Description = "Le plat national du Sénégal - riz cuisiné au poisson, légumes variés et sauce tomate. Servi avec du poisson frais et une variété de légumes de saison.",
+                TitleTranslations = "{\"fr\":\"Thiéboudienne traditionnel\",\"en\":\"Traditional Thiéboudienne\"}",
+                DescriptionTranslations = "{\"fr\":\"Le plat national du Sénégal - riz cuisiné au poisson, légumes variés et sauce tomate. Servi avec du poisson frais et une variété de légumes de saison.\",\"en\":\"Senegal's national dish - rice cooked with fish, assorted vegetables and tomato sauce. Served with fresh fish and a variety of seasonal vegetables.\"}",
                 Price = 18.99m,
                 Currency = "CAD",
                 SKU = "TRAD-THIEB-001",
@@ -229,8 +229,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
-                Title = "Mafé poulet",
-                Description = "Ragoût de poulet mijoté dans une sauce aux arachides crémeuse, accompagné de riz blanc. Un classique de la cuisine ouest-africaine.",
+                TitleTranslations = "{\"fr\":\"Mafé poulet\",\"en\":\"Chicken Mafé\"}",
+                DescriptionTranslations = "{\"fr\":\"Ragoût de poulet mijoté dans une sauce aux arachides crémeuse, accompagné de riz blanc. Un classique de la cuisine ouest-africaine.\",\"en\":\"Chicken stew simmered in a creamy peanut sauce, served with white rice. A West African classic.\"}",
                 Price = 16.50m,
                 Currency = "CAD",
                 SKU = "TRAD-MAFE-002",
@@ -243,8 +243,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
-                Title = "Yassa poulet",
-                Description = "Poulet mariné aux oignons et citron, servi avec du riz. Plat acidulé et savoureux de la cuisine sénégalaise.",
+                TitleTranslations = "{\"fr\":\"Yassa poulet\",\"en\":\"Chicken Yassa\"}",
+                DescriptionTranslations = "{\"fr\":\"Poulet mariné aux oignons et citron, servi avec du riz. Plat acidulé et savoureux de la cuisine sénégalaise.\",\"en\":\"Chicken marinated in onions and lemon, served with rice. A tangy and flavorful Senegalese dish.\"}",
                 Price = 17.25m,
                 Currency = "CAD",
                 SKU = "TRAD-YASSA-003",
@@ -259,8 +259,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[1].Id,
-                Title = "Farine de manioc (Gari)",
-                Description = "Farine de manioc fermentée de qualité premium, importée directement d'Afrique de l'Ouest. Parfaite pour préparer l'eba ou à consommer avec soupe.",
+                TitleTranslations = "{\"fr\":\"Farine de manioc (Gari)\",\"en\":\"Cassava Flour (Gari)\"}",
+                DescriptionTranslations = "{\"fr\":\"Farine de manioc fermentée de qualité premium, importée directement d'Afrique de l'Ouest. Parfaite pour préparer l'eba ou à consommer avec soupe.\",\"en\":\"Premium quality fermented cassava flour, imported directly from West Africa. Perfect for making eba or serving with soup.\"}",
                 Price = 8.99m,
                 Currency = "CAD",
                 SKU = "EPIC-GARI-500G",
@@ -273,8 +273,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[1].Id,
-                Title = "Poisson fumé barracuda",
-                Description = "Barracuda fumé artisanalement, idéal pour vos sauces et ragoûts. Poids approximatif: 500g.",
+                TitleTranslations = "{\"fr\":\"Poisson fumé barracuda\",\"en\":\"Smoked Barracuda Fish\"}",
+                DescriptionTranslations = "{\"fr\":\"Barracuda fumé artisanalement, idéal pour vos sauces et ragoûts. Poids approximatif: 500g.\",\"en\":\"Artisanally smoked barracuda, ideal for your sauces and stews. Approximate weight: 500g.\"}",
                 Price = 12.50m,
                 Currency = "CAD",
                 SKU = "POISS-BARRA-500G",
@@ -289,8 +289,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[3].Id,
-                Title = "Jollof Rice Party Size",
-                Description = "Notre célèbre jollof rice nigérian dans un format familial (4-6 personnes). Riz parfumé cuit dans une sauce tomate épicée avec des légumes.",
+                TitleTranslations = "{\"fr\":\"Jollof Rice Party Size\",\"en\":\"Jollof Rice Party Size\"}",
+                DescriptionTranslations = "{\"fr\":\"Notre célèbre jollof rice nigérian dans un format familial (4-6 personnes). Riz parfumé cuit dans une sauce tomate épicée avec des légumes.\",\"en\":\"Our famous Nigerian jollof rice in a family size (4-6 people). Fragrant rice cooked in a spicy tomato sauce with vegetables.\"}",
                 Price = 35.00m,
                 Currency = "CAD",
                 SKU = "JOLL-PARTY-01",
@@ -303,8 +303,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[3].Id,
-                Title = "Suya Beef Skewers (5 pcs)",
-                Description = "Brochettes de bœuf marinées dans notre mélange d'épices suya maison et grillées à la perfection. Servies avec oignons frais et tomates.",
+                TitleTranslations = "{\"fr\":\"Suya Beef Skewers (5 pcs)\",\"en\":\"Suya Beef Skewers (5 pcs)\"}",
+                DescriptionTranslations = "{\"fr\":\"Brochettes de bœuf marinées dans notre mélange d'épices suya maison et grillées à la perfection. Servies avec oignons frais et tomates.\",\"en\":\"Beef skewers marinated in our homemade suya spice blend and grilled to perfection. Served with fresh onions and tomatoes.\"}",
                 Price = 14.99m,
                 Currency = "CAD",
                 SKU = "SUYA-BEEF-5PC",
@@ -319,8 +319,8 @@ public static class DbInitializer
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[4].Id,
-                Title = "Tissu Wax Ankara Premium",
-                Description = "Tissu wax 100% coton, motifs ankara authentiques. Vendu au mètre (minimum 2 mètres), parfait pour robes, chemises et accessoires.",
+                TitleTranslations = "{\"fr\":\"Tissu Wax Ankara Premium\",\"en\":\"Premium Ankara Wax Fabric\"}",
+                DescriptionTranslations = "{\"fr\":\"Tissu wax 100% coton, motifs ankara authentiques. Vendu au mètre (minimum 2 mètres), parfait pour robes, chemises et accessoires.\",\"en\":\"100% cotton wax fabric, authentic ankara patterns. Sold by the meter (minimum 2 meters), perfect for dresses, shirts and accessories.\"}",
                 Price = 15.00m,
                 Currency = "CAD",
                 SKU = "TISSU-WAX-ANKA-001",

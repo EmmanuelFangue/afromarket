@@ -39,8 +39,11 @@ public class MerchantDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Slug).IsUnique();
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.NameTranslations).IsRequired().HasColumnType("nvarchar(max)");
             entity.Property(e => e.Slug).IsRequired().HasMaxLength(100);
+
+            // Ignore NotMapped properties
+            entity.Ignore(e => e.Name);
         });
 
         // Address configuration
@@ -64,8 +67,8 @@ public class MerchantDbContext : DbContext
             entity.HasIndex(e => e.CategoryId);
             entity.HasIndex(e => e.OwnerId);
 
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Description).HasMaxLength(2000);
+            entity.Property(e => e.NameTranslations).IsRequired().HasColumnType("nvarchar(max)");
+            entity.Property(e => e.DescriptionTranslations).IsRequired().HasColumnType("nvarchar(max)");
             entity.Property(e => e.Phone).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Website).HasMaxLength(500);
@@ -73,6 +76,10 @@ public class MerchantDbContext : DbContext
             entity.Property(e => e.RejectionReason).HasMaxLength(1000);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+
+            // Ignore NotMapped properties
+            entity.Ignore(e => e.Name);
+            entity.Ignore(e => e.Description);
 
             // Relationships
             entity.HasOne(e => e.Owner)
@@ -120,14 +127,18 @@ public class MerchantDbContext : DbContext
             entity.HasIndex(e => new { e.BusinessId, e.Status }); // Composite for filtering
 
             // Property constraints
-            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Description).IsRequired().HasMaxLength(5000);
+            entity.Property(e => e.TitleTranslations).IsRequired().HasColumnType("nvarchar(max)");
+            entity.Property(e => e.DescriptionTranslations).IsRequired().HasColumnType("nvarchar(max)");
             entity.Property(e => e.Price).HasColumnType("decimal(18,2)").IsRequired();
             entity.Property(e => e.Currency).IsRequired().HasMaxLength(3).HasDefaultValue("CAD");
             entity.Property(e => e.SKU).HasMaxLength(100);
             entity.Property(e => e.IsAvailable).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+
+            // Ignore NotMapped properties
+            entity.Ignore(e => e.Title);
+            entity.Ignore(e => e.Description);
 
             // Relationships
             entity.HasOne(e => e.Business)

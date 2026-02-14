@@ -2,7 +2,9 @@ using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;
+using AfroMarket.MerchantService.Resources;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System.Text.Json;
 
 namespace AfroMarket.MerchantService.Services;
@@ -11,11 +13,16 @@ public class BusinessService : IBusinessService
 {
     private readonly MerchantDbContext _context;
     private readonly ILogger<BusinessService> _logger;
+    private readonly IStringLocalizer<SharedResources> _localizer;
 
-    public BusinessService(MerchantDbContext context, ILogger<BusinessService> logger)
+    public BusinessService(
+        MerchantDbContext context,
+        ILogger<BusinessService> logger,
+        IStringLocalizer<SharedResources> localizer)
     {
         _context = context;
         _logger = logger;
+        _localizer = localizer;
     }
 
     public async Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request, Guid ownerId)
@@ -26,7 +33,7 @@ public class BusinessService : IBusinessService
         var categoryExists = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId);
         if (!categoryExists)
         {
-            throw new ArgumentException($"Category with ID {request.CategoryId} does not exist");
+            throw new ArgumentException(string.Format(_localizer["Error.CategoryNotFound"].Value, request.CategoryId));
         }
 
         // Créer l'adresse
@@ -81,19 +88,19 @@ public class BusinessService : IBusinessService
 
         if (business == null)
         {
-            throw new KeyNotFoundException($"Business with ID {businessId} not found");
+            throw new KeyNotFoundException(string.Format(_localizer["Error.BusinessNotFound"].Value, businessId));
         }
 
         // Vérifier que l'utilisateur est propriétaire
         if (business.OwnerId != ownerId)
         {
-            throw new UnauthorizedAccessException("You are not authorized to update this business");
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
         // Vérifier que le statut permet la modification
         if (business.Status != BusinessStatus.Draft)
         {
-            throw new InvalidOperationException($"Cannot update business with status {business.Status}. Only Draft businesses can be updated.");
+            throw new InvalidOperationException(string.Format(_localizer["Error.CannotUpdateStatus"].Value, business.Status));
         }
 
         // Mettre à jour les champs si fournis
@@ -112,7 +119,7 @@ public class BusinessService : IBusinessService
             var categoryExists = await _context.Categories.AnyAsync(c => c.Id == request.CategoryId.Value);
             if (!categoryExists)
             {
-                throw new ArgumentException($"Category with ID {request.CategoryId} does not exist");
+                throw new ArgumentException(string.Format(_localizer["Error.CategoryNotFound"].Value, request.CategoryId));
             }
             business.CategoryId = request.CategoryId.Value;
         }
@@ -199,13 +206,13 @@ public class BusinessService : IBusinessService
         // Vérifier que l'utilisateur est propriétaire
         if (business.OwnerId != ownerId)
         {
-            throw new UnauthorizedAccessException("You are not authorized to delete this business");
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
         // Vérifier que le statut permet la suppression
         if (business.Status != BusinessStatus.Draft)
         {
-            throw new InvalidOperationException($"Cannot delete business with status {business.Status}. Only Draft businesses can be deleted.");
+            throw new InvalidOperationException(string.Format(_localizer["Error.CannotDeleteStatus"].Value, business.Status));
         }
 
         _context.Businesses.Remove(business);
