@@ -2,8 +2,8 @@
 # Backlog AfroMarket (User Stories)
 
 ## EPIC: Recherche
-- [ ] US-101 — Recherche simple par mot clé *(labels: user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux rechercher par mot clé pour trouver des commerces pertinents proches de moi.
+- [x] US-101 — Recherche simple par mot clé *(labels: user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux rechercher par mot clé pour trouver des commerces pertinents proches de moi.
   - AC: saisie "épicerie" → résultats triés par pertinence + distance ; p95 < 300ms
 
 - [ ] US-102 — Recherche géolocalisée *(user-story, frontend, search)*
