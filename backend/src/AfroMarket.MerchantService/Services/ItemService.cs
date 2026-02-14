@@ -107,19 +107,19 @@ public class ItemService : IItemService
 
         if (item == null)
         {
-            throw new KeyNotFoundException($"Item with ID {itemId} not found");
+            throw new KeyNotFoundException(string.Format(_localizer["Error.ItemNotFound"].Value, itemId));
         }
 
         // Verify ownership
         if (item.Business.OwnerId != ownerId)
         {
-            throw new UnauthorizedAccessException("You do not own this item");
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
         // Status check - only Draft items can be updated
         if (item.Status != ItemStatus.Draft)
         {
-            throw new InvalidOperationException("Only Draft items can be updated");
+            throw new InvalidOperationException(_localizer["Error.CannotUpdateStatus"].Value);
         }
 
         // Update fields if provided
@@ -132,14 +132,14 @@ public class ItemService : IItemService
         if (request.Price.HasValue)
         {
             if (request.Price.Value <= 0)
-                throw new ArgumentException("Price must be greater than 0");
+                throw new ArgumentException(_localizer["Error.PricePositive"].Value);
             item.Price = request.Price.Value;
         }
 
         if (request.Currency != null)
         {
             if (!SupportedCurrencies.Contains(request.Currency))
-                throw new ArgumentException($"Invalid currency code. Supported: {string.Join(", ", SupportedCurrencies)}");
+                throw new ArgumentException(string.Format(_localizer["Error.InvalidCurrency"].Value, string.Join(", ", SupportedCurrencies)));
             item.Currency = request.Currency;
         }
 
@@ -190,7 +190,7 @@ public class ItemService : IItemService
         // Ensure at least 1 media remains
         if (item.Media.Count == 0)
         {
-            throw new InvalidOperationException("Item must have at least one media item");
+            throw new InvalidOperationException(_localizer["Error.MediaRequired"].Value);
         }
 
         item.UpdatedAt = DateTime.UtcNow;
@@ -271,13 +271,13 @@ public class ItemService : IItemService
         // Verify ownership
         if (item.Business.OwnerId != ownerId)
         {
-            throw new UnauthorizedAccessException("You do not own this item");
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
         // Status check - only Draft items can be deleted
         if (item.Status != ItemStatus.Draft)
         {
-            throw new InvalidOperationException("Only Draft items can be deleted");
+            throw new InvalidOperationException(string.Format(_localizer["Error.CannotDeleteStatus"].Value, item.Status));
         }
 
         _context.Items.Remove(item);

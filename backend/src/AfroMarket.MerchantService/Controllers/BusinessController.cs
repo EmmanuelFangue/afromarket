@@ -1,8 +1,10 @@
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Extensions;
+using AfroMarket.MerchantService.Resources;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Localization;
 
 namespace AfroMarket.MerchantService.Controllers;
 
@@ -13,11 +15,16 @@ public class BusinessController : ControllerBase
 {
     private readonly IBusinessService _businessService;
     private readonly ILogger<BusinessController> _logger;
+    private readonly IStringLocalizer<SharedResources> _localizer;
 
-    public BusinessController(IBusinessService businessService, ILogger<BusinessController> logger)
+    public BusinessController(
+        IBusinessService businessService,
+        ILogger<BusinessController> logger,
+        IStringLocalizer<SharedResources> localizer)
     {
         _businessService = businessService;
         _logger = logger;
+        _localizer = localizer;
     }
 
     /// <summary>
@@ -52,7 +59,7 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating business");
-            return StatusCode(500, new { error = "An error occurred while creating the business" });
+            return StatusCode(500, new { error = _localizer["Error.CreateBusiness"].Value });
         }
     }
 
@@ -101,7 +108,7 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating business {BusinessId}", id);
-            return StatusCode(500, new { error = "An error occurred while updating the business" });
+            return StatusCode(500, new { error = _localizer["Error.UpdateBusiness"].Value });
         }
     }
 
@@ -130,7 +137,7 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving business {BusinessId}", id);
-            return StatusCode(500, new { error = "An error occurred while retrieving the business" });
+            return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value });
         }
     }
 
@@ -154,7 +161,7 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving businesses");
-            return StatusCode(500, new { error = "An error occurred while retrieving businesses" });
+            return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value });
         }
     }
 
@@ -196,7 +203,7 @@ public class BusinessController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting business {BusinessId}", id);
-            return StatusCode(500, new { error = "An error occurred while deleting the business" });
+            return StatusCode(500, new { error = _localizer["Error.DeleteBusiness"].Value });
         }
     }
 }
