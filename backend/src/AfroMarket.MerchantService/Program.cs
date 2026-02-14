@@ -14,6 +14,7 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
+builder.Services.AddScoped<IItemService, ItemService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -33,6 +33,7 @@ backend/*.pdb
 # IDE
 .idea
 .vscode
+.vs/
 *.swp
 *.swo
 *~
