@@ -1,5 +1,5 @@
 using AfroMarket.MerchantService.Models.Enums;
-using System.Text.Json;
+using AfroMarket.MerchantService.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AfroMarket.MerchantService.Models.Entities;
@@ -38,43 +38,14 @@ public class Item
     [NotMapped]
     public string Title
     {
-        get => GetTranslation(TitleTranslations, "fr");
-        set => TitleTranslations = SetTranslation(TitleTranslations, "fr", value);
+        get => TranslationHelper.GetTranslation(TitleTranslations, "fr");
+        set => TitleTranslations = TranslationHelper.SetTranslation(TitleTranslations, "fr", value);
     }
 
     [NotMapped]
     public string Description
     {
-        get => GetTranslation(DescriptionTranslations, "fr");
-        set => DescriptionTranslations = SetTranslation(DescriptionTranslations, "fr", value);
-    }
-
-    // Helpers pour JSON
-    private static string GetTranslation(string json, string lang)
-    {
-        try
-        {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-            return dict?.GetValueOrDefault(lang) ?? "";
-        }
-        catch
-        {
-            return "";
-        }
-    }
-
-    private static string SetTranslation(string json, string lang, string value)
-    {
-        try
-        {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-                       ?? new Dictionary<string, string>();
-            dict[lang] = value;
-            return JsonSerializer.Serialize(dict);
-        }
-        catch
-        {
-            return "{\"fr\":\"\",\"en\":\"\"}";
-        }
+        get => TranslationHelper.GetTranslation(DescriptionTranslations, "fr");
+        set => DescriptionTranslations = TranslationHelper.SetTranslation(DescriptionTranslations, "fr", value);
     }
 }

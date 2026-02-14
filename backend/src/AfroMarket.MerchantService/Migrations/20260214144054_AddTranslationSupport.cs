@@ -10,6 +10,19 @@ namespace AfroMarket.MerchantService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // NOTE: This migration drops existing columns without preserving data.
+            // This is acceptable for development when the database will be recreated with seed data.
+            //
+            // For production migrations with existing data, use this approach instead:
+            // 1. Add new translation columns with default values
+            // 2. Migrate existing data to JSON format: {"fr":"existing_value","en":""}
+            // 3. Drop old columns
+            //
+            // Example SQL for safe migration:
+            // ALTER TABLE Items ADD DescriptionTranslations nvarchar(max) NOT NULL DEFAULT '{"fr":"","en":""}';
+            // UPDATE Items SET DescriptionTranslations = '{"fr":"' + REPLACE(Description, '"', '\"') + '","en":""}' WHERE Description IS NOT NULL;
+            // ALTER TABLE Items DROP COLUMN Description;
+
             migrationBuilder.DropColumn(
                 name: "Description",
                 table: "Items");

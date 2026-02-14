@@ -75,6 +75,9 @@
   <data name="Business.Category.Required" xml:space="preserve">
     <value>Category is required</value>
   </data>
+  <data name="Business.Address.Required" xml:space="preserve">
+    <value>Address is required</value>
+  </data>
   <data name="Business.Phone.Invalid" xml:space="preserve">
     <value>Phone number is not valid</value>
   </data>

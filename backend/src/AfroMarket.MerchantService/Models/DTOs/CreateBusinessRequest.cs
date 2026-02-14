@@ -16,7 +16,7 @@ public class CreateBusinessRequest
     [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Category.Required")]
     public Guid CategoryId { get; set; }
 
-    [Required(ErrorMessage = "L'adresse est requise")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Address.Required")]
     public AddressDto Address { get; set; } = null!;
 
     [Phone(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Phone.Invalid")]

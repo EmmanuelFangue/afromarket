@@ -1,4 +1,4 @@
-using System.Text.Json;
+using AfroMarket.MerchantService.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AfroMarket.MerchantService.Models.Entities;
@@ -21,36 +21,7 @@ public class Category
     [NotMapped]
     public string Name
     {
-        get => GetTranslation(NameTranslations, "fr");
-        set => NameTranslations = SetTranslation(NameTranslations, "fr", value);
-    }
-
-    // Helpers pour JSON
-    private static string GetTranslation(string json, string lang)
-    {
-        try
-        {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-            return dict?.GetValueOrDefault(lang) ?? "";
-        }
-        catch
-        {
-            return "";
-        }
-    }
-
-    private static string SetTranslation(string json, string lang, string value)
-    {
-        try
-        {
-            var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
-                       ?? new Dictionary<string, string>();
-            dict[lang] = value;
-            return JsonSerializer.Serialize(dict);
-        }
-        catch
-        {
-            return "{\"fr\":\"\",\"en\":\"\"}";
-        }
+        get => TranslationHelper.GetTranslation(NameTranslations, "fr");
+        set => NameTranslations = TranslationHelper.SetTranslation(NameTranslations, "fr", value);
     }
 }
