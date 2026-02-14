@@ -9,6 +9,8 @@ public interface ISearchService
     Task<SearchResponse> SearchBusinessesAsync(BusinessSearchRequest request);
     Task<bool> IndexBusinessAsync(Business business);
     Task<bool> DeleteBusinessAsync(string id);
+    Task<bool> CreateIndexAsync();
+    Task<bool> BulkIndexBusinessesAsync(List<Business> businesses);
 }
 
 public class OpenSearchService : ISearchService
@@ -58,14 +60,14 @@ public class OpenSearchService : ISearchService
     {
         var queries = new List<QueryContainer>();
 
-        // Full-text search
+        // Full-text search in translations (FR + EN)
         if (!string.IsNullOrWhiteSpace(request.Query))
         {
             queries.Add(q.MultiMatch(m => m
                 .Query(request.Query)
                 .Fields(f => f
-                    .Field(b => b.Name, 2.0)
-                    .Field(b => b.Description)
+                    .Field(b => b.NameTranslations, 2.0)         // Boost x2
+                    .Field(b => b.DescriptionTranslations)
                     .Field(b => b.Tags)
                 )
                 .Type(TextQueryType.BestFields)
@@ -77,7 +79,7 @@ public class OpenSearchService : ISearchService
         if (request.Categories?.Any() == true)
         {
             queries.Add(q.Terms(t => t
-                .Field(b => b.Category)
+                .Field(b => b.CategoryName)
                 .Terms(request.Categories)
             ));
         }
@@ -114,7 +116,7 @@ public class OpenSearchService : ISearchService
     {
         return a
             .Terms("categories", t => t
-                .Field(b => b.Category)
+                .Field(b => b.CategoryName)
                 .Size(50)
             )
             .Terms("cities", t => t
@@ -173,6 +175,88 @@ public class OpenSearchService : ISearchService
             _logger.LogError("Delete failed: {Error}", response.DebugInformation);
             return false;
         }
+
+        return true;
+    }
+
+    public async Task<bool> CreateIndexAsync()
+    {
+        // Check if index exists
+        var existsResponse = await _client.Indices.ExistsAsync(IndexName);
+        if (existsResponse.Exists)
+        {
+            _logger.LogInformation("Index {IndexName} already exists", IndexName);
+            return true;
+        }
+
+        // Create index with explicit mapping
+        var createResponse = await _client.Indices.CreateAsync(IndexName, c => c
+            .Settings(s => s
+                .NumberOfShards(1)
+                .NumberOfReplicas(0) // Development - no replicas
+                .RefreshInterval(-1) // Disable refresh during bulk indexing
+            )
+            .Map<Business>(m => m
+                .Properties(p => p
+                    .Keyword(k => k.Name(n => n.Id))
+                    .Text(t => t.Name(n => n.NameTranslations).Analyzer("standard"))
+                    .Text(t => t.Name(n => n.DescriptionTranslations).Analyzer("standard"))
+                    .Keyword(k => k.Name(n => n.CategoryId))
+                    .Keyword(k => k.Name(n => n.CategoryName))
+                    .Keyword(k => k.Name(n => n.AddressId))
+                    .Keyword(k => k.Name(n => n.City))
+                    .Keyword(k => k.Name(n => n.Province))
+                    .GeoPoint(g => g.Name(n => n.Location)) // CRITICAL for geo queries
+                    .Keyword(k => k.Name(n => n.Tags))
+                    .Boolean(b => b.Name(n => n.IsPublished))
+                    .Date(d => d.Name(n => n.CreatedAt))
+                    .Date(d => d.Name(n => n.UpdatedAt))
+                    .Date(d => d.Name(n => n.PublishedAt))
+                )
+            )
+        );
+
+        if (!createResponse.IsValid)
+        {
+            _logger.LogError("Failed to create index: {Error}", createResponse.DebugInformation);
+            return false;
+        }
+
+        _logger.LogInformation("Index {IndexName} created successfully", IndexName);
+        return true;
+    }
+
+    public async Task<bool> BulkIndexBusinessesAsync(List<Business> businesses)
+    {
+        if (!businesses.Any())
+        {
+            _logger.LogWarning("No businesses to index");
+            return true;
+        }
+
+        var bulkDescriptor = new BulkDescriptor();
+
+        foreach (var business in businesses)
+        {
+            bulkDescriptor.Index<Business>(i => i
+                .Index(IndexName)
+                .Id(business.Id)
+                .Document(business)
+            );
+        }
+
+        var response = await _client.BulkAsync(bulkDescriptor);
+
+        if (!response.IsValid)
+        {
+            _logger.LogError("Bulk index failed: {Error}", response.DebugInformation);
+            return false;
+        }
+
+        _logger.LogInformation("Successfully indexed {Count} businesses", businesses.Count);
+
+        // Refresh index to make documents searchable
+        await _client.Indices.RefreshAsync(IndexName);
 
         return true;
     }

@@ -28,6 +28,18 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddSingleton<IOpenSearchClient>(new OpenSearchClient(settings));
 builder.Services.AddScoped<ISearchService, OpenSearchService>();
 
+// Configure HttpClient for MerchantService
+var merchantServiceUrl = builder.Configuration["MerchantService:Uri"] ?? "http://localhost:5002";
+builder.Services.AddHttpClient<IMerchantServiceClient, MerchantServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(merchantServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+// Register indexing services
+builder.Services.AddScoped<IndexingService>();
+builder.Services.AddHostedService<IndexingBackgroundService>();
+
 // Configure Keycloak Authentication
 builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, options =>
 {

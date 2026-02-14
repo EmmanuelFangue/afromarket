@@ -28,4 +28,9 @@ public interface IBusinessService
     /// Supprime un commerce (seulement si statut = Draft)
     /// </summary>
     Task<bool> DeleteBusinessAsync(Guid businessId, Guid ownerId);
+
+    /// <summary>
+    /// Récupère tous les commerces publiés avec pagination
+    /// </summary>
+    Task<PaginatedResult<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20);
 }

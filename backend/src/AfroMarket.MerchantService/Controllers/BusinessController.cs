@@ -206,4 +206,31 @@ public class BusinessController : ControllerBase
             return StatusCode(500, new { error = _localizer["Error.DeleteBusiness"].Value });
         }
     }
+
+    /// <summary>
+    /// Récupère tous les commerces publiés avec pagination
+    /// </summary>
+    /// <param name="page">Numéro de la page (défaut: 1)</param>
+    /// <param name="pageSize">Taille de la page (défaut: 20, max: 100)</param>
+    /// <returns>Liste paginée des commerces publiés</returns>
+    [HttpGet("published")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetPublishedBusinesses(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var result = await _businessService.GetPublishedBusinessesAsync(page, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error retrieving published businesses. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value, correlationId });
+        }
+    }
 }
