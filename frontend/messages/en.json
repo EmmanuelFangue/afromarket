@@ -11,7 +11,18 @@
   "home": {
     "title": "Geolocated Directory",
     "subtitle": "Discover African businesses and services near you",
-    "searchPlaceholder": "Search for businesses, products or services..."
+    "searchPlaceholder": "Search for businesses, products or services...",
+    "nearMe": "Near Me",
+    "distance": "Distance",
+    "geolocation": {
+      "detecting": "Detecting your location...",
+      "detected": "Location detected",
+      "denied": "Geolocation denied",
+      "unavailable": "Geolocation unavailable",
+      "error": "Geolocation error",
+      "permissionDenied": "You must allow geolocation to use this feature",
+      "enableLocation": "Enable location"
+    }
   },
   "business": {
     "name": "Business Name",

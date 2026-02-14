@@ -11,7 +11,18 @@
   "home": {
     "title": "Annuaire géolocalisé",
     "subtitle": "Découvrez les commerces et services africains près de chez vous",
-    "searchPlaceholder": "Rechercher des commerces, produits ou services..."
+    "searchPlaceholder": "Rechercher des commerces, produits ou services...",
+    "nearMe": "Près de moi",
+    "distance": "Distance",
+    "geolocation": {
+      "detecting": "Détection de votre position...",
+      "detected": "Position détectée",
+      "denied": "Géolocalisation refusée",
+      "unavailable": "Géolocalisation non disponible",
+      "error": "Erreur de géolocalisation",
+      "permissionDenied": "Vous devez autoriser la géolocalisation pour utiliser cette fonctionnalité",
+      "enableLocation": "Activer la géolocalisation"
+    }
   },
   "business": {
     "name": "Nom du commerce",
