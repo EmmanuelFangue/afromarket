@@ -17,6 +17,7 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
+builder.Services.AddScoped<IItemService, ItemService>();
 
 // Configure Keycloak Authentication
 builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, options =>
