@@ -1,11 +1,14 @@
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Services;
+using AfroMarket.MerchantService.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AfroMarket.MerchantService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = "MerchantOnly")]
 public class BusinessController : ControllerBase
 {
     private readonly IBusinessService _businessService;
@@ -25,13 +28,13 @@ public class BusinessController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(BusinessResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<BusinessResponse>> CreateBusiness([FromBody] CreateBusinessRequest request)
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            // Pour l'instant, on utilise un GUID temporaire pour les tests
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
+            _logger.LogInformation("Creating business for owner {OwnerId}", ownerId);
 
             var business = await _businessService.CreateBusinessAsync(request, ownerId);
 
@@ -64,12 +67,12 @@ public class BusinessController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<BusinessResponse>> UpdateBusiness(Guid id, [FromBody] UpdateBusinessRequest request)
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var business = await _businessService.UpdateBusinessAsync(id, request, ownerId);
 
@@ -108,6 +111,7 @@ public class BusinessController : ControllerBase
     /// <param name="id">L'ID du commerce</param>
     /// <returns>Le commerce demandé</returns>
     [HttpGet("{id}")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(BusinessResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BusinessResponse>> GetBusinessById(Guid id)
@@ -136,12 +140,12 @@ public class BusinessController : ControllerBase
     /// <returns>La liste des commerces du propriétaire</returns>
     [HttpGet("my-businesses")]
     [ProducesResponseType(typeof(List<BusinessResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<List<BusinessResponse>>> GetMyBusinesses()
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var businesses = await _businessService.GetBusinessesByOwnerAsync(ownerId);
 
@@ -163,12 +167,12 @@ public class BusinessController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteBusiness(Guid id)
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var result = await _businessService.DeleteBusinessAsync(id, ownerId);
 

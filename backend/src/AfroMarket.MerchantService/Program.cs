@@ -1,6 +1,9 @@
 using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Services;
 using Microsoft.EntityFrameworkCore;
+using Keycloak.AuthServices.Authentication;
+using Keycloak.AuthServices.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +18,36 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 
+// Configure Keycloak Authentication
+builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, options =>
+{
+    options.Audience = builder.Configuration["Keycloak:Resource"];
+    options.RequireHttpsMetadata = false; // Development only
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MerchantOnly", policy =>
+        policy.RequireRole("merchant"));
+
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("admin"));
+
+    options.AddPolicy("MerchantOrAdmin", policy =>
+        policy.RequireRole("merchant", "admin"));
+});
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins(
+            builder.Configuration["Cors:AllowedOrigins"]?.Split(',') ?? new[] { "http://localhost:3000" }
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
@@ -63,7 +88,12 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend");
+
+// ADD Authentication & Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();
