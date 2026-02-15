@@ -38,7 +38,7 @@ export default function SearchComponent() {
 
   const { coordinates, loading: geoLoading, error: geoError, requestLocation, clearLocation } = useGeolocation();
 
-  const handleSearch = useCallback(async (e?: React.FormEvent) => {
+  const handleSearch = useCallback(async (e?: React.FormEvent, queryOverride?: string) => {
     if (e) e.preventDefault();
 
     // Cancel any in-flight request
@@ -54,7 +54,8 @@ export default function SearchComponent() {
     setError(null);
 
     try {
-      const searchRequest: SearchRequest = { query };
+      const searchQuery = queryOverride !== undefined ? queryOverride : query;
+      const searchRequest: SearchRequest = { query: searchQuery };
 
       // Add geolocation if available
       if (coordinates) {
@@ -73,7 +74,7 @@ export default function SearchComponent() {
         searchRequest.cities = selectedCities;
       }
 
-      const response = await searchBusinesses(searchRequest);
+      const response = await searchBusinesses(searchRequest, abortController.signal);
 
       // Only update state if this request wasn't aborted
       if (!abortController.signal.aborted) {
@@ -127,8 +128,14 @@ export default function SearchComponent() {
   // Fetch autocomplete suggestions
   const fetchSuggestions = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim()) {
+      // If the query is empty, cancel any in-flight suggestions request
+      if (suggestionsAbortControllerRef.current) {
+        suggestionsAbortControllerRef.current.abort();
+        suggestionsAbortControllerRef.current = null;
+      }
       setSuggestions([]);
       setShowSuggestions(false);
+      setSuggestionsLoading(false);
       return;
     }
 
@@ -148,7 +155,7 @@ export default function SearchComponent() {
         pageSize: 5, // Top-5 suggestions
       };
 
-      const response = await searchBusinesses(searchRequest);
+      const response = await searchBusinesses(searchRequest, abortController.signal);
 
       if (!abortController.signal.aborted) {
         setSuggestions(response.results);
@@ -169,15 +176,14 @@ export default function SearchComponent() {
 
   // Handle suggestion selection
   const selectSuggestion = useCallback((business: Business) => {
-    setQuery(getBusinessName(business));
+    const businessName = getBusinessName(business);
+    setQuery(businessName);
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedSuggestionIndex(-1);
-    // Trigger search with selected business name
-    setTimeout(() => {
-      handleSearch();
-    }, 0);
-  }, [handleSearch]);
+    // Trigger search with selected business name directly
+    handleSearch(undefined, businessName);
+  }, [handleSearch, locale]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -186,13 +192,20 @@ export default function SearchComponent() {
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev =>
-          prev < suggestions.length - 1 ? prev + 1 : prev
-        );
+        setSelectedSuggestionIndex(prev => {
+          // Wrap from -1 (no selection) to 0, or from last to first
+          return (prev + 1) % suggestions.length;
+        });
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedSuggestionIndex(prev => (prev > 0 ? prev - 1 : -1));
+        setSelectedSuggestionIndex(prev => {
+          // From "no selection" (-1) or first item, wrap to last; otherwise move up
+          if (prev <= 0) {
+            return suggestions.length - 1;
+          }
+          return prev - 1;
+        });
         break;
       case 'Enter':
         if (selectedSuggestionIndex >= 0) {
@@ -286,22 +299,33 @@ export default function SearchComponent() {
               }}
               placeholder={t('searchPlaceholder')}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={showSuggestions}
+              aria-controls="autocomplete-listbox"
+              aria-activedescendant={
+                selectedSuggestionIndex >= 0
+                  ? `autocomplete-option-${selectedSuggestionIndex}`
+                  : undefined
+              }
             />
 
             {/* Autocomplete dropdown */}
             {showSuggestions && (
               <div
                 ref={suggestionsRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+                id="autocomplete-listbox"
+                role="listbox"
+                className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-80 overflow-y-auto"
               >
                 {suggestionsLoading && (
-                  <div className="px-4 py-3 text-gray-500 text-sm">
+                  <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
                     {t('autocomplete.loading')}
                   </div>
                 )}
 
                 {!suggestionsLoading && suggestions.length === 0 && debouncedQuery.trim() && (
-                  <div className="px-4 py-3 text-gray-500 text-sm">
+                  <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
                     {t('autocomplete.noSuggestions')}
                   </div>
                 )}
@@ -311,21 +335,24 @@ export default function SearchComponent() {
                     {suggestions.map((business, index) => (
                       <li
                         key={business.id}
+                        id={`autocomplete-option-${index}`}
+                        role="option"
+                        aria-selected={index === selectedSuggestionIndex}
                         onClick={() => selectSuggestion(business)}
                         className={`px-4 py-3 cursor-pointer transition-colors ${
                           index === selectedSuggestionIndex
-                            ? 'bg-blue-50'
-                            : 'hover:bg-gray-50'
+                            ? 'bg-blue-50 dark:bg-blue-900'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                       >
-                        <div className="font-medium text-gray-900">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
                           {getBusinessName(business)}
                         </div>
-                        <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+                        <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2 mt-1">
+                          <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 rounded text-xs">
                             {business.categoryName}
                           </span>
-                          <span className="text-gray-500">{business.city}</span>
+                          <span className="text-gray-500 dark:text-gray-400">{business.city}</span>
                         </div>
                       </li>
                     ))}
