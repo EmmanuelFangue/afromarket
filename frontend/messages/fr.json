@@ -28,7 +28,11 @@
     "clearAllFilters": "Effacer tous les filtres",
     "categories": "Catégories",
     "cities": "Villes",
-    "resultsFound": "{count, plural, one {# résultat trouvé} other {# résultats trouvés}}"
+    "resultsFound": "{count, plural, one {# résultat trouvé} other {# résultats trouvés}}",
+    "autocomplete": {
+      "noSuggestions": "Aucune suggestion",
+      "loading": "Chargement des suggestions..."
+    }
   },
   "business": {
     "name": "Nom du commerce",
