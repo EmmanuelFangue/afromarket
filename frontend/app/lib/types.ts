@@ -2,7 +2,10 @@ export interface Business {
   id: string;
   name: string;
   description: string;
+  nameTranslations: string | Record<string, string>;
+  descriptionTranslations: string | Record<string, string>;
   category: string;
+  categoryName: string;
   city: string;
   address: string;
   location: {

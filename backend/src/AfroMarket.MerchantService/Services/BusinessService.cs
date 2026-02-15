@@ -223,6 +223,49 @@ public class BusinessService : IBusinessService
         return true;
     }
 
+    public async Task<PaginatedResult<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20)
+    {
+        _logger.LogInformation("Fetching published businesses - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+
+        // Valider pagination
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        // Query Published businesses
+        var query = _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .Where(b => b.Status == BusinessStatus.Published)
+            .OrderByDescending(b => b.PublishedAt);
+
+        // Total count
+        var totalCount = await query.CountAsync();
+
+        // Paginate
+        var businesses = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        // Map to DTOs
+        var businessResponses = new List<BusinessResponse>();
+        foreach (var business in businesses)
+        {
+            businessResponses.Add(await MapToResponseAsync(business));
+        }
+
+        _logger.LogInformation("Found {TotalCount} published businesses, returning {Count} for page {Page}",
+            totalCount, businessResponses.Count, page);
+
+        return new PaginatedResult<BusinessResponse>
+        {
+            Items = businessResponses,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
     private async Task<BusinessResponse> MapToResponseAsync(Business business)
     {
         // Charger la catégorie si non chargée
@@ -255,6 +298,8 @@ public class BusinessService : IBusinessService
             OwnerId = business.OwnerId,
             Name = business.Name,
             Description = business.Description,
+            NameTranslations = business.NameTranslations,
+            DescriptionTranslations = business.DescriptionTranslations,
             Status = business.Status,
             CategoryId = business.CategoryId,
             CategoryName = business.Category.Name,
