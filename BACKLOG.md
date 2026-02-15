@@ -19,7 +19,7 @@
   - En tant qu'utilisateur, je veux des suggestions (300 ms debounce, top-N).
 
 ## EPIC: Fiche Commerce
-- [ ] US-201 — Fiche commerce (détails) *(user-story, frontend, market)*
+- [x] US-201 — Fiche commerce (détails) *(user-story, frontend, market)* ✅
 - [ ] US-202 — Contacter un commerce *(user-story, frontend, messaging)*
 
 ## EPIC: Marchand & Marchandises
