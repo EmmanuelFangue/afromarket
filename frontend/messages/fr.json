@@ -32,6 +32,14 @@
     "autocomplete": {
       "noSuggestions": "Aucune suggestion",
       "loading": "Chargement des suggestions..."
+    },
+    "viewToggle": {
+      "list": "Vue liste",
+      "map": "Vue carte"
+    },
+    "map": {
+      "clickMarker": "Cliquez sur un marqueur pour voir les détails",
+      "noLocation": "Aucune donnée de localisation disponible pour ce commerce"
     }
   },
   "business": {

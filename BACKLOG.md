@@ -12,7 +12,7 @@
 - [x] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)* ✅
   - En tant qu'utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
 
-- [ ] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)*
+- [x] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)* ✅
   - En tant qu'utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
 
 - [x] US-105 — Autocomplete *(user-story, frontend, search)* ✅
