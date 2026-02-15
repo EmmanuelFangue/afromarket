@@ -3,10 +3,21 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { Business, SearchResponse, SearchRequest } from '../lib/types';
 import { searchBusinesses } from '../lib/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useDebounce } from '../hooks/useDebounce';
+
+// Dynamic import to avoid SSR issues with Leaflet
+const MapView = dynamic(() => import('./MapView'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-96 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+      <span className="text-gray-600 dark:text-gray-400">Loading map...</span>
+    </div>
+  )
+});
 
 export default function SearchComponent() {
   const t = useTranslations('home');
@@ -18,6 +29,9 @@ export default function SearchComponent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [distance, setDistance] = useState<string>('10km');
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Filter states
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -470,36 +484,80 @@ export default function SearchComponent() {
 
       {results && (
         <div className="space-y-6">
-          <div className="text-gray-600">
-            {t('resultsFound', { count: results.totalResults })}
-            {coordinates && <span className="ml-2 text-sm">({t('nearMe')})</span>}
+          {/* Results header with count and view toggle */}
+          <div className="flex items-center justify-between">
+            <div className="text-gray-600 dark:text-gray-400">
+              {t('resultsFound', { count: results.totalResults })}
+              {coordinates && <span className="ml-2 text-sm">({t('nearMe')})</span>}
+            </div>
+
+            {/* View toggle buttons */}
+            <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                {t('viewToggle.list')}
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  viewMode === 'map'
+                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                }`}
+              >
+                <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                {t('viewToggle.map')}
+              </button>
+            </div>
           </div>
 
-          <div className="grid gap-4">
-            {results.results.map((business: Business) => (
-              <Link
-                key={business.id}
-                href={`/${locale}/business/${business.id}`}
-                className="block p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{getBusinessName(business)}</h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-3">{getBusinessDescription(business)}</p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                    {business.categoryName}
-                  </span>
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
-                    {business.city}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <p>{business.address}</p>
-                  {business.phone && <p>{tBusiness('phone')}: {business.phone}</p>}
-                  {business.email && <p>{tBusiness('email')}: {business.email}</p>}
-                </div>
-              </Link>
-            ))}
-          </div>
+          {/* List view */}
+          {viewMode === 'list' && (
+            <div className="grid gap-4">
+              {results.results.map((business: Business) => (
+                <Link
+                  key={business.id}
+                  href={`/${locale}/business/${business.id}`}
+                  className="block p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{getBusinessName(business)}</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-3">{getBusinessDescription(business)}</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
+                      {business.categoryName}
+                    </span>
+                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
+                      {business.city}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <p>{business.address}</p>
+                    {business.phone && <p>{tBusiness('phone')}: {business.phone}</p>}
+                    {business.email && <p>{tBusiness('email')}: {business.email}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Map view */}
+          {viewMode === 'map' && (
+            <MapView
+              businesses={results.results}
+              userLocation={coordinates ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : undefined}
+            />
+          )}
 
           {/* Facets/Filters Section */}
           {results.facets && Object.keys(results.facets).length > 0 && (

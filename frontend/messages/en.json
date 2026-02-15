@@ -32,6 +32,14 @@
     "autocomplete": {
       "noSuggestions": "No suggestions",
       "loading": "Loading suggestions..."
+    },
+    "viewToggle": {
+      "list": "List View",
+      "map": "Map View"
+    },
+    "map": {
+      "clickMarker": "Click on a marker to view business details",
+      "noLocation": "No location data available for this business"
     }
   },
   "business": {
