@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { AuthProvider } from '../contexts/AuthContext';
+import Header from '../components/Header';
 import "../globals.css";
 
 export async function generateMetadata({
@@ -38,7 +40,10 @@ export default async function LocaleLayout({
     <html lang={locale}>
       <body className="antialiased">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <AuthProvider>
+            <Header />
+            {children}
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
