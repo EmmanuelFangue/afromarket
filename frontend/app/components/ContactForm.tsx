@@ -45,15 +45,17 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
       newErrors.name = t('validation.nameRequired');
     }
 
-    if (!formData.email.trim()) {
+    const trimmedEmail = formData.email.trim();
+    if (!trimmedEmail) {
       newErrors.email = t('validation.emailRequired');
-    } else if (!validateEmail(formData.email)) {
+    } else if (!validateEmail(trimmedEmail)) {
       newErrors.email = t('validation.emailInvalid');
     }
 
-    if (!formData.message.trim()) {
+    const trimmedMessage = formData.message.trim();
+    if (!trimmedMessage) {
       newErrors.message = t('validation.messageRequired');
-    } else if (formData.message.trim().length < 10) {
+    } else if (trimmedMessage.length < 10) {
       newErrors.message = t('validation.messageMinLength');
     }
 
@@ -73,14 +75,19 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
 
     try {
       // TODO: Replace with actual API call when messaging backend is ready
+      // Trim values before sending
+      const trimmedData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+        businessId,
+        businessName
+      };
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      console.log('Contact form submitted:', {
-        ...formData,
-        businessId,
-        businessName
-      });
+      console.log('Contact form submitted:', trimmedData);
 
       setSubmitStatus('success');
       setFormData({ name: '', email: '', message: '' });
@@ -131,6 +138,8 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             value={formData.name}
             onChange={handleChange('name')}
             placeholder={t('namePlaceholder')}
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? 'name-error' : undefined}
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
               errors.name
                 ? 'border-red-500 dark:border-red-400'
@@ -139,7 +148,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             disabled={isSubmitting}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
+            <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
           )}
         </div>
 
@@ -157,6 +166,8 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             value={formData.email}
             onChange={handleChange('email')}
             placeholder={t('emailPlaceholder')}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
               errors.email
                 ? 'border-red-500 dark:border-red-400'
@@ -165,7 +176,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             disabled={isSubmitting}
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+            <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
           )}
         </div>
 
@@ -183,6 +194,8 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             onChange={handleChange('message')}
             placeholder={t('messagePlaceholder')}
             rows={5}
+            aria-invalid={!!errors.message}
+            aria-describedby={errors.message ? 'message-error' : undefined}
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-colors ${
               errors.message
                 ? 'border-red-500 dark:border-red-400'
@@ -191,7 +204,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             disabled={isSubmitting}
           />
           {errors.message && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.message}</p>
+            <p id="message-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.message}</p>
           )}
         </div>
 
@@ -206,14 +219,22 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
 
         {/* Success message */}
         {submitStatus === 'success' && (
-          <div className="p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg">
+          <div
+            role="status"
+            aria-live="polite"
+            className="p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg"
+          >
             {t('success')}
           </div>
         )}
 
         {/* Error message */}
         {submitStatus === 'error' && (
-          <div className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg">
+          <div
+            role="alert"
+            aria-live="assertive"
+            className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg"
+          >
             {t('error')}
           </div>
         )}
