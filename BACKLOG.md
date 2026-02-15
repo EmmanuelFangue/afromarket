@@ -9,8 +9,8 @@
 - [x] US-102 — Recherche géolocalisée *(user-story, frontend, search)* ✅
   - En tant qu'utilisateur, je veux accepter/refuser la géolocalisation pour des résultats locaux ou par ville.
 
-- [ ] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
+- [x] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
 
 - [ ] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)*
   - En tant qu’utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
