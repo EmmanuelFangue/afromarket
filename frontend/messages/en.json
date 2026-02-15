@@ -22,7 +22,13 @@
       "error": "Geolocation error",
       "permissionDenied": "You must allow geolocation to use this feature",
       "enableLocation": "Enable location"
-    }
+    },
+    "filters": "Filters",
+    "activeFilters": "Active filters",
+    "clearAllFilters": "Clear all filters",
+    "categories": "Categories",
+    "cities": "Cities",
+    "resultsFound": "{count, plural, one {# result found} other {# results found}}"
   },
   "business": {
     "name": "Business Name",

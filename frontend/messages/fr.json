@@ -22,7 +22,13 @@
       "error": "Erreur de géolocalisation",
       "permissionDenied": "Vous devez autoriser la géolocalisation pour utiliser cette fonctionnalité",
       "enableLocation": "Activer la géolocalisation"
-    }
+    },
+    "filters": "Filtres",
+    "activeFilters": "Filtres actifs",
+    "clearAllFilters": "Effacer tous les filtres",
+    "categories": "Catégories",
+    "cities": "Villes",
+    "resultsFound": "{count, plural, one {# résultat trouvé} other {# résultats trouvés}}"
   },
   "business": {
     "name": "Nom du commerce",
