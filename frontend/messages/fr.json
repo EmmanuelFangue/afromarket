@@ -28,7 +28,7 @@
     "clearAllFilters": "Effacer tous les filtres",
     "categories": "Catégories",
     "cities": "Villes",
-    "resultsFound": "résultats trouvés"
+    "resultsFound": "{count, plural, one {# résultat trouvé} other {# résultats trouvés}}"
   },
   "business": {
     "name": "Nom du commerce",

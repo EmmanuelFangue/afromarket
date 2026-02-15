@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import { Business, SearchResponse } from '../lib/types';
+import { Business, SearchResponse, SearchRequest } from '../lib/types';
 import { searchBusinesses } from '../lib/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 
@@ -20,15 +20,28 @@ export default function SearchComponent() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
 
+  // AbortController ref to cancel in-flight requests
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const { coordinates, loading: geoLoading, error: geoError, requestLocation, clearLocation } = useGeolocation();
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = useCallback(async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Create new AbortController for this request
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
     setLoading(true);
     setError(null);
 
     try {
-      const searchRequest: any = { query };
+      const searchRequest: SearchRequest = { query };
 
       // Add geolocation if available
       if (coordinates) {
@@ -48,14 +61,23 @@ export default function SearchComponent() {
       }
 
       const response = await searchBusinesses(searchRequest);
-      setResults(response);
-    } catch (err) {
-      setError('Failed to search. Please try again.');
-      console.error(err);
+
+      // Only update state if this request wasn't aborted
+      if (!abortController.signal.aborted) {
+        setResults(response);
+      }
+    } catch (err: any) {
+      // Ignore abort errors
+      if (err.name !== 'AbortError' && !abortController.signal.aborted) {
+        setError('Failed to search. Please try again.');
+        console.error(err);
+      }
     } finally {
-      setLoading(false);
+      if (!abortController.signal.aborted) {
+        setLoading(false);
+      }
     }
-  };
+  }, [query, coordinates, distance, selectedCategories, selectedCities]);
 
   const handleNearMe = () => {
     if (coordinates) {
@@ -94,14 +116,14 @@ export default function SearchComponent() {
     if (coordinates && !loading && !results) {
       handleSearch();
     }
-  }, [coordinates]);
+  }, [coordinates, loading, results, handleSearch]);
 
   // Auto-search when filters change
   useEffect(() => {
     if (results) {
       handleSearch();
     }
-  }, [selectedCategories, selectedCities]);
+  }, [selectedCategories, selectedCities, results, handleSearch]);
 
   // Extract name/description from translations
   const getBusinessName = (business: Business): string => {
@@ -247,7 +269,7 @@ export default function SearchComponent() {
       {results && (
         <div className="space-y-6">
           <div className="text-gray-600">
-            {results.totalResults} {t('resultsFound')}
+            {t('resultsFound', { count: results.totalResults })}
             {coordinates && <span className="ml-2 text-sm">({t('nearMe')})</span>}
           </div>
 

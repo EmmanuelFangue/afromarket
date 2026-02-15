@@ -28,7 +28,7 @@
     "clearAllFilters": "Clear all filters",
     "categories": "Categories",
     "cities": "Cities",
-    "resultsFound": "results found"
+    "resultsFound": "{count, plural, one {# result found} other {# results found}}"
   },
   "business": {
     "name": "Business Name",
