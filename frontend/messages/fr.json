@@ -63,5 +63,15 @@
       "active": "Actif",
       "suspended": "Suspendu"
     }
+  },
+  "businessDetails": {
+    "backToSearch": "Retour à la recherche",
+    "contact": "Contact",
+    "openingHours": "Horaires d'ouverture",
+    "location": "Localisation",
+    "website": "Visiter le site web",
+    "notFound": "Commerce non trouvé",
+    "loading": "Chargement des détails...",
+    "error": "Échec du chargement des détails"
   }
 }

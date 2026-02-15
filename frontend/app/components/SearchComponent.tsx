@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import Link from 'next/link';
 import { Business, SearchResponse, SearchRequest } from '../lib/types';
 import { searchBusinesses } from '../lib/api';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -475,36 +476,37 @@ export default function SearchComponent() {
 
           <div className="grid gap-4">
             {results.results.map((business: Business) => (
-              <div
+              <Link
                 key={business.id}
-                className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                href={`/${locale}/business/${business.id}`}
+                className="block p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
               >
-                <h3 className="text-xl font-semibold mb-2">{getBusinessName(business)}</h3>
-                <p className="text-gray-600 mb-3">{getBusinessDescription(business)}</p>
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{getBusinessName(business)}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-3">{getBusinessDescription(business)}</p>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
                     {business.categoryName}
                   </span>
-                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
                     {business.city}
                   </span>
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   <p>{business.address}</p>
                   {business.phone && <p>Phone: {business.phone}</p>}
                   {business.email && <p>Email: {business.email}</p>}
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
           {/* Facets/Filters Section */}
           {results.facets && Object.keys(results.facets).length > 0 && (
-            <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4">{t('filters')}</h3>
+            <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('filters')}</h3>
               {Object.entries(results.facets).map(([key, items]) => (
                 <div key={key} className="mb-4">
-                  <h4 className="font-medium mb-2">
+                  <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
                     {key === 'categories' ? t('categories') : key === 'cities' ? t('cities') : key}
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -522,7 +524,7 @@ export default function SearchComponent() {
                               ? key === 'categories'
                                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                                 : 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100'
+                              : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                           }`}
                         >
                           {item.key} ({item.count})
