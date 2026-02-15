@@ -6,8 +6,8 @@
   - En tant qu'utilisateur, je veux rechercher par mot clé pour trouver des commerces pertinents proches de moi.
   - AC: saisie "épicerie" → résultats triés par pertinence + distance ; p95 < 300ms
 
-- [ ] US-102 — Recherche géolocalisée *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux accepter/refuser la géolocalisation pour des résultats locaux ou par ville.
+- [x] US-102 — Recherche géolocalisée *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux accepter/refuser la géolocalisation pour des résultats locaux ou par ville.
 
 - [ ] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)*
   - En tant qu’utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
