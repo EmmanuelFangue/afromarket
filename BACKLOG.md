@@ -13,10 +13,10 @@
   - En tant qu'utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
 
 - [ ] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
+  - En tant qu'utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
 
-- [ ] US-105 — Autocomplete *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux des suggestions (300 ms debounce, top-N).
+- [x] US-105 — Autocomplete *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux des suggestions (300 ms debounce, top-N).
 
 ## EPIC: Fiche Commerce
 - [ ] US-201 — Fiche commerce (détails) *(user-story, frontend, market)*
