@@ -63,5 +63,15 @@
       "active": "Active",
       "suspended": "Suspended"
     }
+  },
+  "businessDetails": {
+    "backToSearch": "Back to search",
+    "contact": "Contact",
+    "openingHours": "Opening Hours",
+    "location": "Location",
+    "website": "Visit website",
+    "notFound": "Business not found",
+    "loading": "Loading business details...",
+    "error": "Failed to load business details"
   }
 }
