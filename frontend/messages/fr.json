@@ -81,5 +81,26 @@
     "notFound": "Commerce non trouvé",
     "loading": "Chargement des détails...",
     "error": "Échec du chargement des détails"
+  },
+  "contactForm": {
+    "title": "Contacter ce commerce",
+    "subtitle": "Envoyer un message au commerçant",
+    "name": "Votre nom",
+    "namePlaceholder": "Jean Dupont",
+    "email": "Votre email",
+    "emailPlaceholder": "jean@exemple.com",
+    "message": "Votre message",
+    "messagePlaceholder": "Je voudrais en savoir plus sur...",
+    "send": "Envoyer le message",
+    "sending": "Envoi en cours...",
+    "success": "Votre message a été envoyé avec succès !",
+    "error": "Échec de l'envoi du message. Veuillez réessayer.",
+    "validation": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez entrer une adresse email valide",
+      "messageRequired": "Le message est requis",
+      "messageMinLength": "Le message doit contenir au moins 10 caractères"
+    }
   }
 }

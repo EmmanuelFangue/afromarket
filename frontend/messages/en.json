@@ -81,5 +81,26 @@
     "notFound": "Business not found",
     "loading": "Loading business details...",
     "error": "Failed to load business details"
+  },
+  "contactForm": {
+    "title": "Contact this business",
+    "subtitle": "Send a message to the business owner",
+    "name": "Your name",
+    "namePlaceholder": "John Doe",
+    "email": "Your email",
+    "emailPlaceholder": "john@example.com",
+    "message": "Your message",
+    "messagePlaceholder": "I would like to know more about...",
+    "send": "Send message",
+    "sending": "Sending...",
+    "success": "Your message has been sent successfully!",
+    "error": "Failed to send message. Please try again.",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "messageRequired": "Message is required",
+      "messageMinLength": "Message must be at least 10 characters"
+    }
   }
 }

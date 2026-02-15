@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { getBusinessById } from '../../../lib/api';
 import { Business } from '../../../lib/types';
+import ContactForm from '../../../components/ContactForm';
 
 export default function BusinessDetailPage() {
   const params = useParams();
@@ -198,6 +199,12 @@ export default function BusinessDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Contact Form */}
+      <ContactForm
+        businessId={business.id}
+        businessName={getBusinessName(business)}
+      />
     </div>
   );
 }

@@ -20,7 +20,7 @@
 
 ## EPIC: Fiche Commerce
 - [x] US-201 — Fiche commerce (détails) *(user-story, frontend, market)* ✅
-- [ ] US-202 — Contacter un commerce *(user-story, frontend, messaging)*
+- [x] US-202 — Contacter un commerce *(user-story, frontend, messaging)* ✅
 
 ## EPIC: Marchand & Marchandises
 - [ ] US-301 — Inscription commerçant *(user-story, auth, backend)*
