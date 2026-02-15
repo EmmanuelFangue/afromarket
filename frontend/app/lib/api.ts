@@ -1,4 +1,4 @@
-import { SearchRequest, SearchResponse } from './types';
+import { SearchRequest, SearchResponse, Business } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const MERCHANT_API_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
@@ -26,12 +26,9 @@ export async function searchBusinesses(
 export async function getBusinessById(
   id: string,
   signal?: AbortSignal
-): Promise<any> {
+): Promise<Business | null> {
   const response = await fetch(`${MERCHANT_API_URL}/api/business/${id}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     signal,
   });
 

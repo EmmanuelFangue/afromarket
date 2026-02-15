@@ -11,6 +11,7 @@ import { useDebounce } from '../hooks/useDebounce';
 export default function SearchComponent() {
   const t = useTranslations('home');
   const tCommon = useTranslations('common');
+  const tBusiness = useTranslations('business');
   const locale = useLocale();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResponse | null>(null);
@@ -493,8 +494,8 @@ export default function SearchComponent() {
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <p>{business.address}</p>
-                  {business.phone && <p>Phone: {business.phone}</p>}
-                  {business.email && <p>Email: {business.email}</p>}
+                  {business.phone && <p>{tBusiness('phone')}: {business.phone}</p>}
+                  {business.email && <p>{tBusiness('email')}: {business.email}</p>}
                 </div>
               </Link>
             ))}

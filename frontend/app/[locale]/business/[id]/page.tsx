@@ -11,18 +11,19 @@ export default function BusinessDetailPage() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('businessDetails');
-  const tBusiness = useTranslations('business');
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchBusiness = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await getBusinessById(params.id as string);
+        const data = await getBusinessById(params.id as string, abortController.signal);
 
         if (!data) {
           setError(t('notFound'));
@@ -30,17 +31,25 @@ export default function BusinessDetailPage() {
         }
 
         setBusiness(data);
-      } catch (err) {
-        console.error('Error fetching business:', err);
-        setError(t('error'));
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching business:', err);
+          setError(t('error'));
+        }
       } finally {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
 
     if (params.id) {
       fetchBusiness();
     }
+
+    return () => {
+      abortController.abort();
+    };
   }, [params.id, t]);
 
   const getBusinessName = (business: Business): string => {
@@ -164,9 +173,13 @@ export default function BusinessDetailPage() {
                 <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
-                <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {t('website')}
-                </a>
+                {business.website.match(/^https?:\/\//) ? (
+                  <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
+                    {t('website')}
+                  </a>
+                ) : (
+                  <span className="text-gray-600 dark:text-gray-400">{business.website}</span>
+                )}
               </div>
             )}
           </div>
