@@ -2,25 +2,25 @@
 # Backlog AfroMarket (User Stories)
 
 ## EPIC: Recherche
-- [ ] US-101 — Recherche simple par mot clé *(labels: user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux rechercher par mot clé pour trouver des commerces pertinents proches de moi.
+- [x] US-101 — Recherche simple par mot clé *(labels: user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux rechercher par mot clé pour trouver des commerces pertinents proches de moi.
   - AC: saisie "épicerie" → résultats triés par pertinence + distance ; p95 < 300ms
 
-- [ ] US-102 — Recherche géolocalisée *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux accepter/refuser la géolocalisation pour des résultats locaux ou par ville.
+- [x] US-102 — Recherche géolocalisée *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux accepter/refuser la géolocalisation pour des résultats locaux ou par ville.
 
-- [ ] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
+- [x] US-103 — Filtres & facettes (catégories, ville, rayon) *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux filtrer par catégories/ville/rayon et voir les facettes avec volumes.
 
-- [ ] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
+- [x] US-104 — Affichage carte + marqueurs *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux visualiser la carte avec marqueurs et ouvrir la fiche via le marqueur.
 
-- [ ] US-105 — Autocomplete *(user-story, frontend, search)*
-  - En tant qu’utilisateur, je veux des suggestions (300 ms debounce, top-N).
+- [x] US-105 — Autocomplete *(user-story, frontend, search)* ✅
+  - En tant qu'utilisateur, je veux des suggestions (300 ms debounce, top-N).
 
 ## EPIC: Fiche Commerce
-- [ ] US-201 — Fiche commerce (détails) *(user-story, frontend, market)*
-- [ ] US-202 — Contacter un commerce *(user-story, frontend, messaging)*
+- [x] US-201 — Fiche commerce (détails) *(user-story, frontend, market)* ✅
+- [x] US-202 — Contacter un commerce *(user-story, frontend, messaging)* ✅
 
 ## EPIC: Marchand & Marchandises
 - [ ] US-301 — Inscription commerçant *(user-story, auth, backend)*

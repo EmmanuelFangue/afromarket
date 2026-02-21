@@ -1,0 +1,160 @@
+{
+  "common": {
+    "language": "Language",
+    "french": "Français",
+    "english": "English",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "notFound": "Not Found"
+  },
+  "home": {
+    "title": "Geolocated Directory",
+    "subtitle": "Discover African businesses and services near you",
+    "searchPlaceholder": "Search for businesses, products or services...",
+    "nearMe": "Near Me",
+    "distance": "Distance",
+    "geolocation": {
+      "detecting": "Detecting your location...",
+      "detected": "Location detected",
+      "denied": "Geolocation denied",
+      "unavailable": "Geolocation unavailable",
+      "error": "Geolocation error",
+      "permissionDenied": "You must allow geolocation to use this feature",
+      "enableLocation": "Enable location"
+    },
+    "filters": "Filters",
+    "activeFilters": "Active filters",
+    "clearAllFilters": "Clear all filters",
+    "categories": "Categories",
+    "cities": "Cities",
+    "resultsFound": "{count, plural, one {# result found} other {# results found}}",
+    "autocomplete": {
+      "noSuggestions": "No suggestions",
+      "loading": "Loading suggestions..."
+    },
+    "viewToggle": {
+      "list": "List View",
+      "map": "Map View"
+    },
+    "map": {
+      "clickMarker": "Click on a marker to view business details",
+      "noLocation": "No location data available for this business"
+    }
+  },
+  "business": {
+    "name": "Business Name",
+    "description": "Description",
+    "category": "Category",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "status": {
+      "draft": "Draft",
+      "pendingValidation": "Pending Validation",
+      "published": "Published",
+      "rejected": "Rejected",
+      "suspended": "Suspended"
+    }
+  },
+  "item": {
+    "title": "Title",
+    "description": "Description",
+    "price": "Price",
+    "currency": "Currency",
+    "sku": "SKU",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "suspended": "Suspended"
+    }
+  },
+  "businessDetails": {
+    "backToSearch": "Back to search",
+    "contact": "Contact",
+    "openingHours": "Opening Hours",
+    "location": "Location",
+    "website": "Visit website",
+    "notFound": "Business not found",
+    "loading": "Loading business details...",
+    "error": "Failed to load business details"
+  },
+  "contactForm": {
+    "title": "Contact this business",
+    "subtitle": "Send a message to the business owner",
+    "name": "Your name",
+    "namePlaceholder": "John Doe",
+    "email": "Your email",
+    "emailPlaceholder": "john@example.com",
+    "message": "Your message",
+    "messagePlaceholder": "I would like to know more about...",
+    "send": "Send message",
+    "sending": "Sending...",
+    "success": "Your message has been sent successfully!",
+    "error": "Failed to send message. Please try again.",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "messageRequired": "Message is required",
+      "messageMinLength": "Message must be at least 10 characters"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account? Sign up",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "passwordRequired": "Password is required",
+        "invalidCredentials": "Invalid email or password"
+      }
+    },
+    "register": {
+      "title": "Sign Up",
+      "subtitle": "Create your AfroMarket account",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account? Sign in",
+      "errors": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email format",
+        "emailExists": "This email is already in use",
+        "passwordRequired": "Password is required",
+        "passwordWeak": "Password must contain at least 8 characters, 1 uppercase letter, 1 number and 1 special character",
+        "confirmPasswordRequired": "Password confirmation is required",
+        "passwordMismatch": "Passwords do not match",
+        "registerFailed": "Registration failed"
+      }
+    }
+  },
+  "header": {
+    "login": "Login",
+    "register": "Sign up",
+    "logout": "Logout",
+    "dashboard": "Dashboard"
+  }
+}

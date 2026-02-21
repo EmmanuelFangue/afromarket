@@ -1,0 +1,53 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0F9113EE-888A-26D2-68B0-4A7D0A2A8745}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfroMarket.AdminService", "backend\src\AfroMarket.AdminService\AfroMarket.AdminService.csproj", "{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfroMarket.ApiGateway", "backend\src\AfroMarket.ApiGateway\AfroMarket.ApiGateway.csproj", "{06C17733-BF71-CCF0-092F-BA7F47B5E68B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfroMarket.MerchantService", "backend\src\AfroMarket.MerchantService\AfroMarket.MerchantService.csproj", "{BFE028F0-A055-0551-D294-577E5DE62508}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AfroMarket.SearchService", "backend\src\AfroMarket.SearchService\AfroMarket.SearchService.csproj", "{AC14B616-C5CC-7D35-A361-B2F983E66460}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06C17733-BF71-CCF0-092F-BA7F47B5E68B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06C17733-BF71-CCF0-092F-BA7F47B5E68B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06C17733-BF71-CCF0-092F-BA7F47B5E68B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06C17733-BF71-CCF0-092F-BA7F47B5E68B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFE028F0-A055-0551-D294-577E5DE62508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFE028F0-A055-0551-D294-577E5DE62508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFE028F0-A055-0551-D294-577E5DE62508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFE028F0-A055-0551-D294-577E5DE62508}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC14B616-C5CC-7D35-A361-B2F983E66460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC14B616-C5CC-7D35-A361-B2F983E66460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC14B616-C5CC-7D35-A361-B2F983E66460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC14B616-C5CC-7D35-A361-B2F983E66460}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0F9113EE-888A-26D2-68B0-4A7D0A2A8745} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{0E50BB69-BDFF-B4F6-1F96-89E3433C9CAC} = {0F9113EE-888A-26D2-68B0-4A7D0A2A8745}
+		{06C17733-BF71-CCF0-092F-BA7F47B5E68B} = {0F9113EE-888A-26D2-68B0-4A7D0A2A8745}
+		{BFE028F0-A055-0551-D294-577E5DE62508} = {0F9113EE-888A-26D2-68B0-4A7D0A2A8745}
+		{AC14B616-C5CC-7D35-A361-B2F983E66460} = {0F9113EE-888A-26D2-68B0-4A7D0A2A8745}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2DE88C76-02FC-4C86-AD56-9C207F404E20}
+	EndGlobalSection
+EndGlobal

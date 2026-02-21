@@ -1,0 +1,160 @@
+{
+  "common": {
+    "language": "Langue",
+    "french": "Français",
+    "english": "English",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "notFound": "Non trouvé"
+  },
+  "home": {
+    "title": "Annuaire géolocalisé",
+    "subtitle": "Découvrez les commerces et services africains près de chez vous",
+    "searchPlaceholder": "Rechercher des commerces, produits ou services...",
+    "nearMe": "Près de moi",
+    "distance": "Distance",
+    "geolocation": {
+      "detecting": "Détection de votre position...",
+      "detected": "Position détectée",
+      "denied": "Géolocalisation refusée",
+      "unavailable": "Géolocalisation non disponible",
+      "error": "Erreur de géolocalisation",
+      "permissionDenied": "Vous devez autoriser la géolocalisation pour utiliser cette fonctionnalité",
+      "enableLocation": "Activer la géolocalisation"
+    },
+    "filters": "Filtres",
+    "activeFilters": "Filtres actifs",
+    "clearAllFilters": "Effacer tous les filtres",
+    "categories": "Catégories",
+    "cities": "Villes",
+    "resultsFound": "{count, plural, one {# résultat trouvé} other {# résultats trouvés}}",
+    "autocomplete": {
+      "noSuggestions": "Aucune suggestion",
+      "loading": "Chargement des suggestions..."
+    },
+    "viewToggle": {
+      "list": "Vue liste",
+      "map": "Vue carte"
+    },
+    "map": {
+      "clickMarker": "Cliquez sur un marqueur pour voir les détails",
+      "noLocation": "Aucune donnée de localisation disponible pour ce commerce"
+    }
+  },
+  "business": {
+    "name": "Nom du commerce",
+    "description": "Description",
+    "category": "Catégorie",
+    "address": "Adresse",
+    "phone": "Téléphone",
+    "email": "Email",
+    "website": "Site web",
+    "status": {
+      "draft": "Brouillon",
+      "pendingValidation": "En attente de validation",
+      "published": "Publié",
+      "rejected": "Rejeté",
+      "suspended": "Suspendu"
+    }
+  },
+  "item": {
+    "title": "Titre",
+    "description": "Description",
+    "price": "Prix",
+    "currency": "Devise",
+    "sku": "SKU",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "status": {
+      "draft": "Brouillon",
+      "active": "Actif",
+      "suspended": "Suspendu"
+    }
+  },
+  "businessDetails": {
+    "backToSearch": "Retour à la recherche",
+    "contact": "Contact",
+    "openingHours": "Horaires d'ouverture",
+    "location": "Localisation",
+    "website": "Visiter le site web",
+    "notFound": "Commerce non trouvé",
+    "loading": "Chargement des détails...",
+    "error": "Échec du chargement des détails"
+  },
+  "contactForm": {
+    "title": "Contacter ce commerce",
+    "subtitle": "Envoyer un message au commerçant",
+    "name": "Votre nom",
+    "namePlaceholder": "Jean Dupont",
+    "email": "Votre email",
+    "emailPlaceholder": "jean@exemple.com",
+    "message": "Votre message",
+    "messagePlaceholder": "Je voudrais en savoir plus sur...",
+    "send": "Envoyer le message",
+    "sending": "Envoi en cours...",
+    "success": "Votre message a été envoyé avec succès !",
+    "error": "Échec de l'envoi du message. Veuillez réessayer.",
+    "validation": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "Veuillez entrer une adresse email valide",
+      "messageRequired": "Le message est requis",
+      "messageMinLength": "Le message doit contenir au moins 10 caractères"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Connectez-vous à votre compte",
+      "email": "Email",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "noAccount": "Pas de compte ? Inscrivez-vous",
+      "errors": {
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "invalidCredentials": "Email ou mot de passe incorrect"
+      }
+    },
+    "register": {
+      "title": "Inscription",
+      "subtitle": "Créez votre compte AfroMarket",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Jean",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Dupont",
+      "email": "Email",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Créer mon compte",
+      "submitting": "Inscription en cours...",
+      "hasAccount": "Déjà un compte ? Connectez-vous",
+      "errors": {
+        "firstNameRequired": "Le prénom est requis",
+        "lastNameRequired": "Le nom est requis",
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Format d'email invalide",
+        "emailExists": "Cet email est déjà utilisé",
+        "passwordRequired": "Le mot de passe est requis",
+        "passwordWeak": "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule, 1 chiffre et 1 caractère spécial",
+        "confirmPasswordRequired": "La confirmation du mot de passe est requise",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "registerFailed": "Échec de l'inscription"
+      }
+    }
+  },
+  "header": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord"
+  }
+}

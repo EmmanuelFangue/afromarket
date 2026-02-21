@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- Validation Messages - Business -->
+  <data name="Business.Name.Required" xml:space="preserve">
+    <value>Business name is required</value>
+  </data>
+  <data name="Business.Name.Length" xml:space="preserve">
+    <value>Name must be between {0} and {1} characters</value>
+  </data>
+  <data name="Business.Description.Required" xml:space="preserve">
+    <value>Description is required</value>
+  </data>
+  <data name="Business.Description.Length" xml:space="preserve">
+    <value>Description must be between {0} and {1} characters</value>
+  </data>
+  <data name="Business.Category.Required" xml:space="preserve">
+    <value>Category is required</value>
+  </data>
+  <data name="Business.Address.Required" xml:space="preserve">
+    <value>Address is required</value>
+  </data>
+  <data name="Business.Phone.Invalid" xml:space="preserve">
+    <value>Phone number is not valid</value>
+  </data>
+  <data name="Business.Email.Invalid" xml:space="preserve">
+    <value>Email address is not valid</value>
+  </data>
+  <data name="Business.Website.Invalid" xml:space="preserve">
+    <value>Website is not a valid URL</value>
+  </data>
+
+  <!-- Validation Messages - Item -->
+  <data name="Item.BusinessId.Required" xml:space="preserve">
+    <value>Business identifier is required</value>
+  </data>
+  <data name="Item.Title.Required" xml:space="preserve">
+    <value>Title is required</value>
+  </data>
+  <data name="Item.Title.Length" xml:space="preserve">
+    <value>Title must be between {0} and {1} characters</value>
+  </data>
+  <data name="Item.Description.Required" xml:space="preserve">
+    <value>Description is required</value>
+  </data>
+  <data name="Item.Description.Length" xml:space="preserve">
+    <value>Description must be between {0} and {1} characters</value>
+  </data>
+  <data name="Item.Price.Required" xml:space="preserve">
+    <value>Price is required</value>
+  </data>
+  <data name="Item.Price.Range" xml:space="preserve">
+    <value>Price must be between {0} and {1}</value>
+  </data>
+  <data name="Item.Currency.Required" xml:space="preserve">
+    <value>Currency is required</value>
+  </data>
+  <data name="Item.Currency.Invalid" xml:space="preserve">
+    <value>Currency must be CAD, USD, EUR, XOF or XAF</value>
+  </data>
+  <data name="Item.Media.Required" xml:space="preserve">
+    <value>At least one media item is required</value>
+  </data>
+
+  <!-- Service Layer Messages -->
+  <data name="Error.CategoryNotFound" xml:space="preserve">
+    <value>Category with ID {0} not found</value>
+  </data>
+  <data name="Error.BusinessNotFound" xml:space="preserve">
+    <value>Business with ID {0} not found</value>
+  </data>
+  <data name="Error.Unauthorized" xml:space="preserve">
+    <value>You are not authorized to modify this business</value>
+  </data>
+  <data name="Error.CannotUpdateStatus" xml:space="preserve">
+    <value>Cannot update business with status {0}. Only draft businesses can be updated</value>
+  </data>
+  <data name="Error.CannotDeleteStatus" xml:space="preserve">
+    <value>Cannot delete business with status {0}. Only draft businesses can be deleted</value>
+  </data>
+  <data name="Error.ItemNotFound" xml:space="preserve">
+    <value>Item with ID {0} not found</value>
+  </data>
+  <data name="Error.MediaRequired" xml:space="preserve">
+    <value>At least one media item is required</value>
+  </data>
+  <data name="Error.PricePositive" xml:space="preserve">
+    <value>Price must be greater than 0</value>
+  </data>
+  <data name="Error.InvalidCurrency" xml:space="preserve">
+    <value>Invalid currency code. Supported: {0}</value>
+  </data>
+
+  <!-- Controller Messages -->
+  <data name="Error.CreateBusiness" xml:space="preserve">
+    <value>An error occurred while creating the business</value>
+  </data>
+  <data name="Error.UpdateBusiness" xml:space="preserve">
+    <value>An error occurred while updating the business</value>
+  </data>
+  <data name="Error.RetrieveBusiness" xml:space="preserve">
+    <value>An error occurred while retrieving the business</value>
+  </data>
+  <data name="Error.DeleteBusiness" xml:space="preserve">
+    <value>An error occurred while deleting the business</value>
+  </data>
+  <data name="Error.CreateItem" xml:space="preserve">
+    <value>An error occurred while creating the item</value>
+  </data>
+  <data name="Error.UpdateItem" xml:space="preserve">
+    <value>An error occurred while updating the item</value>
+  </data>
+  <data name="Error.RetrieveItem" xml:space="preserve">
+    <value>An error occurred while retrieving the item</value>
+  </data>
+  <data name="Error.DeleteItem" xml:space="preserve">
+    <value>An error occurred while deleting the item</value>
+  </data>
+  <data name="Error.RetrieveItems" xml:space="preserve">
+    <value>An error occurred while retrieving items</value>
+  </data>
+
+  <!-- Enum Translations - BusinessStatus -->
+  <data name="Enum.BusinessStatus.Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Enum.BusinessStatus.PendingValidation" xml:space="preserve">
+    <value>Pending Validation</value>
+  </data>
+  <data name="Enum.BusinessStatus.Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="Enum.BusinessStatus.Rejected" xml:space="preserve">
+    <value>Rejected</value>
+  </data>
+  <data name="Enum.BusinessStatus.Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+
+  <!-- Enum Translations - ItemStatus -->
+  <data name="Enum.ItemStatus.Draft" xml:space="preserve">
+    <value>Draft</value>
+  </data>
+  <data name="Enum.ItemStatus.Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Enum.ItemStatus.Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+</root>
