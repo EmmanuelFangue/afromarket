@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 
@@ -18,8 +17,9 @@ interface LoginFormErrors {
 }
 
 export default function LoginPage() {
-  const t = useTranslations('auth.login');
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'fr';
   const { login } = useAuth();
 
   const [formData, setFormData] = useState<LoginFormData>({ email: '', password: '' });
@@ -32,13 +32,13 @@ export default function LoginPage() {
 
     const trimmedEmail = formData.email.trim();
     if (!trimmedEmail) {
-      newErrors.email = t('errors.emailRequired');
+      newErrors.email = "L'email est requis";
     } else if (!emailRegex.test(trimmedEmail)) {
-      newErrors.email = t('errors.emailInvalid');
+      newErrors.email = "Format d'email invalide";
     }
 
     if (!formData.password) {
-      newErrors.password = t('errors.passwordRequired');
+      newErrors.password = "Le mot de passe est requis";
     }
 
     setErrors(newErrors);
@@ -47,18 +47,23 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[LoginPage] Form submitted');
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setErrors({});
 
     try {
+      console.log('[LoginPage] Calling login...');
       await login(formData.email.trim(), formData.password);
+      console.log('[LoginPage] Login successful, redirecting...');
       const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-      router.push(returnUrl || '/');
+      const redirectTo = returnUrl || `/${locale}`;
+      console.log('[LoginPage] Redirecting to:', redirectTo);
+      router.push(redirectTo);
     } catch (error) {
-      setErrors({ general: t('errors.invalidCredentials') });
-    } finally {
+      console.error('[LoginPage] Login failed:', error);
+      setErrors({ general: "Email ou mot de passe incorrect" });
       setIsSubmitting(false);
     }
   };
@@ -80,10 +85,10 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
-            {t('title')}
+            Connexion
           </h1>
           <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
-            {t('subtitle')}
+            Connectez-vous à votre compte
           </p>
         </div>
 
@@ -94,14 +99,14 @@ export default function LoginPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              {t('email')}
+              Email
             </label>
             <input
               type="email"
               id="email"
               value={formData.email}
               onChange={handleChange('email')}
-              placeholder={t('emailPlaceholder')}
+              placeholder="vous@exemple.com"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -124,14 +129,14 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              {t('password')}
+              Mot de passe
             </label>
             <input
               type="password"
               id="password"
               value={formData.password}
               onChange={handleChange('password')}
-              placeholder={t('passwordPlaceholder')}
+              placeholder="••••••••"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -165,16 +170,16 @@ export default function LoginPage() {
             disabled={isSubmitting}
             className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isSubmitting ? t('submitting') : t('submit')}
+            {isSubmitting ? "Connexion en cours..." : "Se connecter"}
           </button>
 
           {/* Links */}
           <div className="text-center text-sm">
             <Link
-              href="/auth/register"
+              href={`/${locale}/auth/register`}
               className="text-blue-600 dark:text-blue-400 hover:underline"
             >
-              {t('noAccount')}
+              Pas de compte ? Inscrivez-vous
             </Link>
           </div>
         </form>

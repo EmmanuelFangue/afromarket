@@ -1,14 +1,13 @@
 'use client';
 
 import { useAuth } from '../contexts/AuthContext';
-import { useTranslations, useLocale } from 'next-intl';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const t = useTranslations('header');
-  const locale = useLocale();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'fr';
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow">
@@ -18,9 +17,9 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-4">
-          <LanguageSwitcher />
-
-          {isAuthenticated ? (
+          {isLoading ? (
+            <div className="text-gray-500">Chargement...</div>
+          ) : isAuthenticated ? (
             <div className="flex items-center gap-4">
               <span className="text-gray-700 dark:text-gray-300">
                 {user?.email}
@@ -31,7 +30,7 @@ export default function Header() {
                   href={`/${locale}/merchant/dashboard`}
                   className="text-blue-600 dark:text-blue-400 hover:underline"
                 >
-                  {t('dashboard')}
+                  Tableau de bord
                 </Link>
               )}
 
@@ -39,7 +38,7 @@ export default function Header() {
                 onClick={() => logout()}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                {t('logout')}
+                Déconnexion
               </button>
             </div>
           ) : (
@@ -48,13 +47,13 @@ export default function Header() {
                 href={`/${locale}/auth/login`}
                 className="px-4 py-2 text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
               >
-                {t('login')}
+                Connexion
               </Link>
               <Link
                 href={`/${locale}/auth/register`}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                {t('register')}
+                Inscription
               </Link>
             </div>
           )}

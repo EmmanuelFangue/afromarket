@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
 
@@ -24,7 +23,8 @@ interface RegisterFormErrors {
 }
 
 export default function RegisterPage() {
-  const t = useTranslations('auth.register');
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'fr';
   const router = useRouter();
   const { register } = useAuth();
 
@@ -43,33 +43,33 @@ export default function RegisterPage() {
 
     const trimmedFirstName = formData.firstName.trim();
     if (!trimmedFirstName) {
-      newErrors.firstName = t('errors.firstNameRequired');
+      newErrors.firstName = "Le prénom est requis";
     }
 
     const trimmedLastName = formData.lastName.trim();
     if (!trimmedLastName) {
-      newErrors.lastName = t('errors.lastNameRequired');
+      newErrors.lastName = "Le nom est requis";
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const trimmedEmail = formData.email.trim();
     if (!trimmedEmail) {
-      newErrors.email = t('errors.emailRequired');
+      newErrors.email = "L'email est requis";
     } else if (!emailRegex.test(trimmedEmail)) {
-      newErrors.email = t('errors.emailInvalid');
+      newErrors.email = "Format d'email invalide";
     }
 
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!formData.password) {
-      newErrors.password = t('errors.passwordRequired');
+      newErrors.password = "Le mot de passe est requis";
     } else if (!passwordRegex.test(formData.password)) {
-      newErrors.password = t('errors.passwordWeak');
+      newErrors.password = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = t('errors.confirmPasswordRequired');
+      newErrors.confirmPassword = "La confirmation du mot de passe est requise";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('errors.passwordMismatch');
+      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
     }
 
     setErrors(newErrors);
@@ -90,12 +90,14 @@ export default function RegisterPage() {
         email: formData.email.trim(),
         password: formData.password
       });
-      router.push('/');
+      setTimeout(() => {
+        window.location.replace(`/${locale}`);
+      }, 100);
     } catch (error: any) {
       if (error.message.includes('exists')) {
-        setErrors({ email: t('errors.emailExists') });
+        setErrors({ email: "Cet email existe déjà" });
       } else {
-        setErrors({ general: error.message || t('errors.registerFailed') });
+        setErrors({ general: error.message || "L'inscription a échoué" });
       }
     } finally {
       setIsSubmitting(false);
@@ -119,10 +121,10 @@ export default function RegisterPage() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
-            {t('title')}
+            Inscription
           </h1>
           <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
-            {t('subtitle')}
+            Créez votre compte AfroMarket
           </p>
         </div>
 
@@ -130,14 +132,14 @@ export default function RegisterPage() {
           {/* First Name */}
           <div>
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('firstName')}
+              Prénom
             </label>
             <input
               type="text"
               id="firstName"
               value={formData.firstName}
               onChange={handleChange('firstName')}
-              placeholder={t('firstNamePlaceholder')}
+              placeholder="Votre prénom"
               aria-invalid={!!errors.firstName}
               aria-describedby={errors.firstName ? 'firstName-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -151,14 +153,14 @@ export default function RegisterPage() {
           {/* Last Name */}
           <div>
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('lastName')}
+              Nom
             </label>
             <input
               type="text"
               id="lastName"
               value={formData.lastName}
               onChange={handleChange('lastName')}
-              placeholder={t('lastNamePlaceholder')}
+              placeholder="Votre nom"
               aria-invalid={!!errors.lastName}
               aria-describedby={errors.lastName ? 'lastName-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -172,14 +174,14 @@ export default function RegisterPage() {
           {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('email')}
+              Email
             </label>
             <input
               type="email"
               id="email"
               value={formData.email}
               onChange={handleChange('email')}
-              placeholder={t('emailPlaceholder')}
+              placeholder="vous@exemple.com"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -193,14 +195,14 @@ export default function RegisterPage() {
           {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('password')}
+              Mot de passe
             </label>
             <input
               type="password"
               id="password"
               value={formData.password}
               onChange={handleChange('password')}
-              placeholder={t('passwordPlaceholder')}
+              placeholder="••••••••"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -214,14 +216,14 @@ export default function RegisterPage() {
           {/* Confirm Password */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('confirmPassword')}
+              Confirmer le mot de passe
             </label>
             <input
               type="password"
               id="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange('confirmPassword')}
-              placeholder={t('confirmPasswordPlaceholder')}
+              placeholder="••••••••"
               aria-invalid={!!errors.confirmPassword}
               aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
               className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
@@ -245,13 +247,13 @@ export default function RegisterPage() {
             disabled={isSubmitting}
             className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isSubmitting ? t('submitting') : t('submit')}
+            {isSubmitting ? "Inscription en cours..." : "S'inscrire"}
           </button>
 
           {/* Link */}
           <div className="text-center text-sm">
-            <Link href="/auth/login" className="text-blue-600 dark:text-blue-400 hover:underline">
-              {t('hasAccount')}
+            <Link href={`/${locale}/auth/login`} className="text-blue-600 dark:text-blue-400 hover:underline">
+              Déjà un compte ? Connectez-vous
             </Link>
           </div>
         </form>

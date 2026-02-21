@@ -87,7 +87,21 @@ export async function logout(refreshToken: string): Promise<void> {
 }
 
 export async function register(data: RegisterData): Promise<void> {
-  throw new Error('Registration not implemented - requires Keycloak configuration');
+  // TODO: Implement backend registration endpoint in API Gateway
+  // For now, users must be created manually in Keycloak Admin Console
+  //
+  // Steps to create a user in Keycloak:
+  // 1. Navigate to http://localhost:8080/admin
+  // 2. Login with admin credentials
+  // 3. Select 'afromarket' realm
+  // 4. Users > Add User
+  // 5. Set email, first name, last name
+  // 6. Credentials tab > Set password
+
+  throw new Error(
+    'L\'inscription automatique n\'est pas encore disponible. ' +
+    'Veuillez contacter l\'administrateur pour créer votre compte.'
+  );
 }
 
 function parseTokenToUser(accessToken: string): User {

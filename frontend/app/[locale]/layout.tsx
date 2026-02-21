@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { AuthProvider } from '../contexts/AuthContext';
-import Header from '../components/Header';
+import ClientLayout from '../components/ClientLayout';
 import "../globals.css";
 
 export async function generateMetadata({
@@ -34,17 +31,13 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const messages = await getMessages();
 
   return (
     <html lang={locale}>
       <body className="antialiased">
-        <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <Header />
-            {children}
-          </AuthProvider>
-        </NextIntlClientProvider>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
       </body>
     </html>
   );
