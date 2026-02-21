@@ -26,6 +26,13 @@ Le dashboard marchand a été implémenté avec une interface complète permetta
   - Description
   - Prix
   - Catégorie
+  - **Upload de photos (max 10 images)**
+    - Support des formats PNG, JPG, WEBP
+    - Preview en temps réel
+    - Grille responsive 2-4 colonnes
+    - Suppression d'images avec bouton hover
+    - Compteur d'images (X/10)
+    - Validation de la limite
 - Validation des champs
 - Boutons d'action (Créer/Annuler)
 
@@ -86,13 +93,15 @@ http://localhost:3000/fr/merchant/dashboard
 ### Backend
 - [ ] Créer les endpoints API pour les produits (CRUD)
 - [ ] Créer les endpoints API pour les commandes
-- [ ] Implémenter la gestion des images produits
+- [ ] Implémenter le stockage des images produits (cloud storage ou local)
+- [ ] Créer endpoint pour l'upload d'images avec validation
 - [ ] Ajouter la synchronisation avec la base de données
 
 ### Frontend
 - [ ] Connecter les formulaires aux API backend
 - [ ] Implémenter l'affichage des produits avec données réelles
-- [ ] Ajouter la gestion des images (upload, preview)
+- [x] Ajouter la gestion des images (upload, preview) - ✅ Implémenté (max 10 photos)
+- [ ] Connecter l'upload d'images au backend
 - [ ] Implémenter la modification/suppression de produits
 - [ ] Ajouter la pagination pour les listes
 - [ ] Implémenter les statistiques réelles depuis le backend
