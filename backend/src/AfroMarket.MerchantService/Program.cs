@@ -1,5 +1,6 @@
 using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Services;
+using AfroMarket.MerchantService.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
@@ -20,6 +21,7 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
 // Configure Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -117,6 +119,10 @@ app.UseRequestLocalization();
 
 // ADD Authentication & Authorization middleware
 app.UseAuthentication();
+
+// Sync user from Keycloak JWT to database
+app.UseUserSync();
+
 app.UseAuthorization();
 
 app.MapControllers();

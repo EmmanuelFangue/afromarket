@@ -1,7 +1,26 @@
 import { SearchRequest, SearchResponse, Business } from './types';
+import { AuthTokens } from './auth-types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const MERCHANT_API_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+
+function getAuthHeader(): HeadersInit {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  const stored = localStorage.getItem('afromarket_auth');
+  if (stored) {
+    try {
+      const tokens: AuthTokens = JSON.parse(stored);
+      return { 'Authorization': `Bearer ${tokens.accessToken}` };
+    } catch (error) {
+      console.error('Failed to parse auth tokens:', error);
+      return {};
+    }
+  }
+  return {};
+}
 
 export async function searchBusinesses(
   request: SearchRequest,
@@ -11,6 +30,7 @@ export async function searchBusinesses(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeader()
     },
     body: JSON.stringify(request),
     signal,
@@ -29,6 +49,9 @@ export async function getBusinessById(
 ): Promise<Business | null> {
   const response = await fetch(`${MERCHANT_API_URL}/api/business/${id}`, {
     method: 'GET',
+    headers: {
+      ...getAuthHeader()
+    },
     signal,
   });
 

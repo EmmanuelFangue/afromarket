@@ -46,3 +46,6 @@ Thumbs.db
 tmp/
 temp/
 tmpclaude*
+
+# Test credentials (sensitive)
+TEST_CREDENTIALS.md

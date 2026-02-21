@@ -25,33 +25,14 @@ public static class DbInitializer
         context.Categories.AddRange(categories);
         context.SaveChanges();
 
-        // Créer des utilisateurs de test
-        var merchantUser = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "merchant@afromarket.com",
-            PasswordHash = "hashed_password_here", // En production, utiliser un vrai hash
-            FirstName = "Marie",
-            LastName = "Kouassi",
-            Role = UserRole.Merchant,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        // Note: Users are no longer seeded here
+        // Users will be auto-created from Keycloak JWT when they first authenticate
+        // To create users, use Keycloak Admin Console or keycloak_user_setup.py script
 
-        var adminUser = new User
-        {
-            Id = Guid.NewGuid(),
-            Email = "admin@afromarket.com",
-            PasswordHash = "hashed_password_here",
-            FirstName = "Admin",
-            LastName = "AfroMarket",
-            Role = UserRole.Admin,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        context.Users.AddRange(merchantUser, adminUser);
-        context.SaveChanges();
+        // For demo purposes, we'll use a placeholder user ID from Keycloak
+        // This should match the actual Keycloak user ID after creation
+        // Replace with actual Keycloak user IDs after running keycloak_user_setup.py
+        var merchantUserId = Guid.Parse("cb9b0b74-d068-4219-b9bc-3828f9a6e17c"); // merchant@afromarket.com from Keycloak
 
         // Créer des adresses
         var addresses = new[]
@@ -121,7 +102,7 @@ public static class DbInitializer
             new Business
             {
                 Id = Guid.NewGuid(),
-                OwnerId = merchantUser.Id,
+                OwnerId = merchantUserId,
                 NameTranslations = "{\"fr\":\"Chez Fatou Restaurant\",\"en\":\"Chez Fatou Restaurant\"}",
                 DescriptionTranslations = "{\"fr\":\"Restaurant sénégalais authentique proposant thiéboudienne, mafé et yassa poulet dans une ambiance chaleureuse.\",\"en\":\"Authentic Senegalese restaurant offering thiéboudienne, mafé and yassa chicken in a warm atmosphere.\"}",
                 Status = BusinessStatus.Published,
@@ -138,7 +119,7 @@ public static class DbInitializer
             new Business
             {
                 Id = Guid.NewGuid(),
-                OwnerId = merchantUser.Id,
+                OwnerId = merchantUserId,
                 NameTranslations = "{\"fr\":\"Marché Africain Adama\",\"en\":\"Adama African Market\"}",
                 DescriptionTranslations = "{\"fr\":\"Épicerie africaine offrant produits d'Afrique de l'Ouest, viandes halal, poissons fumés et épices authentiques.\",\"en\":\"African grocery offering West African products, halal meats, smoked fish and authentic spices.\"}",
                 Status = BusinessStatus.Published,
@@ -155,7 +136,7 @@ public static class DbInitializer
             new Business
             {
                 Id = Guid.NewGuid(),
-                OwnerId = merchantUser.Id,
+                OwnerId = merchantUserId,
                 NameTranslations = "{\"fr\":\"Salon Afro Beauté\",\"en\":\"Afro Beauty Salon\"}",
                 DescriptionTranslations = "{\"fr\":\"Salon de coiffure spécialisé en tresses, locks, tissages et soins capillaires pour cheveux afro.\",\"en\":\"Hair salon specializing in braids, locks, weaves and hair care for afro hair.\"}",
                 Status = BusinessStatus.Published,
@@ -172,7 +153,7 @@ public static class DbInitializer
             new Business
             {
                 Id = Guid.NewGuid(),
-                OwnerId = merchantUser.Id,
+                OwnerId = merchantUserId,
                 NameTranslations = "{\"fr\":\"Lagos Kitchen Toronto\",\"en\":\"Lagos Kitchen Toronto\"}",
                 DescriptionTranslations = "{\"fr\":\"Cuisine nigériane authentique - jollof rice, suya, egusi soup, pounded yam et plus encore.\",\"en\":\"Authentic Nigerian cuisine - jollof rice, suya, egusi soup, pounded yam and more.\"}",
                 Status = BusinessStatus.Published,
@@ -189,7 +170,7 @@ public static class DbInitializer
             new Business
             {
                 Id = Guid.NewGuid(),
-                OwnerId = merchantUser.Id,
+                OwnerId = merchantUserId,
                 NameTranslations = "{\"fr\":\"Wax & Pagne Boutique\",\"en\":\"Wax & Pagne Boutique\"}",
                 DescriptionTranslations = "{\"fr\":\"Boutique de vêtements et tissus africains - wax, pagne, boubous, dashikis sur mesure.\",\"en\":\"African clothing and fabric boutique - wax, pagne, boubous, custom dashikis.\"}",
                 Status = BusinessStatus.PendingValidation,
@@ -490,8 +471,8 @@ public static class DbInitializer
         Console.WriteLine("Base de données initialisée avec succès !");
         Console.WriteLine($"- {categories.Length} catégories créées");
         Console.WriteLine($"- {businesses.Length} commerces créés");
-        Console.WriteLine($"- 2 utilisateurs créés");
         Console.WriteLine($"- {items.Length} articles créés");
         Console.WriteLine($"- {mediaList.Count} médias créés");
+        Console.WriteLine("Note: Les utilisateurs seront créés automatiquement depuis Keycloak lors de leur première connexion");
     }
 }

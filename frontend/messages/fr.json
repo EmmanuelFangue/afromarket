@@ -102,5 +102,59 @@
       "messageRequired": "Le message est requis",
       "messageMinLength": "Le message doit contenir au moins 10 caractères"
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Connectez-vous à votre compte",
+      "email": "Email",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours...",
+      "noAccount": "Pas de compte ? Inscrivez-vous",
+      "errors": {
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Format d'email invalide",
+        "passwordRequired": "Le mot de passe est requis",
+        "invalidCredentials": "Email ou mot de passe incorrect"
+      }
+    },
+    "register": {
+      "title": "Inscription",
+      "subtitle": "Créez votre compte AfroMarket",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Jean",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Dupont",
+      "email": "Email",
+      "emailPlaceholder": "vous@exemple.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "••••••••",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "••••••••",
+      "submit": "Créer mon compte",
+      "submitting": "Inscription en cours...",
+      "hasAccount": "Déjà un compte ? Connectez-vous",
+      "errors": {
+        "firstNameRequired": "Le prénom est requis",
+        "lastNameRequired": "Le nom est requis",
+        "emailRequired": "L'email est requis",
+        "emailInvalid": "Format d'email invalide",
+        "emailExists": "Cet email est déjà utilisé",
+        "passwordRequired": "Le mot de passe est requis",
+        "passwordWeak": "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule, 1 chiffre et 1 caractère spécial",
+        "confirmPasswordRequired": "La confirmation du mot de passe est requise",
+        "passwordMismatch": "Les mots de passe ne correspondent pas",
+        "registerFailed": "Échec de l'inscription"
+      }
+    }
+  },
+  "header": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "dashboard": "Tableau de bord"
   }
 }
