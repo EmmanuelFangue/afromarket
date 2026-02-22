@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function NewProductPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, getAccessToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'fr';
@@ -19,6 +19,8 @@ export default function NewProductPage() {
 
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -60,11 +62,81 @@ export default function NewProductPage() {
     setImagePreviews(imagePreviews.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement product creation with images
-    console.log('Creating product:', formData);
-    console.log('Images:', images);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+      const token = await getAccessToken();
+
+      if (!token) {
+        throw new Error('Non authentifié');
+      }
+
+      let imageUrls: string[] = [];
+
+      // Step 1: Upload images if any
+      if (images.length > 0) {
+        const formDataImages = new FormData();
+        images.forEach((image) => {
+          formDataImages.append('images', image);
+        });
+
+        console.log('[NewProduct] Uploading', images.length, 'images...');
+        const uploadResponse = await fetch(`${backendUrl}/api/products/upload-images`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formDataImages,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.message || 'Erreur lors de l\'upload des images');
+        }
+
+        const uploadResult = await uploadResponse.json();
+        imageUrls = uploadResult.imageUrls;
+        console.log('[NewProduct] Images uploaded:', imageUrls);
+      }
+
+      // Step 2: Create product
+      console.log('[NewProduct] Creating product...');
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        imageUrls: imageUrls,
+      };
+
+      const createResponse = await fetch(`${backendUrl}/api/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json();
+        throw new Error(errorData.message || 'Erreur lors de la création du produit');
+      }
+
+      const product = await createResponse.json();
+      console.log('[NewProduct] Product created:', product);
+
+      // Success - redirect to products list
+      router.push(`/${locale}/merchant/products`);
+    } catch (err: any) {
+      console.error('[NewProduct] Error:', err);
+      setError(err.message || 'Une erreur est survenue');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -208,17 +280,26 @@ export default function NewProductPage() {
             </div>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            </div>
+          )}
+
           <div className="flex gap-4">
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              disabled={isSubmitting}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Créer le produit
+              {isSubmitting ? 'Création en cours...' : 'Créer le produit'}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              disabled={isSubmitting}
+              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Annuler
             </button>
