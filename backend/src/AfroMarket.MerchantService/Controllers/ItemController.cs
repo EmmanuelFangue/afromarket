@@ -2,8 +2,11 @@ using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Enums;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Resources;
+using AfroMarket.MerchantService.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Microsoft.EntityFrameworkCore;
 
 namespace AfroMarket.MerchantService.Controllers;
 
@@ -12,17 +15,59 @@ namespace AfroMarket.MerchantService.Controllers;
 public class ItemController : ControllerBase
 {
     private readonly IItemService _itemService;
+    private readonly MerchantDbContext _context;
     private readonly ILogger<ItemController> _logger;
     private readonly IStringLocalizer<SharedResources> _localizer;
 
     public ItemController(
         IItemService itemService,
+        MerchantDbContext context,
         ILogger<ItemController> logger,
         IStringLocalizer<SharedResources> localizer)
     {
         _itemService = itemService;
+        _context = context;
         _logger = logger;
         _localizer = localizer;
+    }
+
+    /// <summary>
+    /// Get all items for the authenticated merchant's business
+    /// </summary>
+    [HttpGet("merchant/items")]
+    [Authorize]
+    [ProducesResponseType(typeof(List<ItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<List<ItemResponse>>> GetMerchantItems()
+    {
+        try
+        {
+            var userId = User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var merchantId))
+            {
+                return Unauthorized(new { message = "Invalid user ID" });
+            }
+
+            // Find the merchant's business
+            var business = await _context.Businesses
+                .FirstOrDefaultAsync(b => b.OwnerId == merchantId);
+
+            if (business == null)
+            {
+                // Merchant doesn't have a business yet, return empty list
+                return Ok(new List<ItemResponse>());
+            }
+
+            // Get items for the business
+            var result = await _itemService.GetItemsByBusinessAsync(business.Id, 1, 100);
+
+            return Ok(result.Items);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving merchant items");
+            return StatusCode(500, new { error = "Error retrieving items" });
+        }
     }
 
     /// <summary>

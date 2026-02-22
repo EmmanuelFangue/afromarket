@@ -22,7 +22,6 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
-builder.Services.AddScoped<IImageUploadService, LocalImageUploadService>();
 
 // Configure Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
