@@ -97,10 +97,11 @@ export default function MerchantProductsPage() {
             Mes produits
           </h1>
           <button
-            onClick={() => router.push(`/${locale}/merchant/products/new`)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            onClick={() => alert('Fonctionnalité en développement - Utilisez directement la table Items en base de données')}
+            className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
+            disabled
           >
-            Ajouter un produit
+            Ajouter un produit (bientôt)
           </button>
         </div>
 
