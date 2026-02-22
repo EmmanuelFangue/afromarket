@@ -4,15 +4,31 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-interface Product {
+interface MediaItem {
   id: string;
-  name: string;
+  url: string;
+  type: number;
+  orderIndex: number;
+  fileName: string | null;
+  altText: string | null;
+  fileSizeBytes: number | null;
+  createdAt: string;
+}
+
+interface Item {
+  id: string;
+  businessId: string;
+  businessName: string;
+  title: string;
   description: string;
   price: number;
-  category: string;
-  isActive: boolean;
+  currency: string;
+  sku: string | null;
+  isAvailable: boolean;
+  status: number;
+  media: MediaItem[];
   createdAt: string;
-  images: { id: string; imageUrl: string; order: number }[];
+  updatedAt: string;
 }
 
 export default function MerchantProductsPage() {
@@ -21,7 +37,7 @@ export default function MerchantProductsPage() {
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'fr';
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Item[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +65,7 @@ export default function MerchantProductsPage() {
         throw new Error('Non authentifié');
       }
 
-      const response = await fetch(`${backendUrl}/api/products`, {
+      const response = await fetch(`${backendUrl}/api/item/merchant/items`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -110,10 +126,10 @@ export default function MerchantProductsPage() {
                   key={product.id}
                   className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  {product.images.length > 0 ? (
+                  {product.media.length > 0 ? (
                     <img
-                      src={`http://localhost:5203${product.images[0].imageUrl}`}
-                      alt={product.name}
+                      src={`http://localhost:5203${product.media[0].url}`}
+                      alt={product.title}
                       className="w-full h-48 object-cover"
                     />
                   ) : (
@@ -123,21 +139,21 @@ export default function MerchantProductsPage() {
                   )}
                   <div className="p-4">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      {product.name}
+                      {product.title}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                       {product.description}
                     </p>
                     <div className="flex justify-between items-center">
                       <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                        {product.price.toFixed(2)} €
+                        {product.price.toFixed(2)} ${product.currency}
                       </span>
                       <span className={`text-xs px-2 py-1 rounded ${
-                        product.isActive
+                        product.isAvailable
                           ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
                       }`}>
-                        {product.isActive ? 'Actif' : 'Inactif'}
+                        {product.isAvailable ? 'Disponible' : 'Indisponible'}
                       </span>
                     </div>
                     <div className="mt-3 flex gap-2">
