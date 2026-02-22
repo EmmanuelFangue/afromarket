@@ -16,6 +16,8 @@ public class MerchantDbContext : DbContext
     public DbSet<Message> Messages { get; set; } = null!;
     public DbSet<Item> Items { get; set; } = null!;
     public DbSet<Media> Media { get; set; } = null!;
+    public DbSet<Product> Products { get; set; } = null!;
+    public DbSet<ProductImage> ProductImages { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -166,6 +168,45 @@ public class MerchantDbContext : DbContext
                 .WithMany(i => i.Media)
                 .HasForeignKey(e => e.ItemId)
                 .OnDelete(DeleteBehavior.Cascade); // Delete media when item deleted
+        });
+
+        // Product configuration
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Indexes for performance
+            entity.HasIndex(e => e.MerchantId);
+            entity.HasIndex(e => e.Category);
+            entity.HasIndex(e => new { e.MerchantId, e.IsActive }); // Composite for merchant filtering
+
+            // Property constraints
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
+            entity.Property(e => e.Price).HasColumnType("decimal(18,2)").IsRequired();
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+        });
+
+        // ProductImage configuration
+        modelBuilder.Entity<ProductImage>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // Index for fetching product images
+            entity.HasIndex(e => e.ProductId);
+
+            // Property constraints
+            entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Order).IsRequired().HasDefaultValue(0);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationship
+            entity.HasOne(e => e.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(e => e.ProductId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete images when product deleted
         });
     }
 }
