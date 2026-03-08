@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AfroMarket.SearchService.Models;
 using AfroMarket.SearchService.Services;
@@ -33,6 +34,7 @@ public class SearchController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost("index")]
     public async Task<ActionResult> IndexBusiness([FromBody] Business business)
     {
@@ -53,6 +55,7 @@ public class SearchController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteBusiness(string id)
     {

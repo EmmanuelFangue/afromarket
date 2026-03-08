@@ -203,7 +203,6 @@ public class OpenSearchService : ISearchService
                     .Text(t => t.Name(n => n.DescriptionTranslations).Analyzer("standard"))
                     .Keyword(k => k.Name(n => n.CategoryId))
                     .Keyword(k => k.Name(n => n.CategoryName))
-                    .Keyword(k => k.Name(n => n.AddressId))
                     .Keyword(k => k.Name(n => n.City))
                     .Keyword(k => k.Name(n => n.Province))
                     .GeoPoint(g => g.Name(n => n.Location)) // CRITICAL for geo queries
