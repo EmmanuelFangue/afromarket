@@ -219,6 +219,68 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
+    /// Upload d'images produit — retourne les URLs servies en statique
+    /// </summary>
+    [HttpPost("upload-images")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UploadImages([FromForm] IFormFileCollection images)
+    {
+        const int maxFiles = 10;
+        const long maxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+        if (images == null || images.Count == 0)
+            return BadRequest(new { message = "Aucune image fournie." });
+
+        if (images.Count > maxFiles)
+            return BadRequest(new { message = $"Maximum {maxFiles} images par envoi." });
+
+        foreach (var file in images)
+        {
+            if (file.Length > maxFileSizeBytes)
+                return BadRequest(new { message = $"Le fichier \"{file.FileName}\" dépasse la limite de 5 MB." });
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext) || !allowedTypes.Contains(file.ContentType.ToLowerInvariant()))
+                return BadRequest(new { message = $"Type non supporté: \"{file.FileName}\". Formats acceptés: JPG, PNG, WEBP." });
+        }
+
+        try
+        {
+            var uploadDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+            Directory.CreateDirectory(uploadDir);
+
+            var imageUrls = new List<string>();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            foreach (var file in images)
+            {
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                var fileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadDir, fileName);
+
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await file.CopyToAsync(stream);
+
+                imageUrls.Add($"{baseUrl}/uploads/products/{fileName}");
+            }
+
+            _logger.LogInformation("Uploaded {Count} image(s) by merchant {MerchantId}", imageUrls.Count, User.GetUserId());
+
+            return Ok(new { imageUrls });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading product images");
+            return StatusCode(500, new { message = "Erreur lors de l'upload des images." });
+        }
+    }
+
+    /// <summary>
     /// Supprime un produit (seulement si statut = Draft)
     /// </summary>
     [HttpDelete("{id}")]
