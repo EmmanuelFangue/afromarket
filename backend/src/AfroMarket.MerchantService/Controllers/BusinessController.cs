@@ -215,9 +215,9 @@ public class BusinessController : ControllerBase
     /// <returns>Liste paginée des commerces publiés</returns>
     [HttpGet("published")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedResponse<BusinessResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetPublishedBusinesses(
+    public async Task<ActionResult<PaginatedResponse<BusinessResponse>>> GetPublishedBusinesses(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {

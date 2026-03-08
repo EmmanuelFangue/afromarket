@@ -15,7 +15,7 @@ interface MediaItem {
   createdAt: string;
 }
 
-interface Item {
+interface Product {
   id: string;
   businessId: string;
   businessName: string;
@@ -37,7 +37,7 @@ export default function MerchantProductsPage() {
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'fr';
 
-  const [products, setProducts] = useState<Item[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,7 +65,7 @@ export default function MerchantProductsPage() {
         throw new Error('Non authentifié');
       }
 
-      const response = await fetch(`${backendUrl}/api/item/merchant/items`, {
+      const response = await fetch(`${backendUrl}/api/products/merchant/products`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -97,11 +97,10 @@ export default function MerchantProductsPage() {
             Mes produits
           </h1>
           <button
-            onClick={() => alert('Fonctionnalité en développement - Utilisez directement la table Items en base de données')}
-            className="px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
-            disabled
+            onClick={() => router.push(`/${locale}/merchant/products/new`)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Ajouter un produit (bientôt)
+            Ajouter un produit
           </button>
         </div>
 

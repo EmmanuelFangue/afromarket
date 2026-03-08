@@ -8,16 +8,16 @@ using Microsoft.Extensions.Localization;
 
 namespace AfroMarket.MerchantService.Services;
 
-public class ItemService : IItemService
+public class ProductService : IProductService
 {
     private readonly MerchantDbContext _context;
-    private readonly ILogger<ItemService> _logger;
+    private readonly ILogger<ProductService> _logger;
     private readonly IStringLocalizer<SharedResources> _localizer;
     private static readonly string[] SupportedCurrencies = { "CAD", "USD", "EUR", "XOF", "XAF" };
 
-    public ItemService(
+    public ProductService(
         MerchantDbContext context,
-        ILogger<ItemService> logger,
+        ILogger<ProductService> logger,
         IStringLocalizer<SharedResources> localizer)
     {
         _context = context;
@@ -25,7 +25,7 @@ public class ItemService : IItemService
         _localizer = localizer;
     }
 
-    public async Task<ItemResponse> CreateItemAsync(CreateItemRequest request, Guid ownerId)
+    public async Task<ProductResponse> CreateProductAsync(CreateProductRequest request, Guid ownerId)
     {
         // Validate business ownership
         var business = await _context.Businesses
@@ -59,8 +59,8 @@ public class ItemService : IItemService
             throw new ArgumentException(string.Format(_localizer["Error.InvalidCurrency"].Value, string.Join(", ", SupportedCurrencies)));
         }
 
-        // Create item
-        var item = new Item
+        // Create product
+        var product = new Product
         {
             Id = Guid.NewGuid(),
             BusinessId = request.BusinessId,
@@ -70,7 +70,7 @@ public class ItemService : IItemService
             Currency = request.Currency,
             SKU = request.SKU,
             IsAvailable = request.IsAvailable,
-            Status = ItemStatus.Draft,
+            Status = ProductStatus.Draft,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -79,7 +79,7 @@ public class ItemService : IItemService
         var mediaList = request.Media.Select((m, index) => new Media
         {
             Id = Guid.NewGuid(),
-            ItemId = item.Id,
+            ProductId = product.Id,
             Url = m.Url,
             Type = m.Type,
             OrderIndex = index,
@@ -89,80 +89,80 @@ public class ItemService : IItemService
             CreatedAt = DateTime.UtcNow
         }).ToList();
 
-        _context.Items.Add(item);
+        _context.Products.Add(product);
         _context.Media.AddRange(mediaList);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Created item {ItemId} for business {BusinessId}", item.Id, item.BusinessId);
+        _logger.LogInformation("Created product {ProductId} for business {BusinessId}", product.Id, product.BusinessId);
 
-        return await MapToResponseAsync(item);
+        return await MapToResponseAsync(product);
     }
 
-    public async Task<ItemResponse> UpdateItemAsync(Guid itemId, UpdateItemRequest request, Guid ownerId)
+    public async Task<ProductResponse> UpdateProductAsync(Guid productId, UpdateProductRequest request, Guid ownerId)
     {
-        var item = await _context.Items
-            .Include(i => i.Business)
-            .Include(i => i.Media.OrderBy(m => m.OrderIndex))
-            .FirstOrDefaultAsync(i => i.Id == itemId);
+        var product = await _context.Products
+            .Include(p => p.Business)
+            .Include(p => p.Media.OrderBy(m => m.OrderIndex))
+            .FirstOrDefaultAsync(p => p.Id == productId);
 
-        if (item == null)
+        if (product == null)
         {
-            throw new KeyNotFoundException(string.Format(_localizer["Error.ItemNotFound"].Value, itemId));
+            throw new KeyNotFoundException(string.Format(_localizer["Error.ProductNotFound"].Value, productId));
         }
 
         // Verify ownership
-        if (item.Business.OwnerId != ownerId)
+        if (product.Business.OwnerId != ownerId)
         {
             throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
-        // Status check - only Draft items can be updated
-        if (item.Status != ItemStatus.Draft)
+        // Status check - only Draft products can be updated
+        if (product.Status != ProductStatus.Draft)
         {
             throw new InvalidOperationException(_localizer["Error.CannotUpdateStatus"].Value);
         }
 
         // Update fields if provided
         if (request.Title != null)
-            item.Title = request.Title;
+            product.Title = request.Title;
 
         if (request.Description != null)
-            item.Description = request.Description;
+            product.Description = request.Description;
 
         if (request.Price.HasValue)
         {
             if (request.Price.Value <= 0)
                 throw new ArgumentException(_localizer["Error.PricePositive"].Value);
-            item.Price = request.Price.Value;
+            product.Price = request.Price.Value;
         }
 
         if (request.Currency != null)
         {
             if (!SupportedCurrencies.Contains(request.Currency))
                 throw new ArgumentException(string.Format(_localizer["Error.InvalidCurrency"].Value, string.Join(", ", SupportedCurrencies)));
-            item.Currency = request.Currency;
+            product.Currency = request.Currency;
         }
 
         if (request.SKU != null)
-            item.SKU = request.SKU;
+            product.SKU = request.SKU;
 
         if (request.IsAvailable.HasValue)
-            item.IsAvailable = request.IsAvailable.Value;
+            product.IsAvailable = request.IsAvailable.Value;
 
         // Handle media updates
         if (request.MediaToRemove != null && request.MediaToRemove.Any())
         {
-            var mediaToRemove = item.Media.Where(m => request.MediaToRemove.Contains(m.Id)).ToList();
+            var mediaToRemove = product.Media.Where(m => request.MediaToRemove.Contains(m.Id)).ToList();
             _context.Media.RemoveRange(mediaToRemove);
         }
 
         if (request.MediaToAdd != null && request.MediaToAdd.Any())
         {
-            var maxOrderIndex = item.Media.Any() ? item.Media.Max(m => m.OrderIndex) : -1;
+            var maxOrderIndex = product.Media.Any() ? product.Media.Max(m => m.OrderIndex) : -1;
             var newMedia = request.MediaToAdd.Select((m, index) => new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = item.Id,
+                ProductId = product.Id,
                 Url = m.Url,
                 Type = m.Type,
                 OrderIndex = maxOrderIndex + index + 1,
@@ -179,7 +179,7 @@ public class ItemService : IItemService
         {
             foreach (var orderUpdate in request.MediaOrderUpdates)
             {
-                var media = item.Media.FirstOrDefault(m => m.Id == orderUpdate.MediaId);
+                var media = product.Media.FirstOrDefault(m => m.Id == orderUpdate.MediaId);
                 if (media != null)
                 {
                     media.OrderIndex = orderUpdate.NewOrderIndex;
@@ -188,136 +188,138 @@ public class ItemService : IItemService
         }
 
         // Ensure at least 1 media remains
-        if (item.Media.Count == 0)
+        if (product.Media.Count == 0)
         {
             throw new InvalidOperationException(_localizer["Error.MediaRequired"].Value);
         }
 
-        item.UpdatedAt = DateTime.UtcNow;
+        product.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Updated item {ItemId}", itemId);
+        _logger.LogInformation("Updated product {ProductId}", productId);
 
-        return await MapToResponseAsync(item);
+        return await MapToResponseAsync(product);
     }
 
-    public async Task<ItemResponse?> GetItemByIdAsync(Guid itemId)
+    public async Task<ProductResponse?> GetProductByIdAsync(Guid productId)
     {
-        var item = await _context.Items
-            .Include(i => i.Business)
-            .Include(i => i.Media.OrderBy(m => m.OrderIndex))
-            .FirstOrDefaultAsync(i => i.Id == itemId);
+        var product = await _context.Products
+            .Include(p => p.Business)
+            .Include(p => p.Media.OrderBy(m => m.OrderIndex))
+            .FirstOrDefaultAsync(p => p.Id == productId);
 
-        if (item == null)
+        if (product == null)
         {
             return null;
         }
 
-        return await MapToResponseAsync(item);
+        return await MapToResponseAsync(product);
     }
 
-    public async Task<PaginatedResponse<ItemResponse>> GetItemsByBusinessAsync(
+    public async Task<PaginatedResponse<ProductResponse>> GetProductsByBusinessAsync(
         Guid businessId,
         int page = 1,
         int pageSize = 20,
-        ItemStatus? statusFilter = null)
+        ProductStatus? statusFilter = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
 
-        var query = _context.Items
-            .Include(i => i.Business)
-            .Include(i => i.Media.OrderBy(m => m.OrderIndex))
-            .Where(i => i.BusinessId == businessId);
+        var query = _context.Products
+            .Include(p => p.Business)
+            .Include(p => p.Media.OrderBy(m => m.OrderIndex))
+            .Where(p => p.BusinessId == businessId);
 
         if (statusFilter.HasValue)
         {
-            query = query.Where(i => i.Status == statusFilter.Value);
+            query = query.Where(p => p.Status == statusFilter.Value);
         }
 
         var totalCount = await query.CountAsync();
-        var items = await query
-            .OrderByDescending(i => i.CreatedAt)
+        var products = await query
+            .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        var itemResponses = new List<ItemResponse>();
-        foreach (var item in items)
+        var productResponses = new List<ProductResponse>();
+        foreach (var product in products)
         {
-            itemResponses.Add(await MapToResponseAsync(item));
+            productResponses.Add(await MapToResponseAsync(product));
         }
 
-        return new PaginatedResponse<ItemResponse>
+        return new PaginatedResponse<ProductResponse>
         {
-            Items = itemResponses,
+            Items = productResponses,
             TotalCount = totalCount,
             Page = page,
             PageSize = pageSize
         };
     }
 
-    public async Task<bool> DeleteItemAsync(Guid itemId, Guid ownerId)
+    public async Task<bool> DeleteProductAsync(Guid productId, Guid ownerId)
     {
-        var item = await _context.Items
-            .Include(i => i.Business)
-            .FirstOrDefaultAsync(i => i.Id == itemId);
+        var product = await _context.Products
+            .Include(p => p.Business)
+            .FirstOrDefaultAsync(p => p.Id == productId);
 
-        if (item == null)
+        if (product == null)
         {
             return false;
         }
 
         // Verify ownership
-        if (item.Business.OwnerId != ownerId)
+        if (product.Business.OwnerId != ownerId)
         {
             throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
         }
 
-        // Status check - only Draft items can be deleted
-        if (item.Status != ItemStatus.Draft)
+        // Status check - only Draft products can be deleted
+        if (product.Status != ProductStatus.Draft)
         {
-            throw new InvalidOperationException(string.Format(_localizer["Error.CannotDeleteStatus"].Value, item.Status));
+            throw new InvalidOperationException(string.Format(_localizer["Error.CannotDeleteStatus"].Value, product.Status));
         }
 
-        _context.Items.Remove(item);
+        _context.Products.Remove(product);
         await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Deleted item {ItemId}", itemId);
+        _logger.LogInformation("Deleted product {ProductId}", productId);
 
         return true;
     }
 
-    private async Task<ItemResponse> MapToResponseAsync(Item item)
+    private async Task<ProductResponse> MapToResponseAsync(Product product)
     {
         // Ensure business is loaded
-        if (item.Business == null)
+        if (product.Business == null)
         {
-            item.Business = await _context.Businesses.FindAsync(item.BusinessId) ?? throw new InvalidOperationException("Business not found");
+            product.Business = await _context.Businesses.FindAsync(product.BusinessId) ?? throw new InvalidOperationException("Business not found");
         }
 
         // Ensure media is loaded
-        if (item.Media == null || !item.Media.Any())
+        if (product.Media == null || !product.Media.Any())
         {
-            item.Media = await _context.Media
-                .Where(m => m.ItemId == item.Id)
+            product.Media = await _context.Media
+                .Where(m => m.ProductId == product.Id)
                 .OrderBy(m => m.OrderIndex)
                 .ToListAsync();
         }
 
-        return new ItemResponse
+        return new ProductResponse
         {
-            Id = item.Id,
-            BusinessId = item.BusinessId,
-            BusinessName = item.Business.Name,
-            Title = item.Title,
-            Description = item.Description,
-            Price = item.Price,
-            Currency = item.Currency,
-            SKU = item.SKU,
-            IsAvailable = item.IsAvailable,
-            Status = item.Status,
-            Media = item.Media.Select(m => new MediaResponse
+            Id = product.Id,
+            BusinessId = product.BusinessId,
+            BusinessName = product.Business.Name,
+            Title = product.Title,
+            Description = product.Description,
+            TitleTranslations = product.TitleTranslations,
+            DescriptionTranslations = product.DescriptionTranslations,
+            Price = product.Price,
+            Currency = product.Currency,
+            SKU = product.SKU,
+            IsAvailable = product.IsAvailable,
+            Status = product.Status,
+            Media = product.Media.Select(m => new MediaResponse
             {
                 Id = m.Id,
                 Url = m.Url,
@@ -328,8 +330,8 @@ public class ItemService : IItemService
                 FileSizeBytes = m.FileSizeBytes,
                 CreatedAt = m.CreatedAt
             }).ToList(),
-            CreatedAt = item.CreatedAt,
-            UpdatedAt = item.UpdatedAt
+            CreatedAt = product.CreatedAt,
+            UpdatedAt = product.UpdatedAt
         };
     }
 }
