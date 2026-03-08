@@ -48,42 +48,39 @@ export default function MerchantProductsPage() {
   }, [isLoading, isAuthenticated, router, locale, pathname]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadProducts();
-    }
-  }, [isAuthenticated]);
+    if (!isAuthenticated) return;
 
-  const loadProducts = async () => {
-    try {
-      setIsLoadingProducts(true);
-      setError(null);
+    let cancelled = false;
 
-      const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
-      const token = await getAccessToken();
+    const load = async () => {
+      try {
+        setIsLoadingProducts(true);
+        setError(null);
 
-      if (!token) {
-        throw new Error('Non authentifié');
+        const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+        const token = await getAccessToken();
+
+        if (!token) throw new Error('Non authentifié');
+
+        const response = await fetch(`${backendUrl}/api/products/merchant/products`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error('Erreur lors du chargement des produits');
+
+        const data = await response.json();
+        if (!cancelled) setProducts(data);
+      } catch (err: any) {
+        console.error('[Products] Error:', err);
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setIsLoadingProducts(false);
       }
+    };
 
-      const response = await fetch(`${backendUrl}/api/products/merchant/products`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des produits');
-      }
-
-      const data = await response.json();
-      setProducts(data);
-    } catch (err: any) {
-      console.error('[Products] Error:', err);
-      setError(err.message);
-    } finally {
-      setIsLoadingProducts(false);
-    }
-  };
+    load();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, getAccessToken]);
 
   if (isLoading || !isAuthenticated) {
     return null;
@@ -128,7 +125,7 @@ export default function MerchantProductsPage() {
                 >
                   {product.media.length > 0 ? (
                     <img
-                      src={`http://localhost:5203${product.media[0].url}`}
+                      src={product.media[0].url}
                       alt={product.title}
                       className="w-full h-48 object-cover"
                     />

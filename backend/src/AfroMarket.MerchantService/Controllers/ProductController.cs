@@ -176,7 +176,13 @@ public class ProductController : ControllerBase
 
             if (product == null)
             {
-                return NotFound(new { error = $"Product with ID {id} not found" });
+                return NotFound(new { error = _localizer["Error.ProductNotFound"].Value });
+            }
+
+            // Anonymous callers may only view Active products
+            if (product.Status != ProductStatus.Active && !(User.Identity?.IsAuthenticated ?? false))
+            {
+                return NotFound(new { error = _localizer["Error.ProductNotFound"].Value });
             }
 
             return Ok(product);
@@ -207,7 +213,12 @@ public class ProductController : ControllerBase
                 return BadRequest(new { error = "businessId parameter is required" });
             }
 
-            var result = await _productService.GetProductsByBusinessAsync(businessId, page, pageSize, status);
+            // Anonymous callers may only see Active products
+            var effectiveStatus = (User.Identity?.IsAuthenticated ?? false)
+                ? status
+                : ProductStatus.Active;
+
+            var result = await _productService.GetProductsByBusinessAsync(businessId, page, pageSize, effectiveStatus);
 
             return Ok(result);
         }
@@ -298,7 +309,7 @@ public class ProductController : ControllerBase
 
             if (!result)
             {
-                return NotFound(new { error = $"Product with ID {id} not found" });
+                return NotFound(new { error = _localizer["Error.ProductNotFound"].Value });
             }
 
             return NoContent();

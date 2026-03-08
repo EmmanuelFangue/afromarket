@@ -11,7 +11,7 @@ public interface IProductService
     Task<ProductResponse> CreateProductAsync(CreateProductRequest request, Guid ownerId);
 
     /// <summary>
-    /// Updates an existing product (only if Draft or owner check passes)
+    /// Updates an existing product (only if in Draft status and ownership check passes)
     /// </summary>
     Task<ProductResponse> UpdateProductAsync(Guid productId, UpdateProductRequest request, Guid ownerId);
 

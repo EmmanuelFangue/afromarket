@@ -39,6 +39,10 @@ export default function NewProductPage() {
       try {
         const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
         const token = await getAccessToken();
+        if (!token) {
+          setBusinessError('Session expirée. Veuillez vous reconnecter.');
+          return;
+        }
         const response = await fetch(`${backendUrl}/api/business/my-businesses`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -55,7 +59,7 @@ export default function NewProductPage() {
     };
 
     fetchBusiness();
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, getAccessToken]);
 
   if (isLoading || !isAuthenticated) return null;
 
