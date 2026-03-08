@@ -4,6 +4,8 @@ import { useAuth } from '../../../../../contexts/AuthContext';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+
 interface MediaItem {
   id: string;
   url: string;
@@ -33,10 +35,7 @@ export default function EditProductPage() {
   const locale = pathname.split('/')[1] || 'fr';
   const productId = params.id as string;
 
-  const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
-
   // Product loading
-  const [product, setProduct] = useState<ProductData | null>(null);
   const [isFetchingProduct, setIsFetchingProduct] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -83,12 +82,16 @@ export default function EditProductPage() {
           return;
         }
 
-        const response = await fetch(`${backendUrl}/api/products/${productId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/products/${productId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
         if (response.status === 404) {
           if (!cancelled) setFetchError('Produit introuvable.');
+          return;
+        }
+        if (response.status === 401 || response.status === 403) {
+          if (!cancelled) setFetchError('Session expirée. Veuillez vous reconnecter.');
           return;
         }
         if (!response.ok) throw new Error('Impossible de charger le produit.');
@@ -101,7 +104,6 @@ export default function EditProductPage() {
         }
 
         if (!cancelled) {
-          setProduct(data);
           setFormData({
             title: data.title,
             description: data.description,
@@ -133,6 +135,7 @@ export default function EditProductPage() {
   };
 
   const handleAddNewImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isSubmitting) return;
     const files = e.target.files;
     if (!files) return;
 
@@ -183,7 +186,7 @@ export default function EditProductPage() {
         const formDataImages = new FormData();
         newImages.forEach(img => formDataImages.append('images', img));
 
-        const uploadResponse = await fetch(`${backendUrl}/api/products/upload-images`, {
+        const uploadResponse = await fetch(`${BACKEND_URL}/api/products/upload-images`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
           body: formDataImages,
@@ -217,7 +220,7 @@ export default function EditProductPage() {
       if (mediaToRemove.length > 0) updatePayload.mediaToRemove = mediaToRemove;
       if (newMediaToAdd.length > 0) updatePayload.mediaToAdd = newMediaToAdd;
 
-      const updateResponse = await fetch(`${backendUrl}/api/products/${productId}`, {
+      const updateResponse = await fetch(`${BACKEND_URL}/api/products/${productId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -409,7 +412,8 @@ export default function EditProductPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveExisting(media.id)}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                          disabled={isSubmitting}
+                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Supprimer cette photo"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +441,8 @@ export default function EditProductPage() {
                         <button
                           type="button"
                           onClick={() => handleRemoveNew(index)}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                          disabled={isSubmitting}
+                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                           aria-label="Annuler l'ajout"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -456,7 +461,11 @@ export default function EditProductPage() {
               {/* Add more images */}
               {totalImageCount < 10 && (
                 <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                  <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg bg-gray-50 dark:bg-gray-700 transition-colors ${
+                    isSubmitting
+                      ? 'cursor-not-allowed opacity-50'
+                      : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600'
+                  }`}>
                     <div className="flex flex-col items-center justify-center py-3">
                       <svg className="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
@@ -470,6 +479,7 @@ export default function EditProductPage() {
                       className="hidden"
                       accept="image/png,image/jpeg,image/jpg,image/webp"
                       multiple
+                      disabled={isSubmitting}
                       onChange={handleAddNewImages}
                     />
                   </label>

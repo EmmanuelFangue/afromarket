@@ -5,6 +5,8 @@ import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+
 interface MediaItem {
   id: string;
   url: string;
@@ -43,8 +45,6 @@ export default function ProductDetailPage() {
   const locale = pathname.split('/')[1] || 'fr';
   const productId = params.id as string;
 
-  const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
-
   const [product, setProduct] = useState<Product | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -52,6 +52,9 @@ export default function ProductDetailPage() {
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -75,12 +78,16 @@ export default function ProductDetailPage() {
           return;
         }
 
-        const response = await fetch(`${backendUrl}/api/products/${productId}`, {
+        const response = await fetch(`${BACKEND_URL}/api/products/${productId}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
         if (response.status === 404) {
           if (!cancelled) setFetchError('Produit introuvable.');
+          return;
+        }
+        if (response.status === 401 || response.status === 403) {
+          if (!cancelled) setFetchError('Session expirée. Veuillez vous reconnecter.');
           return;
         }
         if (!response.ok) throw new Error('Impossible de charger le produit.');
@@ -98,6 +105,38 @@ export default function ProductDetailPage() {
     return () => { cancelled = true; };
   }, [isAuthenticated, isLoading, productId, getAccessToken]);
 
+  const handleChangeStatus = async (newStatus: number) => {
+    setIsChangingStatus(true);
+    setStatusError(null);
+
+    try {
+      const token = await getAccessToken();
+      if (!token) throw new Error('Non authentifié');
+
+      const response = await fetch(`${BACKEND_URL}/api/products/${productId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Impossible de changer le statut.');
+      }
+
+      const updated: Product = await response.json();
+      setProduct(updated);
+    } catch (err: any) {
+      console.error('[ChangeStatus] Error:', err);
+      setStatusError(err.message || 'Une erreur est survenue.');
+    } finally {
+      setIsChangingStatus(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm('Supprimer ce produit ? Cette action est irréversible.')) return;
 
@@ -108,7 +147,7 @@ export default function ProductDetailPage() {
       const token = await getAccessToken();
       if (!token) throw new Error('Non authentifié');
 
-      const response = await fetch(`${backendUrl}/api/products/${productId}`, {
+      const response = await fetch(`${BACKEND_URL}/api/products/${productId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -155,7 +194,6 @@ export default function ProductDetailPage() {
   }
 
   const status = STATUS_LABEL[product.status] ?? STATUS_LABEL[0];
-  const isDraft = product.status === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -170,28 +208,63 @@ export default function ProductDetailPage() {
             ← Mes produits
           </Link>
 
-          {isDraft && (
-            <div className="flex gap-3">
-              <Link
-                href={`/${locale}/merchant/products/${productId}/edit`}
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Modifier
-              </Link>
+          <div className="flex gap-3">
+            {product.status === 0 && (
+              <>
+                <Link
+                  href={`/${locale}/merchant/products/${productId}/edit`}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Modifier
+                </Link>
+                <button
+                  onClick={() => handleChangeStatus(1)}
+                  disabled={isChangingStatus}
+                  className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isChangingStatus ? 'En cours...' : 'Publier'}
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting || isChangingStatus}
+                  className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isDeleting ? 'Suppression...' : 'Supprimer'}
+                </button>
+              </>
+            )}
+
+            {product.status === 1 && (
               <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => handleChangeStatus(2)}
+                disabled={isChangingStatus}
+                className="px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isDeleting ? 'Suppression...' : 'Supprimer'}
+                {isChangingStatus ? 'En cours...' : 'Suspendre'}
               </button>
-            </div>
-          )}
+            )}
+
+            {product.status === 2 && (
+              <button
+                onClick={() => handleChangeStatus(1)}
+                disabled={isChangingStatus}
+                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isChangingStatus ? 'En cours...' : 'Réactiver'}
+              </button>
+            )}
+          </div>
         </div>
 
         {deleteError && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-red-800 dark:text-red-200 text-sm">{deleteError}</p>
+          </div>
+        )}
+
+        {statusError && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-red-800 dark:text-red-200 text-sm">{statusError}</p>
           </div>
         )}
 
@@ -270,23 +343,31 @@ export default function ProductDetailPage() {
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Créé le</p>
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  {new Date(product.createdAt).toLocaleDateString('fr-CA')}
+                  {new Date(product.createdAt).toLocaleDateString(locale)}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Modifié le</p>
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  {new Date(product.updatedAt).toLocaleDateString('fr-CA')}
+                  {new Date(product.updatedAt).toLocaleDateString(locale)}
                 </p>
               </div>
             </div>
 
-            {/* Draft notice */}
-            {isDraft && (
+            {/* Status notices */}
+            {product.status === 0 && (
               <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
                   Ce produit est en brouillon et n'est pas visible par les clients.
-                  La publication sera disponible prochainement.
+                  Cliquez sur <strong>Publier</strong> pour le rendre actif.
+                </p>
+              </div>
+            )}
+            {product.status === 2 && (
+              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  Ce produit est suspendu et n'est pas visible par les clients.
+                  Cliquez sur <strong>Réactiver</strong> pour le rendre à nouveau disponible.
                 </p>
               </div>
             )}

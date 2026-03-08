@@ -220,7 +220,8 @@ public class ProductService : IProductService
         Guid businessId,
         int page = 1,
         int pageSize = 20,
-        ProductStatus? statusFilter = null)
+        ProductStatus? statusFilter = null,
+        string? searchQuery = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
@@ -233,6 +234,14 @@ public class ProductService : IProductService
         if (statusFilter.HasValue)
         {
             query = query.Where(p => p.Status == statusFilter.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var q = searchQuery.Trim().ToLower();
+            query = query.Where(p =>
+                p.Title.ToLower().Contains(q) ||
+                (p.SKU != null && p.SKU.ToLower().Contains(q)));
         }
 
         var totalCount = await query.CountAsync();
@@ -286,6 +295,45 @@ public class ProductService : IProductService
         _logger.LogInformation("Deleted product {ProductId}", productId);
 
         return true;
+    }
+
+    public async Task<ProductResponse> ChangeProductStatusAsync(Guid productId, ProductStatus newStatus, Guid ownerId)
+    {
+        var product = await _context.Products
+            .Include(p => p.Business)
+            .Include(p => p.Media.OrderBy(m => m.OrderIndex))
+            .FirstOrDefaultAsync(p => p.Id == productId);
+
+        if (product == null)
+        {
+            throw new KeyNotFoundException(string.Format(_localizer["Error.ProductNotFound"].Value, productId));
+        }
+
+        if (product.Business.OwnerId != ownerId)
+        {
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
+        }
+
+        var isValidTransition = (product.Status, newStatus) switch
+        {
+            (ProductStatus.Draft, ProductStatus.Active) => true,
+            (ProductStatus.Active, ProductStatus.Suspended) => true,
+            (ProductStatus.Suspended, ProductStatus.Active) => true,
+            _ => false,
+        };
+
+        if (!isValidTransition)
+        {
+            throw new InvalidOperationException(_localizer["Error.InvalidStatusTransition"].Value);
+        }
+
+        product.Status = newStatus;
+        product.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Changed product {ProductId} status from {OldStatus} to {NewStatus}", productId, product.Status, newStatus);
+
+        return await MapToResponseAsync(product);
     }
 
     private async Task<ProductResponse> MapToResponseAsync(Product product)

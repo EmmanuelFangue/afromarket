@@ -21,16 +21,22 @@ public interface IProductService
     Task<ProductResponse?> GetProductByIdAsync(Guid productId);
 
     /// <summary>
-    /// Gets paginated products for a specific business
+    /// Gets paginated products for a specific business with optional status filter and text search
     /// </summary>
     Task<PaginatedResponse<ProductResponse>> GetProductsByBusinessAsync(
         Guid businessId,
         int page = 1,
         int pageSize = 20,
-        ProductStatus? statusFilter = null);
+        ProductStatus? statusFilter = null,
+        string? searchQuery = null);
 
     /// <summary>
     /// Deletes a product (only if Draft status)
     /// </summary>
     Task<bool> DeleteProductAsync(Guid productId, Guid ownerId);
+
+    /// <summary>
+    /// Changes the status of a product. Allowed transitions: Draft→Active, Active→Suspended, Suspended→Active.
+    /// </summary>
+    Task<ProductResponse> ChangeProductStatusAsync(Guid productId, ProductStatus newStatus, Guid ownerId);
 }

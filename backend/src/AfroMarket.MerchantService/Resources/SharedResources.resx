@@ -174,6 +174,12 @@
   <data name="Error.DeleteProduct" xml:space="preserve">
     <value>Une erreur s'est produite lors de la suppression du produit</value>
   </data>
+  <data name="Error.ChangeStatus" xml:space="preserve">
+    <value>Une erreur s'est produite lors du changement de statut du produit</value>
+  </data>
+  <data name="Error.InvalidStatusTransition" xml:space="preserve">
+    <value>Transition de statut invalide. Transitions autorisées : Brouillon → Actif, Actif → Suspendu, Suspendu → Actif.</value>
+  </data>
   <data name="Error.RetrieveProducts" xml:space="preserve">
     <value>Une erreur s'est produite lors de la récupération des produits</value>
   </data>

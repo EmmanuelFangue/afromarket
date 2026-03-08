@@ -37,28 +37,36 @@ public class ProductController : ControllerBase
     /// </summary>
     [HttpGet("merchant/products")]
     [Authorize]
-    [ProducesResponseType(typeof(List<ProductResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedResponse<ProductResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<ProductResponse>>> GetMerchantProducts()
+    public async Task<ActionResult<PaginatedResponse<ProductResponse>>> GetMerchantProducts(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 12,
+        [FromQuery] ProductStatus? status = null,
+        [FromQuery] string? q = null)
     {
         try
         {
             var merchantId = User.GetUserId();
 
-            // Find the merchant's business
             var business = await _context.Businesses
                 .FirstOrDefaultAsync(b => b.OwnerId == merchantId);
 
             if (business == null)
             {
-                // Merchant doesn't have a business yet, return empty list
-                return Ok(new List<ProductResponse>());
+                return Ok(new PaginatedResponse<ProductResponse>
+                {
+                    Items = new List<ProductResponse>(),
+                    TotalCount = 0,
+                    Page = page,
+                    PageSize = pageSize
+                });
             }
 
-            // Get products for the business
-            var result = await _productService.GetProductsByBusinessAsync(business.Id, 1, 100);
+            var result = await _productService.GetProductsByBusinessAsync(
+                business.Id, page, pageSize, status, q);
 
-            return Ok(result.Items);
+            return Ok(result);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -68,7 +76,7 @@ public class ProductController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving merchant products");
-            return StatusCode(500, new { error = "Error retrieving products" });
+            return StatusCode(500, new { error = _localizer["Error.RetrieveProducts"].Value });
         }
     }
 
@@ -328,6 +336,47 @@ public class ProductController : ControllerBase
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
             return StatusCode(500, new { error = _localizer["Error.DeleteProduct"].Value });
+        }
+    }
+
+    /// <summary>
+    /// Change le statut d'un produit (Draft→Active, Active→Suspended, Suspended→Active)
+    /// </summary>
+    [HttpPatch("{id}/status")]
+    [Authorize]
+    [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProductResponse>> ChangeProductStatus(Guid id, [FromBody] ChangeStatusRequest request)
+    {
+        try
+        {
+            var ownerId = User.GetUserId();
+
+            var product = await _productService.ChangeProductStatusAsync(id, request.Status, ownerId);
+
+            return Ok(product);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Product {ProductId} not found", id);
+            return NotFound(new { error = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access to product {ProductId}", id);
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid status transition for product {ProductId}", id);
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing status of product {ProductId}", id);
+            return StatusCode(500, new { error = _localizer["Error.ChangeStatus"].Value });
         }
     }
 }
