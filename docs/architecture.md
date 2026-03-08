@@ -1,9 +1,9 @@
 
 # AfroMarket — Architecture technique (BETA)
 
-**Version** : 0.9 (Draft)
-**Date** : 2026-02-11
-**Stack** : Front — React 19 + Next.js 15 + TS · Backend — .NET 10 microservices · Search — OpenSearch · DB — PostgreSQL+PostGIS · IAM — Keycloak · Bus — Kafka
+- **Version** : 0.9 (Draft)
+- **Date** : 2026-02-11
+- **Stack** : Front — React 19 + Next.js 15 + TS · Backend — .NET 10 microservices · Search — OpenSearch · DB — SQLServer+PostGIS · IAM — Keycloak · Bus — Kafka
 
 ## 1. Vision
 Annuaire géolocalisé de commerces africains au Canada, centré sur la **recherche** (full-text + géo + facettes), modération de contenus et ingestion de sources externes.
@@ -64,4 +64,8 @@ erDiagram
 - `POST /api/admin/items/{id}/validate`
 
 ## 6. NFR
-p95 recherche < 300 ms (hors réseau) • 99.5% BETA • Observabilité OTel→ELK/Grafana • Sécurité OIDC RBAC • CI/CD Blue-Green
+p95 recherche < 300 ms (hors réseau) 
+- 99.5% BETA 
+- Observabilité OTel→ELK/Grafana 
+- Sécurité OIDC RBAC 
+- CI/CD Blue-Green

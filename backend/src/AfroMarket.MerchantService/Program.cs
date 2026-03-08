@@ -20,7 +20,7 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
-builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
 // Configure Localization
@@ -113,6 +113,9 @@ else
 }
 
 app.UseCors("AllowFrontend");
+
+// Serve static files (uploaded images)
+app.UseStaticFiles();
 
 // Request Localization middleware
 app.UseRequestLocalization();

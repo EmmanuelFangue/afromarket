@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  getAccessToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -206,6 +207,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await handleLogin(data.email, data.password);
   }
 
+  async function getAccessToken(): Promise<string | null> {
+    try {
+      if (typeof window === 'undefined') {
+        return null;
+      }
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        return null;
+      }
+
+      const tokens: AuthTokens = JSON.parse(stored);
+
+      // If token is expired, refresh it
+      if (Date.now() >= tokens.expiresAt) {
+        console.log('[AuthContext] Token expired, refreshing...');
+        const newTokens = await authApi.refreshAccessToken(tokens.refreshToken);
+        saveTokens(newTokens);
+        const refreshedUser = parseUserFromToken(newTokens.accessToken);
+        setUser(refreshedUser);
+        scheduleTokenRefresh(newTokens.expiresAt);
+        return newTokens.accessToken;
+      }
+
+      return tokens.accessToken;
+    } catch (error) {
+      console.error('[AuthContext] Error getting access token:', error);
+      return null;
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -214,7 +246,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         login: handleLogin,
         logout: handleLogout,
-        register: handleRegister
+        register: handleRegister,
+        getAccessToken
       }}
     >
       {children}

@@ -57,7 +57,7 @@ export default function MerchantDashboard() {
           />
           <StatCard
             title="Revenus"
-            value="0 €"
+            value="0 $CAD"
             icon="💰"
             color="yellow"
           />

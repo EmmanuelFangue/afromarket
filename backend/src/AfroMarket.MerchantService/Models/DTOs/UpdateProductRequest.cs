@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
-public class UpdateItemRequest
+public class UpdateProductRequest
 {
     [StringLength(200, MinimumLength = 3)]
     public string? Title { get; set; }

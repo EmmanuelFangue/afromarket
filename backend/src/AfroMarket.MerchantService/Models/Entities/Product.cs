@@ -5,20 +5,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AfroMarket.MerchantService.Models.Entities;
 
 /// <summary>
-/// Represents a product/item sold by a business
+/// Represents a product sold by a business
 /// </summary>
-public class Item
+public class Product
 {
     public Guid Id { get; set; }
     public Guid BusinessId { get; set; }
 
     /// <summary>
-    /// Titre de l'article en JSON multilingue: {"fr": "...", "en": "..."}
+    /// Titre du produit en JSON multilingue: {"fr": "...", "en": "..."}
     /// </summary>
     public string TitleTranslations { get; set; } = "{\"fr\":\"\",\"en\":\"\"}";
 
     /// <summary>
-    /// Description de l'article en JSON multilingue: {"fr": "...", "en": "..."}
+    /// Description du produit en JSON multilingue: {"fr": "...", "en": "..."}
     /// </summary>
     public string DescriptionTranslations { get; set; } = "{\"fr\":\"\",\"en\":\"\"}";
 
@@ -26,7 +26,7 @@ public class Item
     public string Currency { get; set; } = "CAD"; // ISO 4217 code
     public string? SKU { get; set; } // Optional Stock Keeping Unit
     public bool IsAvailable { get; set; } = true; // Stock availability
-    public ItemStatus Status { get; set; } = ItemStatus.Draft;
+    public ProductStatus Status { get; set; } = ProductStatus.Draft;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 

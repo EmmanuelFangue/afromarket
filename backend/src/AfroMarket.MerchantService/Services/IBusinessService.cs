@@ -32,5 +32,5 @@ public interface IBusinessService
     /// <summary>
     /// Récupère tous les commerces publiés avec pagination
     /// </summary>
-    Task<PaginatedResult<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20);
+    Task<PaginatedResponse<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20);
 }
