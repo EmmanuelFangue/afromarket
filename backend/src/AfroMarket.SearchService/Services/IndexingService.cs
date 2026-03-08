@@ -87,7 +87,6 @@ public class IndexingService
             DescriptionTranslations = dto.DescriptionTranslations,
             CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
-            AddressId = Guid.NewGuid(), // Not critical for search
             City = dto.Address.City,
             Province = dto.Address.Province,
             Address = $"{dto.Address.Street}, {dto.Address.City}",

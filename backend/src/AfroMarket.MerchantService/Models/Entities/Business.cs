@@ -36,7 +36,7 @@ public class Business
     public Category Category { get; set; } = null!;
     public Address Address { get; set; } = null!;
     public ICollection<Message> Messages { get; set; } = new List<Message>();
-    public ICollection<Item> Items { get; set; } = new List<Item>();
+    public ICollection<Product> Products { get; set; } = new List<Product>();
 
     // Propriétés de commodité (non mappées) pour rétrocompatibilité
     [NotMapped]

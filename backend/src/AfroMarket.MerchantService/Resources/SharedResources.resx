@@ -88,35 +88,35 @@
     <value>Le site web n'est pas une URL valide</value>
   </data>
 
-  <!-- Validation Messages - Item -->
-  <data name="Item.BusinessId.Required" xml:space="preserve">
+  <!-- Validation Messages - Product -->
+  <data name="Product.BusinessId.Required" xml:space="preserve">
     <value>L'identifiant du commerce est requis</value>
   </data>
-  <data name="Item.Title.Required" xml:space="preserve">
+  <data name="Product.Title.Required" xml:space="preserve">
     <value>Le titre est requis</value>
   </data>
-  <data name="Item.Title.Length" xml:space="preserve">
+  <data name="Product.Title.Length" xml:space="preserve">
     <value>Le titre doit contenir entre {0} et {1} caractères</value>
   </data>
-  <data name="Item.Description.Required" xml:space="preserve">
+  <data name="Product.Description.Required" xml:space="preserve">
     <value>La description est requise</value>
   </data>
-  <data name="Item.Description.Length" xml:space="preserve">
+  <data name="Product.Description.Length" xml:space="preserve">
     <value>La description doit contenir entre {0} et {1} caractères</value>
   </data>
-  <data name="Item.Price.Required" xml:space="preserve">
+  <data name="Product.Price.Required" xml:space="preserve">
     <value>Le prix est requis</value>
   </data>
-  <data name="Item.Price.Range" xml:space="preserve">
+  <data name="Product.Price.Range" xml:space="preserve">
     <value>Le prix doit être entre {0} et {1}</value>
   </data>
-  <data name="Item.Currency.Required" xml:space="preserve">
+  <data name="Product.Currency.Required" xml:space="preserve">
     <value>La devise est requise</value>
   </data>
-  <data name="Item.Currency.Invalid" xml:space="preserve">
+  <data name="Product.Currency.Invalid" xml:space="preserve">
     <value>La devise doit être CAD, USD, EUR, XOF ou XAF</value>
   </data>
-  <data name="Item.Media.Required" xml:space="preserve">
+  <data name="Product.Media.Required" xml:space="preserve">
     <value>Au moins un média est requis</value>
   </data>
 
@@ -136,8 +136,8 @@
   <data name="Error.CannotDeleteStatus" xml:space="preserve">
     <value>Impossible de supprimer le commerce avec le statut {0}. Seulement les commerces en brouillon peuvent être supprimés</value>
   </data>
-  <data name="Error.ItemNotFound" xml:space="preserve">
-    <value>L'article avec l'ID {0} n'a pas été trouvé</value>
+  <data name="Error.ProductNotFound" xml:space="preserve">
+    <value>Le produit avec l'ID {0} n'a pas été trouvé</value>
   </data>
   <data name="Error.MediaRequired" xml:space="preserve">
     <value>Au moins un média est requis</value>
@@ -162,20 +162,20 @@
   <data name="Error.DeleteBusiness" xml:space="preserve">
     <value>Une erreur s'est produite lors de la suppression du commerce</value>
   </data>
-  <data name="Error.CreateItem" xml:space="preserve">
-    <value>Une erreur s'est produite lors de la création de l'article</value>
+  <data name="Error.CreateProduct" xml:space="preserve">
+    <value>Une erreur s'est produite lors de la création du produit</value>
   </data>
-  <data name="Error.UpdateItem" xml:space="preserve">
-    <value>Une erreur s'est produite lors de la mise à jour de l'article</value>
+  <data name="Error.UpdateProduct" xml:space="preserve">
+    <value>Une erreur s'est produite lors de la mise à jour du produit</value>
   </data>
-  <data name="Error.RetrieveItem" xml:space="preserve">
-    <value>Une erreur s'est produite lors de la récupération de l'article</value>
+  <data name="Error.RetrieveProduct" xml:space="preserve">
+    <value>Une erreur s'est produite lors de la récupération du produit</value>
   </data>
-  <data name="Error.DeleteItem" xml:space="preserve">
-    <value>Une erreur s'est produite lors de la suppression de l'article</value>
+  <data name="Error.DeleteProduct" xml:space="preserve">
+    <value>Une erreur s'est produite lors de la suppression du produit</value>
   </data>
-  <data name="Error.RetrieveItems" xml:space="preserve">
-    <value>Une erreur s'est produite lors de la récupération des articles</value>
+  <data name="Error.RetrieveProducts" xml:space="preserve">
+    <value>Une erreur s'est produite lors de la récupération des produits</value>
   </data>
 
   <!-- Enum Translations - BusinessStatus -->
@@ -195,14 +195,14 @@
     <value>Suspendu</value>
   </data>
 
-  <!-- Enum Translations - ItemStatus -->
-  <data name="Enum.ItemStatus.Draft" xml:space="preserve">
+  <!-- Enum Translations - ProductStatus -->
+  <data name="Enum.ProductStatus.Draft" xml:space="preserve">
     <value>Brouillon</value>
   </data>
-  <data name="Enum.ItemStatus.Active" xml:space="preserve">
+  <data name="Enum.ProductStatus.Active" xml:space="preserve">
     <value>Actif</value>
   </data>
-  <data name="Enum.ItemStatus.Suspended" xml:space="preserve">
+  <data name="Enum.ProductStatus.Suspended" xml:space="preserve">
     <value>Suspendu</value>
   </data>
 </root>

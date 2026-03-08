@@ -13,7 +13,6 @@ public class Business
     // IDs for relationships
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty; // For display/facets
-    public Guid AddressId { get; set; }
 
     // Geo
     public string City { get; set; } = string.Empty;

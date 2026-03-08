@@ -88,35 +88,35 @@
     <value>Website is not a valid URL</value>
   </data>
 
-  <!-- Validation Messages - Item -->
-  <data name="Item.BusinessId.Required" xml:space="preserve">
+  <!-- Validation Messages - Product -->
+  <data name="Product.BusinessId.Required" xml:space="preserve">
     <value>Business identifier is required</value>
   </data>
-  <data name="Item.Title.Required" xml:space="preserve">
+  <data name="Product.Title.Required" xml:space="preserve">
     <value>Title is required</value>
   </data>
-  <data name="Item.Title.Length" xml:space="preserve">
+  <data name="Product.Title.Length" xml:space="preserve">
     <value>Title must be between {0} and {1} characters</value>
   </data>
-  <data name="Item.Description.Required" xml:space="preserve">
+  <data name="Product.Description.Required" xml:space="preserve">
     <value>Description is required</value>
   </data>
-  <data name="Item.Description.Length" xml:space="preserve">
+  <data name="Product.Description.Length" xml:space="preserve">
     <value>Description must be between {0} and {1} characters</value>
   </data>
-  <data name="Item.Price.Required" xml:space="preserve">
+  <data name="Product.Price.Required" xml:space="preserve">
     <value>Price is required</value>
   </data>
-  <data name="Item.Price.Range" xml:space="preserve">
+  <data name="Product.Price.Range" xml:space="preserve">
     <value>Price must be between {0} and {1}</value>
   </data>
-  <data name="Item.Currency.Required" xml:space="preserve">
+  <data name="Product.Currency.Required" xml:space="preserve">
     <value>Currency is required</value>
   </data>
-  <data name="Item.Currency.Invalid" xml:space="preserve">
+  <data name="Product.Currency.Invalid" xml:space="preserve">
     <value>Currency must be CAD, USD, EUR, XOF or XAF</value>
   </data>
-  <data name="Item.Media.Required" xml:space="preserve">
+  <data name="Product.Media.Required" xml:space="preserve">
     <value>At least one media item is required</value>
   </data>
 
@@ -136,8 +136,8 @@
   <data name="Error.CannotDeleteStatus" xml:space="preserve">
     <value>Cannot delete business with status {0}. Only draft businesses can be deleted</value>
   </data>
-  <data name="Error.ItemNotFound" xml:space="preserve">
-    <value>Item with ID {0} not found</value>
+  <data name="Error.ProductNotFound" xml:space="preserve">
+    <value>Product with ID {0} not found</value>
   </data>
   <data name="Error.MediaRequired" xml:space="preserve">
     <value>At least one media item is required</value>
@@ -162,20 +162,20 @@
   <data name="Error.DeleteBusiness" xml:space="preserve">
     <value>An error occurred while deleting the business</value>
   </data>
-  <data name="Error.CreateItem" xml:space="preserve">
-    <value>An error occurred while creating the item</value>
+  <data name="Error.CreateProduct" xml:space="preserve">
+    <value>An error occurred while creating the product</value>
   </data>
-  <data name="Error.UpdateItem" xml:space="preserve">
-    <value>An error occurred while updating the item</value>
+  <data name="Error.UpdateProduct" xml:space="preserve">
+    <value>An error occurred while updating the product</value>
   </data>
-  <data name="Error.RetrieveItem" xml:space="preserve">
-    <value>An error occurred while retrieving the item</value>
+  <data name="Error.RetrieveProduct" xml:space="preserve">
+    <value>An error occurred while retrieving the product</value>
   </data>
-  <data name="Error.DeleteItem" xml:space="preserve">
-    <value>An error occurred while deleting the item</value>
+  <data name="Error.DeleteProduct" xml:space="preserve">
+    <value>An error occurred while deleting the product</value>
   </data>
-  <data name="Error.RetrieveItems" xml:space="preserve">
-    <value>An error occurred while retrieving items</value>
+  <data name="Error.RetrieveProducts" xml:space="preserve">
+    <value>An error occurred while retrieving products</value>
   </data>
 
   <!-- Enum Translations - BusinessStatus -->
@@ -195,14 +195,14 @@
     <value>Suspended</value>
   </data>
 
-  <!-- Enum Translations - ItemStatus -->
-  <data name="Enum.ItemStatus.Draft" xml:space="preserve">
+  <!-- Enum Translations - ProductStatus -->
+  <data name="Enum.ProductStatus.Draft" xml:space="preserve">
     <value>Draft</value>
   </data>
-  <data name="Enum.ItemStatus.Active" xml:space="preserve">
+  <data name="Enum.ProductStatus.Active" xml:space="preserve">
     <value>Active</value>
   </data>
-  <data name="Enum.ItemStatus.Suspended" xml:space="preserve">
+  <data name="Enum.ProductStatus.Suspended" xml:space="preserve">
     <value>Suspended</value>
   </data>
 </root>

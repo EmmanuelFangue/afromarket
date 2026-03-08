@@ -188,11 +188,11 @@ public static class DbInitializer
         context.Businesses.AddRange(businesses);
         context.SaveChanges();
 
-        // Créer des articles de test
-        var items = new[]
+        // Créer des produits de test
+        var products = new[]
         {
-            // Items for Chez Fatou Restaurant (businesses[0])
-            new Item
+            // Products for Chez Fatou Restaurant (businesses[0])
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
@@ -202,11 +202,11 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "TRAD-THIEB-001",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-25),
                 UpdatedAt = DateTime.UtcNow.AddDays(-15)
             },
-            new Item
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
@@ -216,11 +216,11 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "TRAD-MAFE-002",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-20),
                 UpdatedAt = DateTime.UtcNow.AddDays(-10)
             },
-            new Item
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[0].Id,
@@ -230,13 +230,13 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "TRAD-YASSA-003",
                 IsAvailable = false,
-                Status = ItemStatus.Draft,
+                Status = ProductStatus.Draft,
                 CreatedAt = DateTime.UtcNow.AddDays(-2),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1)
             },
 
-            // Items for Marché Africain Adama (businesses[1])
-            new Item
+            // Products for Marché Africain Adama (businesses[1])
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[1].Id,
@@ -246,11 +246,11 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "EPIC-GARI-500G",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-40),
                 UpdatedAt = DateTime.UtcNow.AddDays(-20)
             },
-            new Item
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[1].Id,
@@ -260,13 +260,13 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "POISS-BARRA-500G",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-35),
                 UpdatedAt = DateTime.UtcNow.AddDays(-25)
             },
 
-            // Items for Lagos Kitchen Toronto (businesses[3])
-            new Item
+            // Products for Lagos Kitchen Toronto (businesses[3])
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[3].Id,
@@ -276,11 +276,11 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "JOLL-PARTY-01",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-15),
                 UpdatedAt = DateTime.UtcNow.AddDays(-8)
             },
-            new Item
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[3].Id,
@@ -290,13 +290,13 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "SUYA-BEEF-5PC",
                 IsAvailable = true,
-                Status = ItemStatus.Active,
+                Status = ProductStatus.Active,
                 CreatedAt = DateTime.UtcNow.AddDays(-18),
                 UpdatedAt = DateTime.UtcNow.AddDays(-12)
             },
 
-            // Draft item for Wax & Pagne Boutique (businesses[4])
-            new Item
+            // Draft product for Wax & Pagne Boutique (businesses[4])
+            new Product
             {
                 Id = Guid.NewGuid(),
                 BusinessId = businesses[4].Id,
@@ -306,22 +306,22 @@ public static class DbInitializer
                 Currency = "CAD",
                 SKU = "TISSU-WAX-ANKA-001",
                 IsAvailable = true,
-                Status = ItemStatus.Draft,
+                Status = ProductStatus.Draft,
                 CreatedAt = DateTime.UtcNow.AddDays(-3),
                 UpdatedAt = DateTime.UtcNow.AddDays(-1)
             }
         };
-        context.Items.AddRange(items);
+        context.Products.AddRange(products);
         context.SaveChanges();
 
-        // Créer des médias pour les articles
+        // Créer des médias pour les produits
         var mediaList = new List<Media>
         {
-            // Media for Thiéboudienne (items[0])
+            // Media for Thiéboudienne (products[0])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[0].Id,
+                ProductId = products[0].Id,
                 Url = "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -333,7 +333,7 @@ public static class DbInitializer
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[0].Id,
+                ProductId = products[0].Id,
                 Url = "https://images.unsplash.com/photo-1546833999-b9f581a1996d",
                 Type = MediaType.Image,
                 OrderIndex = 1,
@@ -343,11 +343,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-25)
             },
 
-            // Media for Mafé poulet (items[1])
+            // Media for Mafé poulet (products[1])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[1].Id,
+                ProductId = products[1].Id,
                 Url = "https://images.unsplash.com/photo-1585937421612-70a008356fbe",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -357,11 +357,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-20)
             },
 
-            // Media for Yassa poulet (items[2] - Draft)
+            // Media for Yassa poulet (products[2] - Draft)
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[2].Id,
+                ProductId = products[2].Id,
                 Url = "https://images.unsplash.com/photo-1598103442097-8b74394b95c6",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -371,11 +371,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-2)
             },
 
-            // Media for Farine de manioc (items[3])
+            // Media for Farine de manioc (products[3])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[3].Id,
+                ProductId = products[3].Id,
                 Url = "https://images.unsplash.com/photo-1586201375761-83865001e31c",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -385,11 +385,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-40)
             },
 
-            // Media for Poisson fumé (items[4])
+            // Media for Poisson fumé (products[4])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[4].Id,
+                ProductId = products[4].Id,
                 Url = "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -399,11 +399,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-35)
             },
 
-            // Media for Jollof Rice (items[5])
+            // Media for Jollof Rice (products[5])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[5].Id,
+                ProductId = products[5].Id,
                 Url = "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -415,7 +415,7 @@ public static class DbInitializer
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[5].Id,
+                ProductId = products[5].Id,
                 Url = "https://images.unsplash.com/photo-1546833998-877b37c2e5c6",
                 Type = MediaType.Image,
                 OrderIndex = 1,
@@ -425,11 +425,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-15)
             },
 
-            // Media for Suya Beef (items[6])
+            // Media for Suya Beef (products[6])
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[6].Id,
+                ProductId = products[6].Id,
                 Url = "https://images.unsplash.com/photo-1529006557810-274b9b2fc783",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -439,11 +439,11 @@ public static class DbInitializer
                 CreatedAt = DateTime.UtcNow.AddDays(-18)
             },
 
-            // Media for Tissu Wax (items[7] - Draft)
+            // Media for Tissu Wax (products[7] - Draft)
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[7].Id,
+                ProductId = products[7].Id,
                 Url = "https://images.unsplash.com/photo-1610652492500-ded49cecc377",
                 Type = MediaType.Image,
                 OrderIndex = 0,
@@ -455,7 +455,7 @@ public static class DbInitializer
             new Media
             {
                 Id = Guid.NewGuid(),
-                ItemId = items[7].Id,
+                ProductId = products[7].Id,
                 Url = "https://images.unsplash.com/photo-1591799265444-d66432b91588",
                 Type = MediaType.Image,
                 OrderIndex = 1,
@@ -471,7 +471,7 @@ public static class DbInitializer
         Console.WriteLine("Base de données initialisée avec succès !");
         Console.WriteLine($"- {categories.Length} catégories créées");
         Console.WriteLine($"- {businesses.Length} commerces créés");
-        Console.WriteLine($"- {items.Length} articles créés");
+        Console.WriteLine($"- {products.Length} produits créés");
         Console.WriteLine($"- {mediaList.Count} médias créés");
         Console.WriteLine("Note: Les utilisateurs seront créés automatiquement depuis Keycloak lors de leur première connexion");
     }
