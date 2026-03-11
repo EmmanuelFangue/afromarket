@@ -23,6 +23,14 @@ builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
+// Register SearchServiceClient for real-time business index notifications
+var searchServiceBaseUrl = builder.Configuration["SearchService:BaseUrl"] ?? "http://localhost:5049";
+builder.Services.AddHttpClient<ISearchServiceClient, SearchServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(searchServiceBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
 // Configure Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 

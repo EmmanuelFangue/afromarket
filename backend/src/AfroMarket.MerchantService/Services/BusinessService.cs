@@ -14,15 +14,18 @@ public class BusinessService : IBusinessService
     private readonly MerchantDbContext _context;
     private readonly ILogger<BusinessService> _logger;
     private readonly IStringLocalizer<SharedResources> _localizer;
+    private readonly ISearchServiceClient _searchClient;
 
     public BusinessService(
         MerchantDbContext context,
         ILogger<BusinessService> logger,
-        IStringLocalizer<SharedResources> localizer)
+        IStringLocalizer<SharedResources> localizer,
+        ISearchServiceClient searchClient)
     {
         _context = context;
         _logger = logger;
         _localizer = localizer;
+        _searchClient = searchClient;
     }
 
     public async Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request, Guid ownerId)
@@ -260,6 +263,167 @@ public class BusinessService : IBusinessService
         return new PaginatedResult<BusinessResponse>
         {
             Items = businessResponses,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<BusinessResponse> SubmitForReviewAsync(Guid businessId, Guid ownerId)
+    {
+        _logger.LogInformation("Submitting business {BusinessId} for review by owner {OwnerId}", businessId, ownerId);
+
+        var business = await _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .FirstOrDefaultAsync(b => b.Id == businessId);
+
+        if (business == null)
+            throw new KeyNotFoundException(string.Format(_localizer["Error.BusinessNotFound"].Value, businessId));
+
+        if (business.OwnerId != ownerId)
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
+
+        if (business.Status != BusinessStatus.Draft && business.Status != BusinessStatus.Rejected)
+            throw new InvalidOperationException($"Business cannot be submitted for review from status '{business.Status}'.");
+
+        business.Status = BusinessStatus.PendingValidation;
+        business.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Business {BusinessId} submitted for review", businessId);
+
+        return await MapToResponseAsync(business);
+    }
+
+    public async Task<BusinessResponse> ApproveBusinessAsync(Guid businessId)
+    {
+        _logger.LogInformation("Approving business {BusinessId}", businessId);
+
+        var business = await _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .FirstOrDefaultAsync(b => b.Id == businessId);
+
+        if (business == null)
+            throw new KeyNotFoundException(string.Format(_localizer["Error.BusinessNotFound"].Value, businessId));
+
+        if (business.Status != BusinessStatus.PendingValidation)
+            throw new InvalidOperationException($"Business cannot be approved from status '{business.Status}'.");
+
+        business.Status = BusinessStatus.Published;
+        business.PublishedAt = DateTime.UtcNow;
+        business.UpdatedAt = DateTime.UtcNow;
+        business.RejectionReason = null;
+
+        await _context.SaveChangesAsync();
+
+        var response = await MapToResponseAsync(business);
+
+        // Notify SearchService to index the newly published business
+        var indexed = await _searchClient.IndexBusinessAsync(response);
+        if (!indexed)
+        {
+            _logger.LogWarning("Failed to index business {BusinessId} in SearchService after approval", businessId);
+        }
+
+        return response;
+    }
+
+    public async Task<BusinessResponse> RejectBusinessAsync(Guid businessId, string reason)
+    {
+        _logger.LogInformation("Rejecting business {BusinessId}", businessId);
+
+        var business = await _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .FirstOrDefaultAsync(b => b.Id == businessId);
+
+        if (business == null)
+            throw new KeyNotFoundException(string.Format(_localizer["Error.BusinessNotFound"].Value, businessId));
+
+        if (business.Status != BusinessStatus.PendingValidation)
+            throw new InvalidOperationException($"Business cannot be rejected from status '{business.Status}'.");
+
+        var wasPublished = business.Status == BusinessStatus.Published;
+
+        business.Status = BusinessStatus.Rejected;
+        business.RejectionReason = reason;
+        business.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        if (wasPublished)
+        {
+            var removed = await _searchClient.DeleteBusinessAsync(businessId.ToString());
+            if (!removed)
+            {
+                _logger.LogWarning("Failed to remove business {BusinessId} from SearchService index after rejection", businessId);
+            }
+        }
+
+        return await MapToResponseAsync(business);
+    }
+
+    public async Task<PaginatedResult<BusinessResponse>> GetPendingBusinessesAsync(int page = 1, int pageSize = 20)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .Where(b => b.Status == BusinessStatus.PendingValidation)
+            .OrderBy(b => b.UpdatedAt);
+
+        var totalCount = await query.CountAsync();
+        var businesses = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var responses = new List<BusinessResponse>();
+        foreach (var business in businesses)
+            responses.Add(await MapToResponseAsync(business));
+
+        return new PaginatedResult<BusinessResponse>
+        {
+            Items = responses,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<PaginatedResult<BusinessResponse>> GetAllBusinessesForAdminAsync(int page = 1, int pageSize = 20, BusinessStatus? status = null)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.Businesses
+            .Include(b => b.Address)
+            .Include(b => b.Category)
+            .AsQueryable();
+
+        if (status.HasValue)
+            query = query.Where(b => b.Status == status.Value);
+
+        query = query.OrderByDescending(b => b.UpdatedAt);
+
+        var totalCount = await query.CountAsync();
+        var businesses = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var responses = new List<BusinessResponse>();
+        foreach (var business in businesses)
+            responses.Add(await MapToResponseAsync(business));
+
+        return new PaginatedResult<BusinessResponse>
+        {
+            Items = responses,
             TotalCount = totalCount,
             Page = page,
             PageSize = pageSize

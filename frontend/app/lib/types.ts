@@ -1,3 +1,61 @@
+export type BusinessStatus = 'Draft' | 'PendingValidation' | 'Published' | 'Rejected' | 'Suspended';
+
+export interface BusinessAddress {
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface MerchantBusiness {
+  id: string;
+  ownerId: string;
+  name: Record<string, string>;
+  description: Record<string, string>;
+  nameTranslations?: string;
+  descriptionTranslations?: string;
+  status: BusinessStatus;
+  categoryId: number;
+  categoryName: string;
+  address: BusinessAddress;
+  phone: string;
+  email: string;
+  website: string;
+  tags: string[];
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  hasNextPage: boolean;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+}
+
+export interface CreateBusinessRequest {
+  name: Record<string, string>;
+  description: Record<string, string>;
+  categoryId: number;
+  phone?: string;
+  email?: string;
+  website?: string;
+  address: BusinessAddress;
+  tags?: string[];
+}
+
 export interface Business {
   id: string;
   name: string;

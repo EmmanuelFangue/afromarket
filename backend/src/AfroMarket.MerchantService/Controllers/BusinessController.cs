@@ -233,4 +233,153 @@ public class BusinessController : ControllerBase
             return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value, correlationId });
         }
     }
+
+    /// <summary>
+    /// Soumet un commerce pour validation (Draft/Rejected → PendingValidation)
+    /// </summary>
+    [HttpPost("{id}/submit")]
+    [ProducesResponseType(typeof(BusinessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BusinessResponse>> SubmitForReview(Guid id)
+    {
+        try
+        {
+            var ownerId = User.GetUserId();
+            var business = await _businessService.SubmitForReviewAsync(id, ownerId);
+            return Ok(business);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error submitting business {BusinessId} for review. CorrelationId: {CorrelationId}", id, correlationId);
+            return StatusCode(500, new { error = "An error occurred while submitting the business for review.", correlationId });
+        }
+    }
+
+    /// <summary>
+    /// Approuve un commerce (AdminOnly)
+    /// </summary>
+    [HttpPost("{id}/approve")]
+    [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(BusinessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BusinessResponse>> ApproveBusiness(Guid id)
+    {
+        try
+        {
+            var business = await _businessService.ApproveBusinessAsync(id);
+            return Ok(business);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error approving business {BusinessId}. CorrelationId: {CorrelationId}", id, correlationId);
+            return StatusCode(500, new { error = "An error occurred while approving the business.", correlationId });
+        }
+    }
+
+    /// <summary>
+    /// Rejette un commerce avec un motif (AdminOnly)
+    /// </summary>
+    [HttpPost("{id}/reject")]
+    [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(BusinessResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<BusinessResponse>> RejectBusiness(Guid id, [FromBody] RejectBusinessRequest request)
+    {
+        try
+        {
+            var business = await _businessService.RejectBusinessAsync(id, request.RejectionReason);
+            return Ok(business);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error rejecting business {BusinessId}. CorrelationId: {CorrelationId}", id, correlationId);
+            return StatusCode(500, new { error = "An error occurred while rejecting the business.", correlationId });
+        }
+    }
+
+    /// <summary>
+    /// Récupère les commerces en attente de validation (AdminOnly)
+    /// </summary>
+    [HttpGet("admin/pending")]
+    [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetPendingBusinesses(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var result = await _businessService.GetPendingBusinessesAsync(page, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error retrieving pending businesses. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value, correlationId });
+        }
+    }
+
+    /// <summary>
+    /// Récupère tous les commerces avec filtre optionnel (AdminOnly)
+    /// </summary>
+    [HttpGet("admin/all")]
+    [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetAllBusinessesForAdmin(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] int? status = null)
+    {
+        try
+        {
+            AfroMarket.MerchantService.Models.Enums.BusinessStatus? statusFilter = status.HasValue
+                ? (AfroMarket.MerchantService.Models.Enums.BusinessStatus)status.Value
+                : null;
+
+            var result = await _businessService.GetAllBusinessesForAdminAsync(page, pageSize, statusFilter);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            var correlationId = Guid.NewGuid();
+            _logger.LogError(ex, "Error retrieving all businesses for admin. CorrelationId: {CorrelationId}", correlationId);
+            return StatusCode(500, new { error = _localizer["Error.RetrieveBusiness"].Value, correlationId });
+        }
+    }
 }

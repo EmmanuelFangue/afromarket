@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function syncUserToBackend(accessToken: string) {
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       console.log('[AuthContext] Syncing user to backend:', backendUrl);
       const response = await fetch(`${backendUrl}/api/auth/me`, {
         headers: {
