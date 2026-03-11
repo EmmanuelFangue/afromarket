@@ -1,11 +1,27 @@
+using AfroMarket.MerchantService.Models.DTOs;
+
 namespace AfroMarket.MerchantService.Services;
 
-/// <summary>
-/// Client for notifying the SearchService when product status changes.
-/// </summary>
 public interface ISearchServiceClient
 {
+    /// <summary>
+    /// Notifies the SearchService to index a newly approved business.
+    /// </summary>
+    Task<bool> IndexBusinessAsync(BusinessResponse business);
+
+    /// <summary>
+    /// Notifies the SearchService to remove a business from the index.
+    /// </summary>
+    Task<bool> DeleteBusinessAsync(string businessId);
+
+    /// <summary>
+    /// Notifies the SearchService to index or update a product.
+    /// </summary>
     Task IndexProductAsync(ProductSearchDocument product);
+
+    /// <summary>
+    /// Notifies the SearchService to remove a product from the index.
+    /// </summary>
     Task DeleteProductAsync(string productId);
 }
 

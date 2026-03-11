@@ -25,7 +25,7 @@ builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
-// Register SearchServiceClient for real-time product index notifications
+// Register SearchServiceClient for real-time business and product index notifications
 var searchServiceBaseUrl = builder.Configuration["SearchService:BaseUrl"] ?? "http://localhost:5049";
 builder.Services.AddHttpClient<ISearchServiceClient, SearchServiceClient>(client =>
 {
