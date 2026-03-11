@@ -28,6 +28,19 @@ public class BusinessService : IBusinessService
         _searchClient = searchClient;
     }
 
+    public async Task<List<CategoryResponse>> GetCategoriesAsync()
+    {
+        return await _context.Categories
+            .OrderBy(c => c.Slug)
+            .Select(c => new CategoryResponse
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Slug = c.Slug
+            })
+            .ToListAsync();
+    }
+
     public async Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request, Guid ownerId)
     {
         _logger.LogInformation("Creating new business for owner {OwnerId}", ownerId);

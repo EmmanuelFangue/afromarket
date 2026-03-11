@@ -6,6 +6,11 @@ namespace AfroMarket.MerchantService.Services;
 public interface IBusinessService
 {
     /// <summary>
+    /// Récupère toutes les catégories disponibles
+    /// </summary>
+    Task<List<CategoryResponse>> GetCategoriesAsync();
+
+    /// <summary>
     /// Crée un nouveau commerce avec le statut Draft
     /// </summary>
     Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request, Guid ownerId);

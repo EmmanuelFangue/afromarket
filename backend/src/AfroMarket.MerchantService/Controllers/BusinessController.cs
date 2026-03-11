@@ -209,6 +209,18 @@ public class BusinessController : ControllerBase
     }
 
     /// <summary>
+    /// Récupère toutes les catégories disponibles
+    /// </summary>
+    [HttpGet("categories")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<CategoryResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<CategoryResponse>>> GetCategories()
+    {
+        var categories = await _businessService.GetCategoriesAsync();
+        return Ok(categories);
+    }
+
+    /// <summary>
     /// Récupère tous les commerces publiés avec pagination
     /// </summary>
     /// <param name="page">Numéro de la page (défaut: 1)</param>
