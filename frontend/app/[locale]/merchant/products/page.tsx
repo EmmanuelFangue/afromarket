@@ -103,7 +103,7 @@ export default function MerchantProductsPage() {
         setIsLoadingProducts(true);
         setError(null);
 
-        const backendUrl = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
         const token = await getAccessToken();
         if (!token) throw new Error('Non authentifié');
 
