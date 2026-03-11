@@ -137,6 +137,7 @@ export default function SearchComponent() {
         if (!abortController.signal.aborted) {
           if (businessData) setResults(businessData);
           if (productData) setProductResults(productData);
+          else setProductResults(null); // Clear stale results from a previous query
           if (bizResult.status === 'rejected') {
             const err = (bizResult as PromiseRejectedResult).reason;
             if (err?.name !== 'AbortError') {

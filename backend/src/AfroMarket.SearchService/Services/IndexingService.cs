@@ -119,42 +119,48 @@ public class IndexingService
                 return;
             }
 
-            var allProducts = new List<ProductDto>();
             int page = 1;
             const int pageSize = 100;
             bool hasMore = true;
+            int totalIndexed = 0;
+            bool anyFailures = false;
 
             while (hasMore)
             {
                 var result = await _merchantClient.GetActiveProductsAsync(page, pageSize);
-                allProducts.AddRange(result.Items);
+
+                if (result.Items?.Any() == true)
+                {
+                    var searchProducts = result.Items.Select(MapToSearchProduct).ToList();
+                    var indexed = await _searchService.BulkIndexProductsAsync(searchProducts);
+
+                    if (indexed)
+                    {
+                        totalIndexed += searchProducts.Count;
+                        _logger.LogInformation("Indexed page {Page} ({Count} products, total: {Total})",
+                            page, searchProducts.Count, totalIndexed);
+                    }
+                    else
+                    {
+                        anyFailures = true;
+                        _logger.LogError("Failed to bulk index products for page {Page}", page);
+                    }
+                }
 
                 hasMore = result.HasNextPage;
                 page++;
-
-                _logger.LogInformation("Fetched product page {Page}, total so far: {Count}", page - 1, allProducts.Count);
             }
 
-            _logger.LogInformation("Fetched {Count} active products from MerchantService", allProducts.Count);
-
-            if (!allProducts.Any())
+            if (totalIndexed == 0)
             {
                 _logger.LogWarning("No active products to index");
                 return;
             }
 
-            var searchProducts = allProducts.Select(MapToSearchProduct).ToList();
-
-            var indexed = await _searchService.BulkIndexProductsAsync(searchProducts);
-
-            if (indexed)
-            {
-                _logger.LogInformation("Successfully indexed {Count} products", searchProducts.Count);
-            }
+            if (!anyFailures)
+                _logger.LogInformation("Successfully indexed {Count} products", totalIndexed);
             else
-            {
-                _logger.LogError("Failed to bulk index products");
-            }
+                _logger.LogWarning("Completed indexing with some failures. Indexed: {Count}", totalIndexed);
         }
         catch (Exception ex)
         {

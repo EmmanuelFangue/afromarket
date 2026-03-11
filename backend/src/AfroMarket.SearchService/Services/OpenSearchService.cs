@@ -284,15 +284,25 @@ public class OpenSearchService : ISearchService
                 if (string.IsNullOrWhiteSpace(request.Query))
                     return q.MatchAll();
 
-                return q.MultiMatch(m => m
-                    .Query(request.Query)
-                    .Fields(f => f
-                        .Field(p => p.TitleTranslations, 3.0)
-                        .Field(p => p.DescriptionTranslations)
-                        .Field(p => p.BusinessName)
+                return q.Bool(b => b
+                    .Should(
+                        // Full-text search on translatable text fields
+                        bs => bs.MultiMatch(m => m
+                            .Query(request.Query)
+                            .Fields(f => f
+                                .Field(p => p.TitleTranslations, 3.0)
+                                .Field(p => p.DescriptionTranslations)
+                            )
+                            .Type(TextQueryType.BestFields)
+                            .Fuzziness(Fuzziness.Auto)
+                        ),
+                        // Exact match on BusinessName (keyword field)
+                        bs => bs.Term(t => t
+                            .Field(p => p.BusinessName)
+                            .Value(request.Query)
+                        )
                     )
-                    .Type(TextQueryType.BestFields)
-                    .Fuzziness(Fuzziness.Auto)
+                    .MinimumShouldMatch(1)
                 );
             });
 

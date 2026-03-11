@@ -33,6 +33,7 @@ export default function ProductDetailPage() {
         }
 
         setProduct(data);
+        setActiveImageIndex(0); // Reset gallery index for the new product
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching product:', err);

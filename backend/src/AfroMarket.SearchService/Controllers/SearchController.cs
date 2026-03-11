@@ -92,6 +92,7 @@ public class SearchController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost("products/index")]
     public async Task<ActionResult> IndexProduct([FromBody] Product product)
     {
@@ -112,6 +113,7 @@ public class SearchController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpDelete("products/{id}")]
     public async Task<ActionResult> DeleteProduct(string id)
     {
