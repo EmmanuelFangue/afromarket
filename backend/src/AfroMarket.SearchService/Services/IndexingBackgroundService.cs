@@ -24,6 +24,7 @@ public class IndexingBackgroundService : BackgroundService
         var indexingService = scope.ServiceProvider.GetRequiredService<IndexingService>();
 
         await indexingService.InitialIndexAsync();
+        await indexingService.InitialIndexProductsAsync();
 
         _logger.LogInformation("IndexingBackgroundService completed");
     }

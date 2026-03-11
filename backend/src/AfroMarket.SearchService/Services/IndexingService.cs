@@ -105,4 +105,83 @@ public class IndexingService
             PublishedAt = dto.PublishedAt
         };
     }
+
+    public async Task InitialIndexProductsAsync()
+    {
+        _logger.LogInformation("Starting initial indexing of active products");
+
+        try
+        {
+            var indexCreated = await _searchService.CreateProductIndexAsync();
+            if (!indexCreated)
+            {
+                _logger.LogError("Failed to create OpenSearch product index");
+                return;
+            }
+
+            int page = 1;
+            const int pageSize = 100;
+            bool hasMore = true;
+            int totalIndexed = 0;
+            bool anyFailures = false;
+
+            while (hasMore)
+            {
+                var result = await _merchantClient.GetActiveProductsAsync(page, pageSize);
+
+                if (result.Items?.Any() == true)
+                {
+                    var searchProducts = result.Items.Select(MapToSearchProduct).ToList();
+                    var indexed = await _searchService.BulkIndexProductsAsync(searchProducts);
+
+                    if (indexed)
+                    {
+                        totalIndexed += searchProducts.Count;
+                        _logger.LogInformation("Indexed page {Page} ({Count} products, total: {Total})",
+                            page, searchProducts.Count, totalIndexed);
+                    }
+                    else
+                    {
+                        anyFailures = true;
+                        _logger.LogError("Failed to bulk index products for page {Page}", page);
+                    }
+                }
+
+                hasMore = result.HasNextPage;
+                page++;
+            }
+
+            if (totalIndexed == 0)
+            {
+                _logger.LogWarning("No active products to index");
+                return;
+            }
+
+            if (!anyFailures)
+                _logger.LogInformation("Successfully indexed {Count} products", totalIndexed);
+            else
+                _logger.LogWarning("Completed indexing with some failures. Indexed: {Count}", totalIndexed);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during initial product indexing");
+        }
+    }
+
+    private Product MapToSearchProduct(ProductDto dto)
+    {
+        return new Product
+        {
+            Id = dto.Id.ToString(),
+            TitleTranslations = dto.TitleTranslations,
+            DescriptionTranslations = dto.DescriptionTranslations,
+            Price = dto.Price,
+            Currency = dto.Currency,
+            BusinessId = dto.BusinessId.ToString(),
+            BusinessName = dto.BusinessName,
+            FirstImageUrl = dto.Media.OrderBy(m => m.OrderIndex).FirstOrDefault()?.Url ?? string.Empty,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
+        };
+    }
 }

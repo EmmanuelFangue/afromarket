@@ -16,3 +16,10 @@ public class GeoSearchParams
     public double Lon { get; set; }
     public string Distance { get; set; } = "10km";
 }
+
+public class ProductSearchRequest
+{
+    public string Query { get; set; } = string.Empty;
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+}

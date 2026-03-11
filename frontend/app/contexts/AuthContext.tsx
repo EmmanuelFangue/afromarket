@@ -124,6 +124,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Auto token refresh failed:', error);
           clearSession();
           setUser(null);
+          // Session expired while in use — send user back to login
+          const locale = window.location.pathname.split('/')[1] || 'fr';
+          window.location.href = `/${locale}/auth/login`;
         }
       }, refreshTime);
     }

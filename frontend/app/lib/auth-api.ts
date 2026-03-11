@@ -56,7 +56,8 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthToke
   });
 
   if (!response.ok) {
-    throw new Error('Token refresh failed');
+    const error = await response.json().catch(() => ({ error: 'unknown' }));
+    throw new Error(error.error_description || error.error || `Token refresh failed (HTTP ${response.status})`);
   }
 
   const data = await response.json();
