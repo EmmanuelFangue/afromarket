@@ -1,6 +1,5 @@
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 
@@ -11,7 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure Keycloak Authentication
-// VerifyTokenAudience is false in appsettings — tokens from afromarket-frontend
+// VerifyTokenAudience is set to false in appsettings — tokens from afromarket-frontend
 // have aud:"account", not aud:"afromarket-api-gateway", so we skip audience validation.
 builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, options =>
 {
