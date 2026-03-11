@@ -41,6 +41,15 @@ export default function Header() {
                 </Link>
               )}
 
+              {user?.roles.includes('admin') && (
+                <Link
+                  href={`/${locale}/admin/dashboard`}
+                  className="text-purple-600 dark:text-purple-400 hover:underline"
+                >
+                  Administration
+                </Link>
+              )}
+
               <button
                 onClick={() => logout()}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
