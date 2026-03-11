@@ -17,6 +17,13 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-4">
+          <Link
+            href={`/${locale}/search`}
+            className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"
+          >
+            Rechercher
+          </Link>
+
           {isLoading ? (
             <div className="text-gray-500">Chargement...</div>
           ) : isAuthenticated ? (

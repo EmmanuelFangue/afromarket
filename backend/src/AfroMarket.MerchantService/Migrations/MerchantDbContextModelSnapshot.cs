@@ -165,7 +165,86 @@ namespace AfroMarket.MerchantService.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Item", b =>
+            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Media", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AltText")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<long?>("FileSizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Media");
+                });
+
+            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("SenderEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("SenderName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -222,86 +301,7 @@ namespace AfroMarket.MerchantService.Migrations
 
                     b.HasIndex("BusinessId", "Status");
 
-                    b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Media", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AltText")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("FileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<long?>("FileSizeBytes")
-                        .HasColumnType("bigint");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("OrderIndex")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("Media");
-                });
-
-            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Message", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BusinessId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("SenderEmail")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("SenderName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BusinessId");
-
-                    b.ToTable("Messages");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.User", b =>
@@ -380,26 +380,15 @@ namespace AfroMarket.MerchantService.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Item", b =>
-                {
-                    b.HasOne("AfroMarket.MerchantService.Models.Entities.Business", "Business")
-                        .WithMany("Items")
-                        .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Business");
-                });
-
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Media", b =>
                 {
-                    b.HasOne("AfroMarket.MerchantService.Models.Entities.Item", "Item")
+                    b.HasOne("AfroMarket.MerchantService.Models.Entities.Product", "Product")
                         .WithMany("Media")
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Message", b =>
@@ -413,6 +402,17 @@ namespace AfroMarket.MerchantService.Migrations
                     b.Navigation("Business");
                 });
 
+            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Product", b =>
+                {
+                    b.HasOne("AfroMarket.MerchantService.Models.Entities.Business", "Business")
+                        .WithMany("Products")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Address", b =>
                 {
                     b.Navigation("Business");
@@ -420,9 +420,9 @@ namespace AfroMarket.MerchantService.Migrations
 
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Business", b =>
                 {
-                    b.Navigation("Items");
-
                     b.Navigation("Messages");
+
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Category", b =>
@@ -430,7 +430,7 @@ namespace AfroMarket.MerchantService.Migrations
                     b.Navigation("Businesses");
                 });
 
-            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Item", b =>
+            modelBuilder.Entity("AfroMarket.MerchantService.Models.Entities.Product", b =>
                 {
                     b.Navigation("Media");
                 });

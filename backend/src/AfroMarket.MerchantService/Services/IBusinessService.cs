@@ -33,7 +33,7 @@ public interface IBusinessService
     /// <summary>
     /// Récupère tous les commerces publiés avec pagination
     /// </summary>
-    Task<PaginatedResult<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20);
+    Task<PaginatedResponse<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20);
 
     /// <summary>
     /// Soumet un commerce pour validation (Draft/Rejected → PendingValidation)
@@ -53,11 +53,11 @@ public interface IBusinessService
     /// <summary>
     /// Récupère les commerces en attente de validation (admin)
     /// </summary>
-    Task<PaginatedResult<BusinessResponse>> GetPendingBusinessesAsync(int page = 1, int pageSize = 20);
+    Task<PaginatedResponse<BusinessResponse>> GetPendingBusinessesAsync(int page = 1, int pageSize = 20);
 
     /// <summary>
     /// Récupère tous les commerces avec filtre optionnel par statut (admin)
     /// </summary>
-    Task<PaginatedResult<BusinessResponse>> GetAllBusinessesForAdminAsync(int page = 1, int pageSize = 20, BusinessStatus? status = null);
+    Task<PaginatedResponse<BusinessResponse>> GetAllBusinessesForAdminAsync(int page = 1, int pageSize = 20, BusinessStatus? status = null);
 }
 

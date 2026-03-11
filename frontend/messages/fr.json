@@ -40,6 +40,12 @@
     "map": {
       "clickMarker": "Cliquez sur un marqueur pour voir les détails",
       "noLocation": "Aucune donnée de localisation disponible pour ce commerce"
+    },
+    "products": {
+      "title": "Produits correspondants",
+      "resultsFound": "{count, plural, one {# produit trouvé} other {# produits trouvés}}",
+      "by": "Vendu par",
+      "noResults": "Aucun produit trouvé pour cette recherche"
     }
   },
   "business": {
@@ -80,7 +86,26 @@
     "website": "Visiter le site web",
     "notFound": "Commerce non trouvé",
     "loading": "Chargement des détails...",
-    "error": "Échec du chargement des détails"
+    "error": "Échec du chargement des détails",
+    "products": {
+      "title": "Produits proposés",
+      "noProducts": "Aucun produit disponible pour ce commerce",
+      "viewAll": "Voir tous les produits",
+      "loading": "Chargement des produits..."
+    }
+  },
+  "productDetails": {
+    "backToSearch": "Retour à la recherche",
+    "soldBy": "Vendu par",
+    "viewBusiness": "Voir le commerce",
+    "price": "Prix",
+    "availability": "Disponibilité",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "sku": "Référence",
+    "notFound": "Produit non trouvé",
+    "loading": "Chargement du produit...",
+    "error": "Échec du chargement du produit"
   },
   "contactForm": {
     "title": "Contacter ce commerce",

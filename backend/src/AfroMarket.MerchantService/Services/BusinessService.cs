@@ -226,7 +226,7 @@ public class BusinessService : IBusinessService
         return true;
     }
 
-    public async Task<PaginatedResult<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20)
+    public async Task<PaginatedResponse<BusinessResponse>> GetPublishedBusinessesAsync(int page = 1, int pageSize = 20)
     {
         _logger.LogInformation("Fetching published businesses - Page: {Page}, PageSize: {PageSize}", page, pageSize);
 
@@ -260,7 +260,7 @@ public class BusinessService : IBusinessService
         _logger.LogInformation("Found {TotalCount} published businesses, returning {Count} for page {Page}",
             totalCount, businessResponses.Count, page);
 
-        return new PaginatedResult<BusinessResponse>
+        return new PaginatedResponse<BusinessResponse>
         {
             Items = businessResponses,
             TotalCount = totalCount,
@@ -366,7 +366,7 @@ public class BusinessService : IBusinessService
         return await MapToResponseAsync(business);
     }
 
-    public async Task<PaginatedResult<BusinessResponse>> GetPendingBusinessesAsync(int page = 1, int pageSize = 20)
+    public async Task<PaginatedResponse<BusinessResponse>> GetPendingBusinessesAsync(int page = 1, int pageSize = 20)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
@@ -387,7 +387,7 @@ public class BusinessService : IBusinessService
         foreach (var business in businesses)
             responses.Add(await MapToResponseAsync(business));
 
-        return new PaginatedResult<BusinessResponse>
+        return new PaginatedResponse<BusinessResponse>
         {
             Items = responses,
             TotalCount = totalCount,
@@ -396,7 +396,7 @@ public class BusinessService : IBusinessService
         };
     }
 
-    public async Task<PaginatedResult<BusinessResponse>> GetAllBusinessesForAdminAsync(int page = 1, int pageSize = 20, BusinessStatus? status = null)
+    public async Task<PaginatedResponse<BusinessResponse>> GetAllBusinessesForAdminAsync(int page = 1, int pageSize = 20, BusinessStatus? status = null)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
@@ -421,7 +421,7 @@ public class BusinessService : IBusinessService
         foreach (var business in businesses)
             responses.Add(await MapToResponseAsync(business));
 
-        return new PaginatedResult<BusinessResponse>
+        return new PaginatedResponse<BusinessResponse>
         {
             Items = responses,
             TotalCount = totalCount,

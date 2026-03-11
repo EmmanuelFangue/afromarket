@@ -14,7 +14,7 @@ public class MerchantDbContext : DbContext
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Address> Addresses { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
-    public DbSet<Item> Items { get; set; } = null!;
+    public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Media> Media { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -116,8 +116,8 @@ public class MerchantDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Item configuration
-        modelBuilder.Entity<Item>(entity =>
+        // Product configuration
+        modelBuilder.Entity<Product>(entity =>
         {
             entity.HasKey(e => e.Id);
 
@@ -142,9 +142,9 @@ public class MerchantDbContext : DbContext
 
             // Relationships
             entity.HasOne(e => e.Business)
-                .WithMany(b => b.Items)
+                .WithMany(b => b.Products)
                 .HasForeignKey(e => e.BusinessId)
-                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete items when business deleted
+                .OnDelete(DeleteBehavior.Restrict); // Don't cascade delete products when business deleted
         });
 
         // Media configuration
@@ -152,8 +152,8 @@ public class MerchantDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
 
-            // Index for fetching item media
-            entity.HasIndex(e => e.ItemId);
+            // Index for fetching product media
+            entity.HasIndex(e => e.ProductId);
 
             // Property constraints
             entity.Property(e => e.Url).IsRequired().HasMaxLength(1000);
@@ -162,10 +162,10 @@ public class MerchantDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
 
             // Relationship
-            entity.HasOne(e => e.Item)
-                .WithMany(i => i.Media)
-                .HasForeignKey(e => e.ItemId)
-                .OnDelete(DeleteBehavior.Cascade); // Delete media when item deleted
+            entity.HasOne(e => e.Product)
+                .WithMany(p => p.Media)
+                .HasForeignKey(e => e.ProductId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete media when product deleted
         });
     }
 }

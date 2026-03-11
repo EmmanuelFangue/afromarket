@@ -215,9 +215,9 @@ public class BusinessController : ControllerBase
     /// <returns>Liste paginée des commerces publiés</returns>
     [HttpGet("published")]
     [AllowAnonymous]
-    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PaginatedResponse<BusinessResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetPublishedBusinesses(
+    public async Task<ActionResult<PaginatedResponse<BusinessResponse>>> GetPublishedBusinesses(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -337,8 +337,8 @@ public class BusinessController : ControllerBase
     /// </summary>
     [HttpGet("admin/pending")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetPendingBusinesses(
+    [ProducesResponseType(typeof(PaginatedResponse<BusinessResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedResponse<BusinessResponse>>> GetPendingBusinesses(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20)
     {
@@ -360,8 +360,8 @@ public class BusinessController : ControllerBase
     /// </summary>
     [HttpGet("admin/all")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(typeof(PaginatedResult<BusinessResponse>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedResult<BusinessResponse>>> GetAllBusinessesForAdmin(
+    [ProducesResponseType(typeof(PaginatedResponse<BusinessResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedResponse<BusinessResponse>>> GetAllBusinessesForAdmin(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] int? status = null)
