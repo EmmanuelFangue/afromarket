@@ -1,4 +1,5 @@
 using AfroMarket.MerchantService.Models.DTOs;
+using AfroMarket.MerchantService.Models.Enums;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Extensions;
 using AfroMarket.MerchantService.Resources;
@@ -10,7 +11,7 @@ namespace AfroMarket.MerchantService.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Policy = "MerchantOnly")]
+[Authorize(Policy = "MerchantOrAdmin")]
 public class BusinessController : ControllerBase
 {
     private readonly IBusinessService _businessService;
@@ -364,15 +365,11 @@ public class BusinessController : ControllerBase
     public async Task<ActionResult<PaginatedResponse<BusinessResponse>>> GetAllBusinessesForAdmin(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] int? status = null)
+        [FromQuery] BusinessStatus? status = null)
     {
         try
         {
-            AfroMarket.MerchantService.Models.Enums.BusinessStatus? statusFilter = status.HasValue
-                ? (AfroMarket.MerchantService.Models.Enums.BusinessStatus)status.Value
-                : null;
-
-            var result = await _businessService.GetAllBusinessesForAdminAsync(page, pageSize, statusFilter);
+            var result = await _businessService.GetAllBusinessesForAdminAsync(page, pageSize, status);
             return Ok(result);
         }
         catch (Exception ex)

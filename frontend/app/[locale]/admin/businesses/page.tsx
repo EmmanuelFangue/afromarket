@@ -127,7 +127,7 @@ export default function AdminBusinessesPage() {
                       ? (biz.name[locale] || biz.name['fr'] || Object.values(biz.name)[0])
                       : biz.name;
                     return (
-                      <tr key={biz.id} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                      <tr key={biz.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
                           {String(name)}
                         </td>

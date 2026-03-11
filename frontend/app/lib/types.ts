@@ -18,7 +18,7 @@ export interface MerchantBusiness {
   nameTranslations?: string;
   descriptionTranslations?: string;
   status: BusinessStatus;
-  categoryId: number;
+  categoryId: string;
   categoryName: string;
   address: BusinessAddress;
   phone: string;
@@ -40,7 +40,7 @@ export interface PaginatedResult<T> {
 }
 
 export interface Category {
-  id: number;
+  id: string;
   name: string;
   description?: string;
 }
@@ -48,7 +48,7 @@ export interface Category {
 export interface CreateBusinessRequest {
   name: Record<string, string>;
   description: Record<string, string>;
-  categoryId: number;
+  categoryId: string;
   phone?: string;
   email?: string;
   website?: string;

@@ -25,13 +25,12 @@ export default function AdminDashboardPage() {
     if (!isAuthenticated || !user?.roles.includes('admin')) return;
     Promise.all([
       getAdminPendingBusinesses(1, 1),
-      getAdminAllBusinesses(1, 1, 'Published'),
       getAdminAllBusinesses(1, 1),
     ])
-      .then(([pending, published, all]) => {
+      .then(([pending, all]) => {
         setStats({
           pending: pending.totalCount,
-          published: published.totalCount,
+          published: Math.max(all.totalCount - pending.totalCount, 0),
           total: all.totalCount,
         });
       })

@@ -346,22 +346,11 @@ public class BusinessService : IBusinessService
         if (business.Status != BusinessStatus.PendingValidation)
             throw new InvalidOperationException($"Business cannot be rejected from status '{business.Status}'.");
 
-        var wasPublished = business.Status == BusinessStatus.Published;
-
         business.Status = BusinessStatus.Rejected;
         business.RejectionReason = reason;
         business.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
-
-        if (wasPublished)
-        {
-            var removed = await _searchClient.DeleteBusinessAsync(businessId.ToString());
-            if (!removed)
-            {
-                _logger.LogWarning("Failed to remove business {BusinessId} from SearchService index after rejection", businessId);
-            }
-        }
 
         return await MapToResponseAsync(business);
     }

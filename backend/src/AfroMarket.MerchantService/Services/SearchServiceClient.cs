@@ -1,6 +1,5 @@
 using AfroMarket.MerchantService.Models.DTOs;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace AfroMarket.MerchantService.Services;
 

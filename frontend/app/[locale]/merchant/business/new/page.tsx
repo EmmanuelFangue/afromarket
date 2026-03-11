@@ -69,7 +69,7 @@ export default function NewBusinessPage() {
       const business = await createBusiness({
         name: { fr: form.nameFr, en: form.nameEn || form.nameFr },
         description: { fr: form.descriptionFr, en: form.descriptionEn || form.descriptionFr },
-        categoryId: parseInt(form.categoryId),
+        categoryId: form.categoryId,
         phone: form.phone || undefined,
         email: form.email || undefined,
         website: form.website || undefined,

@@ -145,7 +145,7 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getMyBusinesses(): Promise<MerchantBusiness[]> {
-  const response = await fetch(`${API_URL}/api/business/my`, {
+  const response = await fetch(`${API_URL}/api/business/my-businesses`, {
     headers: getAuthHeader(),
   });
   if (!response.ok) throw new Error('Failed to fetch businesses');
