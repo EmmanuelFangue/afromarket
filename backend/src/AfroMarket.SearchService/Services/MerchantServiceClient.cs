@@ -39,4 +39,30 @@ public class MerchantServiceClient : IMerchantServiceClient
             throw;
         }
     }
+
+    public async Task<PaginatedResult<ProductDto>> GetActiveProductsAsync(int page = 1, int pageSize = 100)
+    {
+        try
+        {
+            _logger.LogInformation("Fetching active products from MerchantService - Page: {Page}, PageSize: {PageSize}", page, pageSize);
+
+            var response = await _httpClient.GetAsync($"/api/products/published?page={page}&pageSize={pageSize}");
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<PaginatedResult<ProductDto>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            _logger.LogInformation("Successfully fetched {Count} products from MerchantService", result?.Items.Count ?? 0);
+
+            return result ?? new PaginatedResult<ProductDto>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to fetch active products from MerchantService");
+            throw;
+        }
+    }
 }

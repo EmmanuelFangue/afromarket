@@ -39,4 +39,9 @@ public interface IProductService
     /// Changes the status of a product. Allowed transitions: Draft→Active, Active→Suspended, Suspended→Active.
     /// </summary>
     Task<ProductResponse> ChangeProductStatusAsync(Guid productId, ProductStatus newStatus, Guid ownerId);
+
+    /// <summary>
+    /// Gets all Active products across all businesses (used by SearchService for indexing).
+    /// </summary>
+    Task<PaginatedResponse<ProductResponse>> GetAllActiveProductsAsync(int page = 1, int pageSize = 100);
 }

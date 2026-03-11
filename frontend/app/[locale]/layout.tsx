@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from 'next-intl';
 import ClientLayout from '../components/ClientLayout';
 import "../globals.css";
 
@@ -35,9 +36,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body className="antialiased">
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        <NextIntlClientProvider>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

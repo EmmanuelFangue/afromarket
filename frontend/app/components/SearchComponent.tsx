@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { Business, SearchResponse, SearchRequest } from '../lib/types';
-import { searchBusinesses } from '../lib/api';
+import { Business, SearchResponse, SearchRequest, Product, ProductSearchResponse } from '../lib/types';
+import { searchBusinesses, searchProducts, getBusinessById } from '../lib/api';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { useDebounce } from '../hooks/useDebounce';
 
@@ -26,6 +26,9 @@ export default function SearchComponent() {
   const locale = useLocale();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResponse | null>(null);
+  const resultsRef = useRef<SearchResponse | null>(null);
+  resultsRef.current = results;
+  const [productResults, setProductResults] = useState<ProductSearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [distance, setDistance] = useState<string>('10km');
@@ -90,11 +93,58 @@ export default function SearchComponent() {
         searchRequest.cities = selectedCities;
       }
 
-      const response = await searchBusinesses(searchRequest, abortController.signal);
+      const [bizResult, prodResult] = await Promise.allSettled([
+        searchBusinesses(searchRequest, abortController.signal),
+        searchProducts(searchQuery, abortController.signal),
+      ]);
 
       // Only update state if this request wasn't aborted
       if (!abortController.signal.aborted) {
-        setResults(response);
+        let businessData = bizResult.status === 'fulfilled' ? bizResult.value : null;
+        const productData = prodResult.status === 'fulfilled' ? prodResult.value : null;
+
+        // Find businesses referenced by products that are missing from the business results.
+        // This happens when a merchant's products match the query but their business profile doesn't.
+        if (businessData && productData && productData.results.length > 0) {
+          const existingBizIds = new Set(businessData.results.map(b => b.id));
+          const missingBizIds = [
+            ...new Set(
+              productData.results
+                .filter(p => !existingBizIds.has(p.businessId))
+                .map(p => p.businessId)
+            ),
+          ];
+
+          if (missingBizIds.length > 0) {
+            const fetched = await Promise.all(
+              missingBizIds.map(id =>
+                getBusinessById(id, abortController.signal).catch(() => null)
+              )
+            );
+            if (!abortController.signal.aborted) {
+              const extra = fetched.filter((b): b is Business => b !== null);
+              if (extra.length > 0) {
+                businessData = {
+                  ...businessData,
+                  results: [...businessData.results, ...extra],
+                  totalResults: businessData.totalResults + extra.length,
+                };
+              }
+            }
+          }
+        }
+
+        if (!abortController.signal.aborted) {
+          if (businessData) setResults(businessData);
+          if (productData) setProductResults(productData);
+          if (bizResult.status === 'rejected') {
+            const err = (bizResult as PromiseRejectedResult).reason;
+            if (err?.name !== 'AbortError') {
+              setError('Failed to search. Please try again.');
+              console.error(err);
+            }
+          }
+        }
       }
     } catch (err: any) {
       // Ignore abort errors
@@ -108,6 +158,9 @@ export default function SearchComponent() {
       }
     }
   }, [query, coordinates, distance, selectedCategories, selectedCities]);
+
+  const handleSearchRef = useRef(handleSearch);
+  handleSearchRef.current = handleSearch;
 
   const handleNearMe = () => {
     if (coordinates) {
@@ -255,17 +308,19 @@ export default function SearchComponent() {
 
   // Auto-search when location is obtained
   useEffect(() => {
-    if (coordinates && !loading && !results) {
-      handleSearch();
+    if (coordinates && !resultsRef.current) {
+      handleSearchRef.current();
     }
-  }, [coordinates, loading, results, handleSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coordinates]);
 
   // Auto-search when filters change
   useEffect(() => {
-    if (results) {
-      handleSearch();
+    if (resultsRef.current) {
+      handleSearchRef.current();
     }
-  }, [selectedCategories, selectedCities, results, handleSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategories, selectedCities]);
 
   // Fetch suggestions when debounced query changes
   useEffect(() => {
@@ -292,6 +347,23 @@ export default function SearchComponent() {
       return translations[locale] || translations['fr'] || business.description || '';
     } catch {
       return business.description || '';
+    }
+  };
+
+  const getProductTitle = (product: Product): string => {
+    try {
+      const translations = JSON.parse(product.titleTranslations);
+      return translations[locale] || translations['fr'] || '';
+    } catch {
+      return '';
+    }
+  };
+
+  const formatPrice = (price: number, currency: string): string => {
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(price);
+    } catch {
+      return `${price} ${currency}`;
     }
   };
 
@@ -522,6 +594,45 @@ export default function SearchComponent() {
             </div>
           </div>
 
+          {/* Facets/Filters Section — above the results list */}
+          {results.facets && Object.keys(results.facets).length > 0 && (
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <h3 className="text-sm font-semibold mb-3 text-gray-700 dark:text-gray-300 uppercase tracking-wide">{t('filters')}</h3>
+              <div className="flex flex-col gap-3">
+                {Object.entries(results.facets).map(([key, items]) => (
+                  <div key={key}>
+                    <h4 className="text-xs font-medium mb-2 text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      {key === 'categories' ? t('categories') : key === 'cities' ? t('cities') : key}
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {items.slice(0, 10).map((item) => {
+                        const isSelected = key === 'categories'
+                          ? selectedCategories.includes(item.key)
+                          : selectedCities.includes(item.key);
+
+                        return (
+                          <button
+                            key={item.key}
+                            onClick={() => key === 'categories' ? toggleCategory(item.key) : toggleCity(item.key)}
+                            className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                              isSelected
+                                ? key === 'categories'
+                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
+                                : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            {item.key} ({item.count})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* List view */}
           {viewMode === 'list' && (
             <div className="grid gap-4">
@@ -558,43 +669,50 @@ export default function SearchComponent() {
               userLocation={coordinates ? { latitude: coordinates.latitude, longitude: coordinates.longitude } : undefined}
             />
           )}
+        </div>
+      )}
 
-          {/* Facets/Filters Section */}
-          {results.facets && Object.keys(results.facets).length > 0 && (
-            <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('filters')}</h3>
-              {Object.entries(results.facets).map(([key, items]) => (
-                <div key={key} className="mb-4">
-                  <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
-                    {key === 'categories' ? t('categories') : key === 'cities' ? t('cities') : key}
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {items.slice(0, 10).map((item) => {
-                      const isSelected = key === 'categories'
-                        ? selectedCategories.includes(item.key)
-                        : selectedCities.includes(item.key);
-
-                      return (
-                        <button
-                          key={item.key}
-                          onClick={() => key === 'categories' ? toggleCategory(item.key) : toggleCity(item.key)}
-                          className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                            isSelected
-                              ? key === 'categories'
-                                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                : 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                          }`}
-                        >
-                          {item.key} ({item.count})
-                        </button>
-                      );
-                    })}
+      {/* Product Results Section */}
+      {productResults && productResults.results.length > 0 && (
+        <div className="mt-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              {t('products.title')}
+            </h2>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {t('products.resultsFound', { count: productResults.totalResults })}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {productResults.results.map((product: Product) => (
+              <Link
+                key={product.id}
+                href={`/${locale}/product/${product.id}`}
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+              >
+                {product.firstImageUrl && (
+                  <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                    <img
+                      src={product.firstImageUrl}
+                      alt={getProductTitle(product)}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
+                )}
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                    {getProductTitle(product)}
+                  </h3>
+                  <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-2">
+                    {formatPrice(product.price, product.currency)}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {t('products.by')} {product.businessName}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>

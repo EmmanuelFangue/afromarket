@@ -11,6 +11,12 @@ public interface ISearchService
     Task<bool> DeleteBusinessAsync(string id);
     Task<bool> CreateIndexAsync();
     Task<bool> BulkIndexBusinessesAsync(List<Business> businesses);
+
+    Task<ProductSearchResponse> SearchProductsAsync(ProductSearchRequest request);
+    Task<bool> IndexProductAsync(Product product);
+    Task<bool> DeleteProductAsync(string id);
+    Task<bool> CreateProductIndexAsync();
+    Task<bool> BulkIndexProductsAsync(List<Product> products);
 }
 
 public class OpenSearchService : ISearchService
@@ -256,6 +262,160 @@ public class OpenSearchService : ISearchService
 
         // Refresh index to make documents searchable
         await _client.Indices.RefreshAsync(IndexName);
+
+        return true;
+    }
+
+    // ─── Product methods ───────────────────────────────────────────────────────
+
+    private const string ProductIndexName = "products";
+
+    public async Task<ProductSearchResponse> SearchProductsAsync(ProductSearchRequest request)
+    {
+        var page = Math.Max(1, request.Page);
+        var pageSize = Math.Max(1, Math.Min(100, request.PageSize));
+
+        var searchDescriptor = new SearchDescriptor<Product>()
+            .Index(ProductIndexName)
+            .From((page - 1) * pageSize)
+            .Size(pageSize)
+            .Query(q =>
+            {
+                if (string.IsNullOrWhiteSpace(request.Query))
+                    return q.MatchAll();
+
+                return q.MultiMatch(m => m
+                    .Query(request.Query)
+                    .Fields(f => f
+                        .Field(p => p.TitleTranslations, 3.0)
+                        .Field(p => p.DescriptionTranslations)
+                        .Field(p => p.BusinessName)
+                    )
+                    .Type(TextQueryType.BestFields)
+                    .Fuzziness(Fuzziness.Auto)
+                );
+            });
+
+        var response = await _client.SearchAsync<Product>(searchDescriptor);
+
+        if (!response.IsValid)
+        {
+            _logger.LogError("Product search failed: {Error}", response.DebugInformation);
+            throw new Exception($"Product search failed: {response.OriginalException?.Message ?? "Unknown error"}");
+        }
+
+        return new ProductSearchResponse
+        {
+            Results = response.Documents.ToList(),
+            TotalResults = response.Total,
+            Page = page,
+            PageSize = pageSize
+        };
+    }
+
+    public async Task<bool> IndexProductAsync(Product product)
+    {
+        var response = await _client.IndexAsync(product, i => i
+            .Index(ProductIndexName)
+            .Id(product.Id)
+            .Refresh(Refresh.True)
+        );
+
+        if (!response.IsValid)
+        {
+            _logger.LogError("Product index failed: {Error}", response.DebugInformation);
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<bool> DeleteProductAsync(string id)
+    {
+        var response = await _client.DeleteAsync<Product>(id, d => d
+            .Index(ProductIndexName)
+            .Refresh(Refresh.True)
+        );
+
+        if (!response.IsValid && response.Result != Result.NotFound)
+        {
+            _logger.LogError("Product delete failed: {Error}", response.DebugInformation);
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<bool> CreateProductIndexAsync()
+    {
+        var existsResponse = await _client.Indices.ExistsAsync(ProductIndexName);
+        if (existsResponse.Exists)
+        {
+            _logger.LogInformation("Index {IndexName} already exists", ProductIndexName);
+            return true;
+        }
+
+        var createResponse = await _client.Indices.CreateAsync(ProductIndexName, c => c
+            .Settings(s => s
+                .NumberOfShards(1)
+                .NumberOfReplicas(0)
+                .RefreshInterval(-1)
+            )
+            .Map<Product>(m => m
+                .Properties(p => p
+                    .Keyword(k => k.Name(n => n.Id))
+                    .Text(t => t.Name(n => n.TitleTranslations).Analyzer("standard"))
+                    .Text(t => t.Name(n => n.DescriptionTranslations).Analyzer("standard"))
+                    .Keyword(k => k.Name(n => n.BusinessId))
+                    .Keyword(k => k.Name(n => n.BusinessName))
+                    .Number(n => n.Name(p => p.Price).Type(NumberType.Double))
+                    .Keyword(k => k.Name(n => n.Currency))
+                    .Keyword(k => k.Name(n => n.FirstImageUrl))
+                    .Date(d => d.Name(n => n.CreatedAt))
+                    .Date(d => d.Name(n => n.UpdatedAt))
+                )
+            )
+        );
+
+        if (!createResponse.IsValid)
+        {
+            _logger.LogError("Failed to create product index: {Error}", createResponse.DebugInformation);
+            return false;
+        }
+
+        _logger.LogInformation("Index {IndexName} created successfully", ProductIndexName);
+        return true;
+    }
+
+    public async Task<bool> BulkIndexProductsAsync(List<Product> products)
+    {
+        if (!products.Any())
+        {
+            _logger.LogWarning("No products to index");
+            return true;
+        }
+
+        var bulkDescriptor = new BulkDescriptor();
+
+        foreach (var product in products)
+        {
+            bulkDescriptor.Index<Product>(i => i
+                .Index(ProductIndexName)
+                .Id(product.Id)
+                .Document(product)
+            );
+        }
+
+        var response = await _client.BulkAsync(bulkDescriptor);
+
+        if (!response.IsValid)
+        {
+            _logger.LogError("Product bulk index failed: {Error}", response.DebugInformation);
+            return false;
+        }
+
+        _logger.LogInformation("Successfully indexed {Count} products", products.Count);
+        await _client.Indices.RefreshAsync(ProductIndexName);
 
         return true;
     }

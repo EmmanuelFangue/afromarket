@@ -105,4 +105,77 @@ public class IndexingService
             PublishedAt = dto.PublishedAt
         };
     }
+
+    public async Task InitialIndexProductsAsync()
+    {
+        _logger.LogInformation("Starting initial indexing of active products");
+
+        try
+        {
+            var indexCreated = await _searchService.CreateProductIndexAsync();
+            if (!indexCreated)
+            {
+                _logger.LogError("Failed to create OpenSearch product index");
+                return;
+            }
+
+            var allProducts = new List<ProductDto>();
+            int page = 1;
+            const int pageSize = 100;
+            bool hasMore = true;
+
+            while (hasMore)
+            {
+                var result = await _merchantClient.GetActiveProductsAsync(page, pageSize);
+                allProducts.AddRange(result.Items);
+
+                hasMore = result.HasNextPage;
+                page++;
+
+                _logger.LogInformation("Fetched product page {Page}, total so far: {Count}", page - 1, allProducts.Count);
+            }
+
+            _logger.LogInformation("Fetched {Count} active products from MerchantService", allProducts.Count);
+
+            if (!allProducts.Any())
+            {
+                _logger.LogWarning("No active products to index");
+                return;
+            }
+
+            var searchProducts = allProducts.Select(MapToSearchProduct).ToList();
+
+            var indexed = await _searchService.BulkIndexProductsAsync(searchProducts);
+
+            if (indexed)
+            {
+                _logger.LogInformation("Successfully indexed {Count} products", searchProducts.Count);
+            }
+            else
+            {
+                _logger.LogError("Failed to bulk index products");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during initial product indexing");
+        }
+    }
+
+    private Product MapToSearchProduct(ProductDto dto)
+    {
+        return new Product
+        {
+            Id = dto.Id.ToString(),
+            TitleTranslations = dto.TitleTranslations,
+            DescriptionTranslations = dto.DescriptionTranslations,
+            Price = dto.Price,
+            Currency = dto.Currency,
+            BusinessId = dto.BusinessId.ToString(),
+            BusinessName = dto.BusinessName,
+            FirstImageUrl = dto.Media.OrderBy(m => m.OrderIndex).FirstOrDefault()?.Url ?? string.Empty,
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
+        };
+    }
 }
