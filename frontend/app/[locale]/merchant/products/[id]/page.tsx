@@ -5,7 +5,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 interface MediaItem {
   id: string;

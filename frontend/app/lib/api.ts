@@ -2,7 +2,6 @@ import { SearchRequest, SearchResponse, Business, ProductSearchResponse, Product
 import { AuthTokens } from './auth-types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const MERCHANT_API_URL = process.env.NEXT_PUBLIC_MERCHANT_API_URL || 'http://localhost:5203';
 
 function getAuthHeader(): HeadersInit {
   if (typeof window === 'undefined') {
@@ -47,7 +46,7 @@ export async function getBusinessById(
   id: string,
   signal?: AbortSignal
 ): Promise<Business | null> {
-  const response = await fetch(`${MERCHANT_API_URL}/api/business/${id}`, {
+  const response = await fetch(`${API_URL}/api/business/${id}`, {
     method: 'GET',
     headers: {
       ...getAuthHeader()
@@ -102,7 +101,7 @@ export async function getPublicProductById(
   id: string,
   signal?: AbortSignal
 ): Promise<ProductDetail | null> {
-  const response = await fetch(`${MERCHANT_API_URL}/api/products/${id}`, {
+  const response = await fetch(`${API_URL}/api/products/${id}`, {
     method: 'GET',
     signal,
   });
@@ -125,7 +124,7 @@ export async function getProductsByBusiness(
     pageSize: String(pageSize),
   });
 
-  const response = await fetch(`${MERCHANT_API_URL}/api/products?${params}`, {
+  const response = await fetch(`${API_URL}/api/products?${params}`, {
     method: 'GET',
     signal,
   });
