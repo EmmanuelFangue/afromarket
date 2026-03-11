@@ -13,16 +13,19 @@ public class ProductService : IProductService
     private readonly MerchantDbContext _context;
     private readonly ILogger<ProductService> _logger;
     private readonly IStringLocalizer<SharedResources> _localizer;
+    private readonly ISearchServiceClient _searchServiceClient;
     private static readonly string[] SupportedCurrencies = { "CAD", "USD", "EUR", "XOF", "XAF" };
 
     public ProductService(
         MerchantDbContext context,
         ILogger<ProductService> logger,
-        IStringLocalizer<SharedResources> localizer)
+        IStringLocalizer<SharedResources> localizer,
+        ISearchServiceClient searchServiceClient)
     {
         _context = context;
         _logger = logger;
         _localizer = localizer;
+        _searchServiceClient = searchServiceClient;
     }
 
     public async Task<ProductResponse> CreateProductAsync(CreateProductRequest request, Guid ownerId)
@@ -333,7 +336,42 @@ public class ProductService : IProductService
 
         _logger.LogInformation("Changed product {ProductId} status from {OldStatus} to {NewStatus}", productId, product.Status, newStatus);
 
+        // Notify SearchService asynchronously (fire-and-forget)
+        _ = NotifySearchServiceAsync(product, newStatus);
+
         return await MapToResponseAsync(product);
+    }
+
+    public async Task<PaginatedResponse<ProductResponse>> GetAllActiveProductsAsync(int page = 1, int pageSize = 100)
+    {
+        if (page < 1) page = 1;
+        if (pageSize < 1 || pageSize > 500) pageSize = 100;
+
+        var query = _context.Products
+            .Include(p => p.Business)
+            .Include(p => p.Media.OrderBy(m => m.OrderIndex))
+            .Where(p => p.Status == ProductStatus.Active);
+
+        var totalCount = await query.CountAsync();
+        var products = await query
+            .OrderBy(p => p.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var productResponses = new List<ProductResponse>();
+        foreach (var product in products)
+        {
+            productResponses.Add(await MapToResponseAsync(product));
+        }
+
+        return new PaginatedResponse<ProductResponse>
+        {
+            Items = productResponses,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     private async Task<ProductResponse> MapToResponseAsync(Product product)
@@ -381,5 +419,42 @@ public class ProductService : IProductService
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };
+    }
+
+    private async Task NotifySearchServiceAsync(Product product, ProductStatus newStatus)
+    {
+        try
+        {
+            if (newStatus == ProductStatus.Active)
+            {
+                var firstImageUrl = product.Media?.OrderBy(m => m.OrderIndex).FirstOrDefault()?.Url ?? string.Empty;
+
+                var doc = new ProductSearchDocument
+                {
+                    Id = product.Id.ToString(),
+                    TitleTranslations = product.TitleTranslations ?? string.Empty,
+                    DescriptionTranslations = product.DescriptionTranslations ?? string.Empty,
+                    Price = product.Price,
+                    Currency = product.Currency,
+                    BusinessId = product.BusinessId.ToString(),
+                    BusinessName = product.Business?.Name ?? string.Empty,
+                    FirstImageUrl = firstImageUrl,
+                    CreatedAt = product.CreatedAt,
+                    UpdatedAt = product.UpdatedAt
+                };
+
+                await _searchServiceClient.IndexProductAsync(doc);
+                _logger.LogInformation("Notified SearchService to index product {ProductId}", product.Id);
+            }
+            else
+            {
+                await _searchServiceClient.DeleteProductAsync(product.Id.ToString());
+                _logger.LogInformation("Notified SearchService to remove product {ProductId} from index", product.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to notify SearchService for product {ProductId}", product.Id);
+        }
     }
 }

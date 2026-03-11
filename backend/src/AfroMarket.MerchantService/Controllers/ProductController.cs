@@ -340,6 +340,27 @@ public class ProductController : ControllerBase
     }
 
     /// <summary>
+    /// Returns all Active products across all businesses — used by SearchService for indexing.
+    /// </summary>
+    [HttpGet("published")]
+    [ProducesResponseType(typeof(PaginatedResponse<ProductResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedResponse<ProductResponse>>> GetPublishedProducts(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 100)
+    {
+        try
+        {
+            var result = await _productService.GetAllActiveProductsAsync(page, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving published products");
+            return StatusCode(500, new { error = _localizer["Error.RetrieveProducts"].Value });
+        }
+    }
+
+    /// <summary>
     /// Change le statut d'un produit (Draft→Active, Active→Suspended, Suspended→Active)
     /// </summary>
     [HttpPatch("{id}/status")]

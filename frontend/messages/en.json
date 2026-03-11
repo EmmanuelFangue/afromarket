@@ -40,6 +40,12 @@
     "map": {
       "clickMarker": "Click on a marker to view business details",
       "noLocation": "No location data available for this business"
+    },
+    "products": {
+      "title": "Matching Products",
+      "resultsFound": "{count, plural, one {# product found} other {# products found}}",
+      "by": "Sold by",
+      "noResults": "No products found for this search"
     }
   },
   "business": {
@@ -80,7 +86,26 @@
     "website": "Visit website",
     "notFound": "Business not found",
     "loading": "Loading business details...",
-    "error": "Failed to load business details"
+    "error": "Failed to load business details",
+    "products": {
+      "title": "Products offered",
+      "noProducts": "No products available for this business",
+      "viewAll": "View all products",
+      "loading": "Loading products..."
+    }
+  },
+  "productDetails": {
+    "backToSearch": "Back to search",
+    "soldBy": "Sold by",
+    "viewBusiness": "View business",
+    "price": "Price",
+    "availability": "Availability",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "sku": "SKU",
+    "notFound": "Product not found",
+    "loading": "Loading product...",
+    "error": "Failed to load product"
   },
   "contactForm": {
     "title": "Contact this business",

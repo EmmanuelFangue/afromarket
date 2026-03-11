@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { getBusinessById } from '../../../lib/api';
-import { Business } from '../../../lib/types';
+import Link from 'next/link';
+import { getBusinessById, getProductsByBusiness } from '../../../lib/api';
+import { Business, ProductDetail } from '../../../lib/types';
 import ContactForm from '../../../components/ContactForm';
 
 export default function BusinessDetailPage() {
@@ -12,15 +13,19 @@ export default function BusinessDetailPage() {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('businessDetails');
+  const tProduct = useTranslations('productDetails');
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [products, setProducts] = useState<ProductDetail[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+
   useEffect(() => {
     const abortController = new AbortController();
 
-    const fetchBusiness = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
@@ -32,6 +37,23 @@ export default function BusinessDetailPage() {
         }
 
         setBusiness(data);
+
+        // Fetch products in parallel once we have the business id
+        setProductsLoading(true);
+        try {
+          const prodData = await getProductsByBusiness(params.id as string, 1, 20, abortController.signal);
+          if (!abortController.signal.aborted) {
+            setProducts(prodData.items);
+          }
+        } catch (prodErr: any) {
+          if (prodErr.name !== 'AbortError') {
+            console.error('Error fetching products:', prodErr);
+          }
+        } finally {
+          if (!abortController.signal.aborted) {
+            setProductsLoading(false);
+          }
+        }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error('Error fetching business:', err);
@@ -45,7 +67,7 @@ export default function BusinessDetailPage() {
     };
 
     if (params.id) {
-      fetchBusiness();
+      fetchData();
     }
 
     return () => {
@@ -73,6 +95,29 @@ export default function BusinessDetailPage() {
     } catch {
       return business.description || '';
     }
+  };
+
+  const getProductTitle = (product: ProductDetail): string => {
+    try {
+      const translations = JSON.parse(product.titleTranslations);
+      return translations[locale] || translations['fr'] || product.title || '';
+    } catch {
+      return product.title || '';
+    }
+  };
+
+  const formatPrice = (price: number, currency: string): string => {
+    try {
+      return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(price);
+    } catch {
+      return `${price} ${currency}`;
+    }
+  };
+
+  const getFirstImageUrl = (product: ProductDetail): string | null => {
+    if (!product.media || product.media.length === 0) return null;
+    const sorted = [...product.media].sort((a, b) => a.orderIndex - b.orderIndex);
+    return sorted[0].url;
   };
 
   if (loading) {
@@ -196,6 +241,64 @@ export default function BusinessDetailPage() {
                 </span>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Products Section */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8 mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+          {t('products.title')}
+        </h2>
+
+        {productsLoading && (
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            {t('products.loading')}
+          </div>
+        )}
+
+        {!productsLoading && products.length === 0 && (
+          <p className="text-gray-500 dark:text-gray-400">{t('products.noProducts')}</p>
+        )}
+
+        {!productsLoading && products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((product) => {
+              const imageUrl = getFirstImageUrl(product);
+              const title = getProductTitle(product);
+              return (
+                <Link
+                  key={product.id}
+                  href={`/${locale}/product/${product.id}`}
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  {imageUrl ? (
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                      <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">{title}</h3>
+                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {formatPrice(product.price, product.currency)}
+                    </p>
+                    <span className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full ${
+                      product.isAvailable
+                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                        : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
+                    }`}>
+                      {product.isAvailable ? tProduct('available') : tProduct('unavailable')}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
