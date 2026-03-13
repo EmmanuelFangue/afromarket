@@ -1,4 +1,4 @@
-# Workflow Gitflow pour AfroMarket
+﻿# Workflow Gitflow pour AfroMarket
 
 ## Branches principales
 

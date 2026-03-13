@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Services;
+﻿using AfroMarket.MerchantService.Services;
 
 namespace AfroMarket.MerchantService.Middleware;
 

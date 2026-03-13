@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Data;
+﻿using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Middleware;
 using Microsoft.EntityFrameworkCore;

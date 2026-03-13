@@ -1,4 +1,4 @@
-namespace AfroMarket.MerchantService.Models.Entities;
+﻿namespace AfroMarket.MerchantService.Models.Entities;
 
 public class Address
 {

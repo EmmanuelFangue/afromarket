@@ -1,0 +1,52 @@
+# EditorConfig — https://editorconfig.org
+# Appliqué à tous les éditeurs et IDEs compatibles (VS, VS Code, Rider, etc.)
+root = true
+
+# ─── Défauts pour tous les fichiers ─────────────────────────────────────────
+[*]
+indent_style             = space
+indent_size              = 4
+end_of_line              = crlf
+charset                  = utf-8-bom
+trim_trailing_whitespace = true
+insert_final_newline     = true
+
+# ─── C# / .NET ───────────────────────────────────────────────────────────────
+[*.cs]
+indent_size = 4
+charset     = utf-8-bom
+
+[*.{csproj,props,targets}]
+indent_size = 2
+charset     = utf-8-bom
+
+# ─── Frontend — TypeScript / React ───────────────────────────────────────────
+[*.{ts,tsx}]
+indent_size = 2
+charset     = utf-8-bom
+
+# ─── JSON — le BOM est interdit par la RFC 8259 ──────────────────────────────
+[*.json]
+indent_size              = 2
+charset                  = utf-8
+insert_final_newline     = false
+
+# ─── Markdown ────────────────────────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+charset                  = utf-8-bom
+
+# ─── YAML / Docker ───────────────────────────────────────────────────────────
+[*.{yml,yaml}]
+indent_size = 2
+charset     = utf-8
+
+# ─── Shell scripts ───────────────────────────────────────────────────────────
+[*.{sh,bash,py}]
+end_of_line = lf
+charset     = utf-8
+
+# ─── SQL ─────────────────────────────────────────────────────────────────────
+[*.sql]
+indent_size = 4
+charset     = utf-8-bom

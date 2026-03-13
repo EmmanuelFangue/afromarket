@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Data;
+﻿using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;

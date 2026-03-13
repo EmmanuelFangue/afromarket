@@ -1,4 +1,4 @@
-# État de l'Authentification AfroMarket (US-802)
+﻿# État de l'Authentification AfroMarket (US-802)
 
 ## ✅ Fonctionnalités Opérationnelles
 

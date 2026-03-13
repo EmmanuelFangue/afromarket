@@ -1,0 +1,51 @@
+# .gitattributes — Normalisation des fins de ligne et des encodages
+# https://git-scm.com/docs/gitattributes
+
+# ─── Défaut : CRLF sur Windows, LF sur Linux/macOS ──────────────────────────
+* text=auto eol=crlf
+
+# ─── C# / .NET ───────────────────────────────────────────────────────────────
+*.cs          text eol=crlf working-tree-encoding=UTF-8
+*.csproj      text eol=crlf working-tree-encoding=UTF-8
+*.sln         text eol=crlf working-tree-encoding=UTF-8
+*.props       text eol=crlf working-tree-encoding=UTF-8
+*.targets     text eol=crlf working-tree-encoding=UTF-8
+*.resx        text eol=crlf working-tree-encoding=UTF-8
+
+# ─── Frontend ────────────────────────────────────────────────────────────────
+*.ts          text eol=crlf working-tree-encoding=UTF-8
+*.tsx         text eol=crlf working-tree-encoding=UTF-8
+*.js          text eol=crlf working-tree-encoding=UTF-8
+*.jsx         text eol=crlf working-tree-encoding=UTF-8
+*.css         text eol=crlf working-tree-encoding=UTF-8
+
+# ─── JSON — pas de BOM (RFC 8259) ─────────────────────────────────────────────
+*.json        text eol=crlf working-tree-encoding=UTF-8
+
+# ─── Markup / Docs ───────────────────────────────────────────────────────────
+*.md          text eol=crlf working-tree-encoding=UTF-8
+*.html        text eol=crlf working-tree-encoding=UTF-8
+
+# ─── Config / Scripts ────────────────────────────────────────────────────────
+*.yml         text eol=crlf working-tree-encoding=UTF-8
+*.yaml        text eol=crlf working-tree-encoding=UTF-8
+*.sh          text eol=lf
+*.py          text eol=lf   working-tree-encoding=UTF-8
+*.sql         text eol=crlf working-tree-encoding=UTF-8
+*.env         text eol=crlf
+
+# ─── Fichiers binaires — pas de modification de fin de ligne ─────────────────
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.svg   text eol=crlf
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.pdf   binary
+*.zip   binary
+*.dll   binary
+*.exe   binary

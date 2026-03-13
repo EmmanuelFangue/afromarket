@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Data;
+﻿using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -47,8 +47,9 @@ public class UserSyncService : IUserSyncService
             throw new InvalidOperationException("Email not found in token");
         }
 
-        // Check if user already exists
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        // Check if user already exists — by ID first, then by email (handles seeded placeholder IDs)
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId)
+                   ?? await _context.Users.FirstOrDefaultAsync(u => u.Email == emailClaim.Value);
 
         if (user == null)
         {

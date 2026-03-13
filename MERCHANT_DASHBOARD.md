@@ -1,4 +1,4 @@
-# Dashboard Marchand - AfroMarket
+﻿# Dashboard Marchand - AfroMarket
 
 ## Vue d'ensemble
 

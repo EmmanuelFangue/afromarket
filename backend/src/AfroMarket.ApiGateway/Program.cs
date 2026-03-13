@@ -1,4 +1,4 @@
-using Keycloak.AuthServices.Authentication;
+﻿using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;

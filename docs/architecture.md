@@ -1,4 +1,4 @@
-
+﻿
 # AfroMarket — Architecture technique (BETA)
 
 - **Version** : 0.9 (Draft)
