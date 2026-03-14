@@ -30,6 +30,7 @@ export default function MerchantDashboard() {
   const locale = pathname.split('/')[1] || 'fr';
   const [businesses, setBusinesses] = useState<MerchantBusiness[]>([]);
   const [loadingBiz, setLoadingBiz] = useState(true);
+  const [bizError, setBizError] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
