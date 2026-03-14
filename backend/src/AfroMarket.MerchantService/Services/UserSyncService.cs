@@ -47,9 +47,43 @@ public class UserSyncService : IUserSyncService
             throw new InvalidOperationException("Email not found in token");
         }
 
-        // Check if user already exists — by ID first, then by email (handles seeded placeholder IDs)
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId)
-                   ?? await _context.Users.FirstOrDefaultAsync(u => u.Email == emailClaim.Value);
+        // Check if user already exists -- by Keycloak ID first
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user == null)
+        {
+            // Not found by Keycloak ID -- check if a record exists with the same email but a different (seeded) ID
+            var userByEmail = await _context.Users.FirstOrDefaultAsync(u => u.Email == emailClaim.Value);
+            if (userByEmail != null)
+            {
+                // DB was seeded with a placeholder ID that differs from the real Keycloak sub.
+                // Migrate: disable FK, update PK, update FK references, re-enable FK.
+                _logger.LogWarning(
+                    "User {Email} found in DB with placeholder ID {OldId} -- Keycloak ID is {NewId}. Migrating...",
+                    emailClaim.Value, userByEmail.Id, userId);
+
+                var oldId = userByEmail.Id;
+
+                // Disable FK constraint to allow PK update without violating referential integrity
+                await _context.Database.ExecuteSqlRawAsync(
+                    "ALTER TABLE dbo.Businesses NOCHECK CONSTRAINT FK_Businesses_Users_OwnerId");
+                // Update the PK first
+                await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"UPDATE Users SET Id = {userId} WHERE Id = {oldId}");
+                // Update all child FK references
+                await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $"UPDATE Businesses SET OwnerId = {userId} WHERE OwnerId = {oldId}");
+                // Re-enable and validate the FK constraint
+                await _context.Database.ExecuteSqlRawAsync(
+                    "ALTER TABLE dbo.Businesses WITH CHECK CHECK CONSTRAINT FK_Businesses_Users_OwnerId");
+
+                _context.Entry(userByEmail).State = EntityState.Detached;
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+                _logger.LogInformation(
+                    "Migration complete -- User {Email} ID updated to {NewId}", emailClaim.Value, userId);
+            }
+        }
 
         if (user == null)
         {
@@ -78,57 +112,28 @@ public class UserSyncService : IUserSyncService
         else
         {
             // Update existing user info (email, name might have changed in Keycloak)
-            var hasChanges = false;
-
-            if (user.Email != emailClaim.Value)
-            {
-                user.Email = emailClaim.Value;
-                hasChanges = true;
-            }
+            if (user.Email != emailClaim.Value) user.Email = emailClaim.Value;
 
             var newFirstName = firstNameClaim?.Value ?? "";
-            if (user.FirstName != newFirstName)
-            {
-                user.FirstName = newFirstName;
-                hasChanges = true;
-            }
+            if (user.FirstName != newFirstName) user.FirstName = newFirstName;
 
             var newLastName = lastNameClaim?.Value ?? "";
-            if (user.LastName != newLastName)
-            {
-                user.LastName = newLastName;
-                hasChanges = true;
-            }
+            if (user.LastName != newLastName) user.LastName = newLastName;
 
             var newPreferredUsername = preferredUsernameClaim?.Value;
-            if (user.PreferredUsername != newPreferredUsername)
-            {
-                user.PreferredUsername = newPreferredUsername;
-                hasChanges = true;
-            }
+            if (user.PreferredUsername != newPreferredUsername) user.PreferredUsername = newPreferredUsername;
 
             var newRole = DetermineUserRole(claimsPrincipal);
             if (user.Role != newRole)
             {
                 user.Role = newRole;
-                hasChanges = true;
                 _logger.LogInformation("User {Email} role updated to {Role}", user.Email, newRole);
             }
 
-            // Always update LastLoginAt
             user.LastLoginAt = DateTime.UtcNow;
             user.UpdatedAt = DateTime.UtcNow;
 
-            if (hasChanges)
-            {
-                await _context.SaveChangesAsync();
-                _logger.LogInformation("User {Email} updated in database", user.Email);
-            }
-            else
-            {
-                // Just update LastLoginAt without triggering change detection
-                await _context.SaveChangesAsync();
-            }
+            await _context.SaveChangesAsync();
         }
 
         return user;
@@ -136,29 +141,13 @@ public class UserSyncService : IUserSyncService
 
     private UserRole DetermineUserRole(ClaimsPrincipal claimsPrincipal)
     {
-        // Check realm_access.roles from Keycloak
-        var roles = claimsPrincipal.FindAll("realm_access.roles")
-            .Select(c => c.Value)
-            .ToList();
-
-        // Also check direct role claims
-        var directRoles = claimsPrincipal.FindAll(ClaimTypes.Role)
-            .Select(c => c.Value)
-            .ToList();
-
+        var roles = claimsPrincipal.FindAll("realm_access.roles").Select(c => c.Value).ToList();
+        var directRoles = claimsPrincipal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
         var allRoles = roles.Concat(directRoles).Select(r => r.ToLowerInvariant()).ToList();
 
-        if (allRoles.Contains("admin"))
-        {
-            return UserRole.Admin;
-        }
+        if (allRoles.Contains("admin"))   return UserRole.Admin;
+        if (allRoles.Contains("merchant")) return UserRole.Merchant;
 
-        if (allRoles.Contains("merchant"))
-        {
-            return UserRole.Merchant;
-        }
-
-        // Default to merchant role
         return UserRole.Merchant;
     }
 }
