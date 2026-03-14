@@ -1,9 +1,13 @@
-﻿'use client';
+'use client';
 
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import {
+  Search, Plus, Package, X, ChevronLeft, ChevronRight,
+  Tag, CheckCircle, XCircle, Clock, AlertCircle,
+} from 'lucide-react';
 
 interface MediaItem {
   id: string;
@@ -43,25 +47,72 @@ interface PaginatedResponse {
 }
 
 const STATUS_FILTERS = [
-  { label: 'Tous', value: null },
-  { label: 'Brouillon', value: 0 },
-  { label: 'Actif', value: 1 },
-  { label: 'Suspendu', value: 2 },
+  { label: { fr: 'Tous', en: 'All' }, value: null },
+  { label: { fr: 'Brouillon', en: 'Draft' }, value: 0 },
+  { label: { fr: 'Actif', en: 'Active' }, value: 1 },
+  { label: { fr: 'Suspendu', en: 'Suspended' }, value: 2 },
 ] as const;
 
 const PAGE_SIZE = 12;
 
-const STATUS_LABEL: Record<number, { label: string; className: string }> = {
-  0: { label: 'Brouillon', className: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
-  1: { label: 'Actif', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  2: { label: 'Suspendu', className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+interface StatusConfig {
+  label: string;
+  className: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+const STATUS_CONFIG: Record<number, StatusConfig> = {
+  0: { label: 'Brouillon', className: 'status-draft', icon: Clock },
+  1: { label: 'Actif', className: 'status-published', icon: CheckCircle },
+  2: { label: 'Suspendu', className: 'status-suspended', icon: AlertCircle },
 };
 
 export default function MerchantProductsPage() {
   const { isAuthenticated, isLoading, getAccessToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'fr';
+  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
+
+  const t = {
+    fr: {
+      title: 'Mes produits',
+      add: 'Ajouter un produit',
+      search: 'Rechercher par titre ou SKU...',
+      loading: 'Chargement des produits...',
+      empty: "Vous n'avez pas encore de produits. Commencez par en ajouter un !",
+      noResults: 'Aucun produit ne correspond à votre recherche.',
+      see: 'Voir',
+      edit: 'Modifier',
+      noImage: "Pas d'image",
+      available: 'Disponible',
+      unavailable: 'Indisponible',
+      page: 'Page',
+      of: 'sur',
+      prev: 'Précédent',
+      next: 'Suivant',
+      products: (n: number) => `${n} produit${n > 1 ? 's' : ''}`,
+      found: (n: number) => ` trouvé${n > 1 ? 's' : ''}`,
+    },
+    en: {
+      title: 'My Products',
+      add: 'Add a product',
+      search: 'Search by title or SKU...',
+      loading: 'Loading products...',
+      empty: "You don't have any products yet. Start by adding one!",
+      noResults: 'No products match your search.',
+      see: 'View',
+      edit: 'Edit',
+      noImage: 'No image',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      page: 'Page',
+      of: 'of',
+      prev: 'Previous',
+      next: 'Next',
+      products: (n: number) => `${n} product${n > 1 ? 's' : ''}`,
+      found: (n: number) => ` found`,
+    },
+  }[locale];
 
   const [products, setProducts] = useState<Product[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -69,7 +120,6 @@ export default function MerchantProductsPage() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filters
   const [statusFilter, setStatusFilter] = useState<number | null>(null);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -83,7 +133,6 @@ export default function MerchantProductsPage() {
     }
   }, [isLoading, isAuthenticated, router, locale, pathname]);
 
-  // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
@@ -92,7 +141,6 @@ export default function MerchantProductsPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // Load products
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -147,183 +195,207 @@ export default function MerchantProductsPage() {
   if (isLoading || !isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Mes produits
-          </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="font-heading text-3xl font-bold text-foreground">{t.title}</h1>
+            {!isLoadingProducts && (
+              <p className="text-muted-foreground text-sm mt-1">
+                {t.products(totalCount)}
+                {hasActiveFilter && t.found(totalCount)}
+              </p>
+            )}
+          </div>
           <Link
             href={`/${locale}/merchant/products/new`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            className="btn-primary inline-flex items-center gap-2"
+            data-testid="add-product-btn"
           >
-            + Ajouter un produit
+            <Plus className="w-4 h-4" />
+            {t.add}
           </Link>
         </div>
 
-        {/* Search + status filter bar */}
+        {/* Search + status filter */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           {/* Search */}
           <div className="relative flex-1">
-            <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Rechercher par titre ou SKU..."
-              className="w-full pl-9 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder={t.search}
+              className="input-default pl-9 pr-9"
+              data-testid="products-search"
             />
             {searchInput && (
               <button
                 onClick={() => setSearchInput('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="Effacer la recherche"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
           {/* Status filter tabs */}
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+          <div className="flex gap-1 bg-muted/30 border border-border p-1 rounded-xl">
             {STATUS_FILTERS.map(({ label, value }) => (
               <button
-                key={label}
+                key={String(value)}
                 onClick={() => handleStatusFilter(value)}
-                className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors ${
+                data-testid={`filter-${value ?? 'all'}`}
+                className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
                   statusFilter === value
-                    ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {label}
+                {label[locale]}
               </button>
             ))}
           </div>
         </div>
 
+        {/* Error */}
         {error && (
-          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-red-800 text-sm">{error}</p>
           </div>
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+        {/* Content */}
+        <div className="card-dashboard p-0 overflow-hidden">
           {isLoadingProducts ? (
-            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-              Chargement des produits...
+            <div className="p-12 text-center">
+              <div className="inline-flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-muted-foreground text-sm">{t.loading}</p>
+              </div>
             </div>
           ) : products.length === 0 ? (
-            <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-              {hasActiveFilter
-                ? 'Aucun produit ne correspond à votre recherche.'
-                : 'Vous n\'avez pas encore de produits. Commencez par en ajouter un !'}
+            <div className="p-16 text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-primary" />
+              </div>
+              <p className="text-muted-foreground">
+                {hasActiveFilter ? t.noResults : t.empty}
+              </p>
+              {!hasActiveFilter && (
+                <Link href={`/${locale}/merchant/products/new`} className="btn-primary inline-flex items-center gap-2 mt-4">
+                  <Plus className="w-4 h-4" />
+                  {t.add}
+                </Link>
+              )}
             </div>
           ) : (
             <>
-              {/* Count + grid */}
-              <div className="px-6 pt-5 pb-1">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {totalCount} produit{totalCount > 1 ? 's' : ''}
-                  {hasActiveFilter && ' trouvé' + (totalCount > 1 ? 's' : '')}
-                </p>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
                 {products.map((product) => {
-                  const statusInfo = STATUS_LABEL[product.status] ?? STATUS_LABEL[0];
+                  const statusCfg = STATUS_CONFIG[product.status] ?? STATUS_CONFIG[0];
+                  const StatusIcon = statusCfg.icon;
                   return (
-                  <div
-                    key={product.id}
-                    className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    {product.media.length > 0 ? (
-                      <img
-                        src={product.media[0].url}
-                        alt={product.title}
-                        className="w-full h-48 object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <span className="text-gray-400 dark:text-gray-500 text-sm">Pas d'image</span>
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-white leading-tight">
-                          {product.title}
-                        </h3>
-                        <span className={`ml-2 flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusInfo.className}`}>
-                          {statusInfo.label}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-                        {product.description}
-                      </p>
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                          {product.price.toFixed(2)} {product.currency}
-                        </span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          product.isAvailable
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                        }`}>
-                          {product.isAvailable ? 'Disponible' : 'Indisponible'}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/${locale}/merchant/products/${product.id}`}
-                          className="flex-1 px-3 py-1.5 text-sm text-center bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                        >
-                          Voir
-                        </Link>
-                        {product.status === 0 && (
+                    <div
+                      key={product.id}
+                      className="border border-border rounded-2xl overflow-hidden hover:shadow-md transition-shadow bg-background"
+                      data-testid={`product-card-${product.id}`}
+                    >
+                      {product.media.length > 0 ? (
+                        <img
+                          src={product.media[0].url}
+                          alt={product.title}
+                          className="w-full h-48 object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-muted/30 flex flex-col items-center justify-center gap-2">
+                          <Package className="w-8 h-8 text-muted-foreground" />
+                          <span className="text-muted-foreground text-xs">{t.noImage}</span>
+                        </div>
+                      )}
+
+                      <div className="p-4">
+                        {/* Title + status */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 className="font-semibold text-foreground leading-tight line-clamp-2">{product.title}</h3>
+                          <span className={`inline-flex items-center gap-1 flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${statusCfg.className}`}>
+                            <StatusIcon className="w-3 h-3" />
+                            {statusCfg.label}
+                          </span>
+                        </div>
+
+                        {/* Description */}
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{product.description}</p>
+
+                        {/* Price + availability */}
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="font-heading text-lg font-bold text-primary">
+                            {product.price.toFixed(2)} {product.currency}
+                          </span>
+                          <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${
+                            product.isAvailable
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-muted/40 text-muted-foreground'
+                          }`}>
+                            {product.isAvailable
+                              ? <><CheckCircle className="w-3 h-3" />{t.available}</>
+                              : <><XCircle className="w-3 h-3" />{t.unavailable}</>
+                            }
+                          </span>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-2">
                           <Link
-                            href={`/${locale}/merchant/products/${product.id}/edit`}
-                            className="px-3 py-1.5 text-sm bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                            href={`/${locale}/merchant/products/${product.id}`}
+                            className="flex-1 px-3 py-1.5 text-sm text-center btn-primary"
+                            data-testid={`view-product-${product.id}`}
                           >
-                            Modifier
+                            {t.see}
                           </Link>
-                        )}
+                          {product.status === 0 && (
+                            <Link
+                              href={`/${locale}/merchant/products/${product.id}/edit`}
+                              className="px-3 py-1.5 text-sm btn-outline"
+                              data-testid={`edit-product-${product.id}`}
+                            >
+                              {t.edit}
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Page {page} sur {totalPages}
+                <div className="flex items-center justify-between px-6 py-4 border-t border-border">
+                  <p className="text-sm text-muted-foreground">
+                    {t.page} {page} {t.of} {totalPages}
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setPage(p => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="btn-outline inline-flex items-center gap-1 px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      ← Précédent
+                      <ChevronLeft className="w-4 h-4" />
+                      {t.prev}
                     </button>
                     <button
                       onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                       disabled={page === totalPages}
-                      className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="btn-outline inline-flex items-center gap-1 px-3 py-1.5 text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      Suivant →
+                      {t.next}
+                      <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

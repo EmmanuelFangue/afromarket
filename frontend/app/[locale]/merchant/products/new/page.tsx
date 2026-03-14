@@ -1,14 +1,15 @@
-﻿'use client';
+'use client';
 
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ArrowLeft, ImagePlus, X, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function NewProductPage() {
   const { isAuthenticated, isLoading, getAccessToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'fr';
+  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
 
   const [formData, setFormData] = useState({
     title: '',
@@ -31,7 +32,6 @@ export default function NewProductPage() {
     }
   }, [isLoading, isAuthenticated, router, locale, pathname]);
 
-  // Fetch merchant's businessId on mount
   useEffect(() => {
     if (!isAuthenticated || isLoading) return;
 
@@ -49,7 +49,7 @@ export default function NewProductPage() {
         if (!response.ok) throw new Error('Impossible de récupérer votre commerce');
         const businesses = await response.json();
         if (!businesses || businesses.length === 0) {
-          setBusinessError('Vous devez créer un commerce avant d\'ajouter des produits.');
+          setBusinessError("Vous devez créer un commerce avant d'ajouter des produits.");
         } else {
           setBusinessId(businesses[0].id);
         }
@@ -97,7 +97,7 @@ export default function NewProductPage() {
     setError(null);
 
     if (!businessId) {
-      setError('Commerce introuvable. Veuillez créer un commerce d\'abord.');
+      setError("Commerce introuvable. Veuillez créer un commerce d'abord.");
       setIsSubmitting(false);
       return;
     }
@@ -111,10 +111,8 @@ export default function NewProductPage() {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const token = await getAccessToken();
-
       if (!token) throw new Error('Non authentifié');
 
-      // Step 1: Upload images
       const formDataImages = new FormData();
       images.forEach((image) => formDataImages.append('images', image));
 
@@ -126,12 +124,11 @@ export default function NewProductPage() {
 
       if (!uploadResponse.ok) {
         const err = await uploadResponse.json();
-        throw new Error(err.message || 'Erreur lors de l\'upload des images');
+        throw new Error(err.message || "Erreur lors de l'upload des images");
       }
 
       const { imageUrls } = await uploadResponse.json();
 
-      // Step 2: Create product with correct API structure
       const productData = {
         businessId,
         title: formData.title,
@@ -142,7 +139,7 @@ export default function NewProductPage() {
         isAvailable: true,
         media: imageUrls.map((url: string, index: number) => ({
           url,
-          type: 0, // Image
+          type: 0,
           fileName: images[index]?.name ?? null,
           altText: null,
           fileSizeBytes: images[index]?.size ?? null,
@@ -172,37 +169,43 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.back()}
-            className="text-blue-600 dark:text-blue-400 hover:underline mb-4"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            data-testid="back-btn"
           >
-            ← Retour
+            <ArrowLeft className="w-4 h-4" />
+            Retour
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Ajouter un produit
-          </h1>
+          <h1 className="font-heading text-3xl font-bold text-foreground">Ajouter un produit</h1>
         </div>
 
+        {/* Business error banner */}
         {businessError && (
-          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <p className="text-yellow-800 dark:text-yellow-200 text-sm">{businessError}</p>
-            <button
-              onClick={() => router.push(`/${locale}/merchant/dashboard`)}
-              className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              Créer un commerce →
-            </button>
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-800 text-sm">{businessError}</p>
+              <button
+                onClick={() => router.push(`/${locale}/merchant/dashboard`)}
+                className="mt-2 text-sm text-primary hover:underline font-medium"
+              >
+                Créer un commerce →
+              </button>
+            </div>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="card-dashboard space-y-6" data-testid="new-product-form">
 
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-1.5">
               Titre du produit <span className="text-red-500">*</span>
             </label>
             <input
@@ -210,17 +213,18 @@ export default function NewProductPage() {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default"
               required
               minLength={3}
               maxLength={200}
               placeholder="Ex: Jollof Rice Party Size"
+              data-testid="input-title"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1.5">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -228,18 +232,19 @@ export default function NewProductPage() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default resize-none"
               required
               minLength={10}
               maxLength={5000}
               placeholder="Décrivez votre produit en détail..."
+              data-testid="input-description"
             />
           </div>
 
           {/* Price + Currency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="price" className="block text-sm font-medium text-foreground mb-1.5">
                 Prix <span className="text-red-500">*</span>
               </label>
               <input
@@ -249,20 +254,22 @@ export default function NewProductPage() {
                 min="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="input-default"
                 required
                 placeholder="0.00"
+                data-testid="input-price"
               />
             </div>
             <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="currency" className="block text-sm font-medium text-foreground mb-1.5">
                 Devise
               </label>
               <select
                 id="currency"
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="input-default"
+                data-testid="select-currency"
               >
                 <option value="CAD">CAD</option>
                 <option value="USD">USD</option>
@@ -273,73 +280,76 @@ export default function NewProductPage() {
             </div>
           </div>
 
-          {/* SKU (optional) */}
+          {/* SKU */}
           <div>
-            <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              SKU <span className="text-gray-400 text-xs">(optionnel)</span>
+            <label htmlFor="sku" className="block text-sm font-medium text-foreground mb-1.5">
+              SKU <span className="text-muted-foreground text-xs">(optionnel)</span>
             </label>
             <input
               type="text"
               id="sku"
               value={formData.sku}
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default"
               maxLength={100}
               placeholder="Ex: PROD-001"
+              data-testid="input-sku"
             />
           </div>
 
           {/* Image Upload */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Photos du produit <span className="text-red-500">*</span>
-              <span className="text-gray-400 text-xs ml-1">(max 10, 5MB chacune)</span>
+              <span className="text-muted-foreground text-xs ml-1">(max 10, 5MB chacune)</span>
             </label>
+
             <div className="space-y-4">
               {images.length < 10 && (
-                <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg className="w-8 h-8 mb-2 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                      </svg>
-                      <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="font-semibold">Cliquez pour ajouter</span> ou glissez-déposez
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG, WEBP (MAX. 5MB)</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">{images.length}/10 photos</p>
+                <label
+                  className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-border rounded-2xl cursor-pointer bg-muted/20 hover:bg-primary/5 hover:border-primary/40 transition-colors"
+                  data-testid="image-upload-zone"
+                >
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <ImagePlus className="w-5 h-5 text-primary" />
                     </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      multiple
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                </div>
+                    <div className="text-center">
+                      <p className="text-sm text-foreground">
+                        <span className="font-medium text-primary">Cliquez pour ajouter</span> ou glissez-déposez
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">PNG, JPG, WEBP (MAX. 5MB)</p>
+                      <p className="text-xs text-primary mt-1 font-medium">{images.length}/10 photos</p>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    multiple
+                    onChange={handleImageUpload}
+                  />
+                </label>
               )}
 
               {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative group">
+                    <div key={index} className="relative group rounded-xl overflow-hidden aspect-square border border-border">
                       <img
                         src={preview}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600"
+                        className="w-full h-full object-cover"
                       />
                       <button
                         type="button"
                         onClick={() => handleRemoveImage(index)}
-                        className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
                         aria-label="Supprimer l'image"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <X className="w-3 h-3" />
                       </button>
-                      <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                      <div className="absolute bottom-1.5 left-1.5 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded-md">
                         {index + 1}/{imagePreviews.length}
                       </div>
                     </div>
@@ -351,24 +361,29 @@ export default function NewProductPage() {
 
           {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-800 text-sm">{error}</p>
             </div>
           )}
 
-          <div className="flex gap-4">
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
               disabled={isSubmitting || !!businessError}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex-1 btn-primary inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="submit-product"
             >
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isSubmitting ? 'Création en cours...' : 'Créer le produit'}
             </button>
             <button
               type="button"
               onClick={() => router.back()}
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="cancel-btn"
             >
               Annuler
             </button>

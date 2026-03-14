@@ -150,11 +150,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function parseUserFromToken(accessToken: string): User {
     const decoded = decodeJwt(accessToken);
 
+    // DEBUG — log the full JWT payload to identify where roles are stored in Keycloak
+    console.log('[AuthContext] Full JWT claims:', JSON.stringify(decoded, null, 2));
+
+    // Keycloak can store roles in realm_access (realm-level) OR resource_access (client-level)
+    const realmRoles: string[] = (decoded.realm_access as any)?.roles || [];
+    const resourceRoles: string[] = Object.values(
+      (decoded.resource_access as Record<string, { roles: string[] }>) || {}
+    ).flatMap(r => r.roles || []);
+    const roles = Array.from(new Set([...realmRoles, ...resourceRoles]));
+
+    console.log('[AuthContext] Parsed roles:', roles);
+
     return {
       id: decoded.sub as string,
       email: (decoded.email as string) || '',
       name: (decoded.name as string) || (decoded.preferred_username as string),
-      roles: (decoded.realm_access as any)?.roles || []
+      roles,
     };
   }
 

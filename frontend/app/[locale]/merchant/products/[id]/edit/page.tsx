@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import { useAuth } from '../../../../../contexts/AuthContext';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { ArrowLeft, ImagePlus, X, AlertCircle, Loader2 } from 'lucide-react';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -32,14 +33,12 @@ export default function EditProductPage() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  const locale = pathname.split('/')[1] || 'fr';
+  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
   const productId = params.id as string;
 
-  // Product loading
   const [isFetchingProduct, setIsFetchingProduct] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Form state (pre-filled after product loads)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -49,25 +48,20 @@ export default function EditProductPage() {
     isAvailable: true,
   });
 
-  // Existing media management
   const [existingMedia, setExistingMedia] = useState<MediaItem[]>([]);
   const [mediaToRemove, setMediaToRemove] = useState<string[]>([]);
-
-  // New image uploads
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push(`/${locale}/auth/login?returnUrl=${encodeURIComponent(pathname)}`);
     }
   }, [isLoading, isAuthenticated, router, locale, pathname]);
 
-  // Fetch product on mount
   useEffect(() => {
     if (!isAuthenticated || isLoading) return;
 
@@ -176,7 +170,6 @@ export default function EditProductPage() {
       const token = await getAccessToken();
       if (!token) throw new Error('Non authentifié');
 
-      // Step 1: Upload new images if any
       let newMediaToAdd: Array<{
         url: string; type: number; fileName: string | null;
         altText: null; fileSizeBytes: number | null;
@@ -194,7 +187,7 @@ export default function EditProductPage() {
 
         if (!uploadResponse.ok) {
           const err = await uploadResponse.json();
-          throw new Error(err.message || 'Erreur lors de l\'upload des images.');
+          throw new Error(err.message || "Erreur lors de l'upload des images.");
         }
 
         const { imageUrls } = await uploadResponse.json();
@@ -207,7 +200,6 @@ export default function EditProductPage() {
         }));
       }
 
-      // Step 2: Submit update
       const updatePayload: Record<string, unknown> = {
         title: formData.title,
         description: formData.description,
@@ -242,28 +234,33 @@ export default function EditProductPage() {
     }
   };
 
-  // Loading state
   if (isFetchingProduct) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">Chargement du produit...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Chargement du produit...</p>
+        </div>
       </div>
     );
   }
 
-  // Error state (not found, not Draft, etc.)
   if (fetchError) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-            <p className="text-red-800 dark:text-red-200">{fetchError}</p>
-            <button
-              onClick={() => router.push(`/${locale}/merchant/products`)}
-              className="mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-            >
-              ← Retour à mes produits
-            </button>
+          <div className="p-6 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-800">{fetchError}</p>
+              <button
+                onClick={() => router.push(`/${locale}/merchant/products`)}
+                className="mt-3 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour à mes produits
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -271,28 +268,30 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => router.push(`/${locale}/merchant/products/${productId}`)}
-            className="text-blue-600 dark:text-blue-400 hover:underline mb-4 block"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+            data-testid="back-btn"
           >
-            ← Retour au produit
+            <ArrowLeft className="w-4 h-4" />
+            Retour au produit
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Modifier le produit
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <h1 className="font-heading text-3xl font-bold text-foreground">Modifier le produit</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Brouillon — les modifications ne seront visibles qu'après publication.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="card-dashboard space-y-6" data-testid="edit-product-form">
 
           {/* Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-1.5">
               Titre du produit <span className="text-red-500">*</span>
             </label>
             <input
@@ -300,16 +299,17 @@ export default function EditProductPage() {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default"
               required
               minLength={3}
               maxLength={200}
+              data-testid="input-title"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1.5">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -317,17 +317,18 @@ export default function EditProductPage() {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default resize-none"
               required
               minLength={10}
               maxLength={5000}
+              data-testid="input-description"
             />
           </div>
 
           {/* Price + Currency */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="price" className="block text-sm font-medium text-foreground mb-1.5">
                 Prix <span className="text-red-500">*</span>
               </label>
               <input
@@ -337,19 +338,21 @@ export default function EditProductPage() {
                 min="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="input-default"
                 required
+                data-testid="input-price"
               />
             </div>
             <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label htmlFor="currency" className="block text-sm font-medium text-foreground mb-1.5">
                 Devise
               </label>
               <select
                 id="currency"
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="input-default"
+                data-testid="select-currency"
               >
                 <option value="CAD">CAD</option>
                 <option value="USD">USD</option>
@@ -362,63 +365,63 @@ export default function EditProductPage() {
 
           {/* SKU */}
           <div>
-            <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              SKU <span className="text-gray-400 text-xs">(optionnel)</span>
+            <label htmlFor="sku" className="block text-sm font-medium text-foreground mb-1.5">
+              SKU <span className="text-muted-foreground text-xs">(optionnel)</span>
             </label>
             <input
               type="text"
               id="sku"
               value={formData.sku}
               onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="input-default"
               maxLength={100}
+              data-testid="input-sku"
             />
           </div>
 
           {/* Availability toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 p-4 bg-muted/20 border border-border rounded-xl">
             <input
               type="checkbox"
               id="isAvailable"
               checked={formData.isAvailable}
               onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 accent-primary"
+              data-testid="checkbox-available"
             />
-            <label htmlFor="isAvailable" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label htmlFor="isAvailable" className="text-sm font-medium text-foreground cursor-pointer">
               Produit disponible à la vente
             </label>
           </div>
 
           {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Photos du produit <span className="text-red-500">*</span>
-              <span className="text-gray-400 text-xs ml-1">({totalImageCount}/10)</span>
+              <span className="text-muted-foreground text-xs ml-1">({totalImageCount}/10)</span>
             </label>
 
             <div className="space-y-4">
               {/* Existing images */}
               {visibleExistingMedia.length > 0 && (
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Photos actuelles</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Photos actuelles</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {visibleExistingMedia.map((media, index) => (
-                      <div key={media.id} className="relative group">
+                      <div key={media.id} className="relative group rounded-xl overflow-hidden aspect-square border border-border">
                         <img
                           src={media.url}
                           alt={`Photo ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600"
+                          className="w-full h-full object-cover"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemoveExisting(media.id)}
                           disabled={isSubmitting}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed"
                           aria-label="Supprimer cette photo"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          <X className="w-3 h-3" />
                         </button>
                       </div>
                     ))}
@@ -429,27 +432,25 @@ export default function EditProductPage() {
               {/* New images to upload */}
               {newImagePreviews.length > 0 && (
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Nouvelles photos</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Nouvelles photos</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {newImagePreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
+                      <div key={index} className="relative group rounded-xl overflow-hidden aspect-square border-2 border-primary/40">
                         <img
                           src={preview}
                           alt={`Nouvelle photo ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg border-2 border-blue-300 dark:border-blue-600"
+                          className="w-full h-full object-cover"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemoveNew(index)}
                           disabled={isSubmitting}
-                          className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="absolute top-1.5 right-1.5 w-6 h-6 bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 disabled:cursor-not-allowed"
                           aria-label="Annuler l'ajout"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
+                          <X className="w-3 h-3" />
                         </button>
-                        <div className="absolute bottom-2 left-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded">
+                        <div className="absolute bottom-1.5 left-1.5 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-md font-medium">
                           Nouvelle
                         </div>
                       </div>
@@ -460,54 +461,57 @@ export default function EditProductPage() {
 
               {/* Add more images */}
               {totalImageCount < 10 && (
-                <div className="flex items-center justify-center w-full">
-                  <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg bg-gray-50 dark:bg-gray-700 transition-colors ${
-                    isSubmitting
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600'
-                  }`}>
-                    <div className="flex flex-col items-center justify-center py-3">
-                      <svg className="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400" fill="none" viewBox="0 0 20 16" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                      </svg>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        <span className="font-semibold">Ajouter des photos</span> (PNG, JPG, WEBP — max. 5MB)
-                      </p>
+                <label className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-border rounded-2xl bg-muted/20 transition-colors ${
+                  isSubmitting
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer hover:bg-primary/5 hover:border-primary/40'
+                }`}>
+                  <div className="flex flex-col items-center justify-center gap-1.5">
+                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                      <ImagePlus className="w-4 h-4 text-primary" />
                     </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="image/png,image/jpeg,image/jpg,image/webp"
-                      multiple
-                      disabled={isSubmitting}
-                      onChange={handleAddNewImages}
-                    />
-                  </label>
-                </div>
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-medium text-primary">Ajouter des photos</span> (PNG, JPG, WEBP — max. 5MB)
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    multiple
+                    disabled={isSubmitting}
+                    onChange={handleAddNewImages}
+                  />
+                </label>
               )}
             </div>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-800 text-sm">{error}</p>
             </div>
           )}
 
-          <div className="flex gap-4">
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="flex-1 btn-primary inline-flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="submit-edit"
             >
+              {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
               {isSubmitting ? 'Enregistrement...' : 'Enregistrer les modifications'}
             </button>
             <button
               type="button"
               onClick={() => router.push(`/${locale}/merchant/products/${productId}`)}
               disabled={isSubmitting}
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="cancel-btn"
             >
               Annuler
             </button>

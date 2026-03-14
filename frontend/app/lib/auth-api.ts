@@ -108,10 +108,19 @@ export async function register(data: RegisterData): Promise<void> {
 function parseTokenToUser(accessToken: string): User {
   const decoded = decodeJwt(accessToken);
 
+  // Keycloak can store roles in realm_access (realm-level) OR resource_access (client-level)
+  const realmRoles: string[] = (decoded.realm_access as any)?.roles || [];
+  const resourceRoles: string[] = Object.values(
+    (decoded.resource_access as Record<string, { roles: string[] }>) || {}
+  ).flatMap(r => r.roles || []);
+  const roles = Array.from(new Set([...realmRoles, ...resourceRoles]));
+
+  console.log('[auth-api] Parsed roles:', roles);
+
   return {
     id: decoded.sub as string,
     email: (decoded.email as string) || '',
     name: (decoded.name as string) || (decoded.preferred_username as string),
-    roles: (decoded.realm_access as any)?.roles || []
+    roles,
   };
 }

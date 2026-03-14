@@ -1,9 +1,10 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Mail, Lock, User, Loader2, ArrowRight, ShoppingBag, Store } from 'lucide-react';
 
 interface RegisterFormData {
   firstName: string;
@@ -22,54 +23,106 @@ interface RegisterFormErrors {
   general?: string;
 }
 
+type Role = 'user' | 'merchant';
+
 export default function RegisterPage() {
-  const pathname = usePathname();
-  const locale = pathname.split('/')[1] || 'fr';
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
   const { register } = useAuth();
 
+  const [role, setRole] = useState<Role>('user');
   const [formData, setFormData] = useState<RegisterFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
+    firstName: '', lastName: '', email: '', password: '', confirmPassword: ''
   });
   const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const t = {
+    fr: {
+      title: 'Créer un compte',
+      subtitle: 'Rejoignez AfroMarket et découvrez les commerces africains au Canada',
+      roleLabel: 'Je souhaite…',
+      roleUser: 'Acheter & explorer',
+      roleUserDesc: 'Parcourir et découvrir les commerces africains',
+      roleMerchant: 'Vendre mes produits',
+      roleMerchantDesc: 'Ouvrir ma boutique et gérer mes produits',
+      firstName: 'Prénom',
+      lastName: 'Nom',
+      email: 'Email',
+      password: 'Mot de passe',
+      confirmPassword: 'Confirmer le mot de passe',
+      submit: 'Créer mon compte',
+      submitting: 'Création en cours...',
+      hasAccount: 'Déjà un compte ?',
+      login: 'Se connecter',
+      errors: {
+        firstNameRequired: 'Le prénom est requis',
+        lastNameRequired: 'Le nom est requis',
+        emailRequired: "L'email est requis",
+        emailInvalid: "Format d'email invalide",
+        passwordRequired: 'Le mot de passe est requis',
+        passwordWeak: 'Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial',
+        confirmRequired: 'La confirmation est requise',
+        passwordMismatch: 'Les mots de passe ne correspondent pas',
+        registrationFailed: "Échec de l'inscription. Veuillez réessayer.",
+      }
+    },
+    en: {
+      title: 'Create an account',
+      subtitle: 'Join AfroMarket and discover African businesses in Canada',
+      roleLabel: 'I want to…',
+      roleUser: 'Buy & explore',
+      roleUserDesc: 'Browse and discover African businesses',
+      roleMerchant: 'Sell my products',
+      roleMerchantDesc: 'Open my store and manage my products',
+      firstName: 'First name',
+      lastName: 'Last name',
+      email: 'Email',
+      password: 'Password',
+      confirmPassword: 'Confirm password',
+      submit: 'Create my account',
+      submitting: 'Creating...',
+      hasAccount: 'Already have an account?',
+      login: 'Sign in',
+      errors: {
+        firstNameRequired: 'First name is required',
+        lastNameRequired: 'Last name is required',
+        emailRequired: 'Email is required',
+        emailInvalid: 'Invalid email format',
+        passwordRequired: 'Password is required',
+        passwordWeak: 'Min. 8 characters, 1 uppercase, 1 number, 1 special char',
+        confirmRequired: 'Confirmation is required',
+        passwordMismatch: 'Passwords do not match',
+        registrationFailed: 'Registration failed. Please try again.',
+      }
+    }
+  }[locale];
+
   const validateForm = (): boolean => {
     const newErrors: RegisterFormErrors = {};
-
-    const trimmedFirstName = formData.firstName.trim();
-    if (!trimmedFirstName) {
-      newErrors.firstName = "Le prénom est requis";
-    }
-
-    const trimmedLastName = formData.lastName.trim();
-    if (!trimmedLastName) {
-      newErrors.lastName = "Le nom est requis";
-    }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const trimmedEmail = formData.email.trim();
-    if (!trimmedEmail) {
-      newErrors.email = "L'email est requis";
-    } else if (!emailRegex.test(trimmedEmail)) {
-      newErrors.email = "Format d'email invalide";
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_+=-]).{8,}$/;
+
+    if (!formData.firstName.trim()) newErrors.firstName = t.errors.firstNameRequired;
+    if (!formData.lastName.trim()) newErrors.lastName = t.errors.lastNameRequired;
+
+    if (!formData.email.trim()) {
+      newErrors.email = t.errors.emailRequired;
+    } else if (!emailRegex.test(formData.email.trim())) {
+      newErrors.email = t.errors.emailInvalid;
     }
 
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (!formData.password) {
-      newErrors.password = "Le mot de passe est requis";
+      newErrors.password = t.errors.passwordRequired;
     } else if (!passwordRegex.test(formData.password)) {
-      newErrors.password = "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial";
+      newErrors.password = t.errors.passwordWeak;
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "La confirmation du mot de passe est requise";
+      newErrors.confirmPassword = t.errors.confirmRequired;
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Les mots de passe ne correspondent pas";
+      newErrors.confirmPassword = t.errors.passwordMismatch;
     }
 
     setErrors(newErrors);
@@ -88,18 +141,12 @@ export default function RegisterPage() {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
-        password: formData.password
+        password: formData.password,
+        role,
       });
-      setTimeout(() => {
-        window.location.replace(`/${locale}`);
-      }, 100);
-    } catch (error: any) {
-      if (error.message.includes('exists')) {
-        setErrors({ email: "Cet email existe déjà" });
-      } else {
-        setErrors({ general: error.message || "L'inscription a échoué" });
-      }
-    } finally {
+      router.push(role === 'merchant' ? `/${locale}/merchant/dashboard` : `/${locale}`);
+    } catch (error) {
+      setErrors({ general: t.errors.registrationFailed });
       setIsSubmitting(false);
     }
   };
@@ -108,154 +155,210 @@ export default function RegisterPage() {
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-    if (errors.general) {
-      setErrors(prev => ({ ...prev, general: undefined }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+    if (errors.general) setErrors(prev => ({ ...prev, general: undefined }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
-            Inscription
-          </h1>
-          <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
-            Créez votre compte AfroMarket
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
+      <div className="max-w-md w-full">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href={`/${locale}`} className="inline-flex items-center gap-2 mb-8">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-heading font-bold text-2xl">A</span>
+            </div>
+          </Link>
+          <h1 className="font-heading text-3xl font-bold text-foreground mb-2">{t.title}</h1>
+          <p className="text-muted-foreground">{t.subtitle}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-          {/* First Name */}
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Prénom
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              value={formData.firstName}
-              onChange={handleChange('firstName')}
-              placeholder="Votre prénom"
-              aria-invalid={!!errors.firstName}
-              aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.firstName ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.firstName && <p id="firstName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.firstName}</p>}
-          </div>
-
-          {/* Last Name */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Nom
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              value={formData.lastName}
-              onChange={handleChange('lastName')}
-              placeholder="Votre nom"
-              aria-invalid={!!errors.lastName}
-              aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.lastName ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.lastName && <p id="lastName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.lastName}</p>}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={formData.email}
-              onChange={handleChange('email')}
-              placeholder="vous@exemple.com"
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? 'email-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.email ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.email && <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
-          </div>
-
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={formData.password}
-              onChange={handleChange('password')}
-              placeholder="••••••••"
-              aria-invalid={!!errors.password}
-              aria-describedby={errors.password ? 'password-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.password ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.password && <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Confirmer le mot de passe
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange('confirmPassword')}
-              placeholder="••••••••"
-              aria-invalid={!!errors.confirmPassword}
-              aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.confirmPassword ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
-              }`}
-              disabled={isSubmitting}
-            />
-            {errors.confirmPassword && <p id="confirmPassword-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
-          </div>
-
+        <form onSubmit={handleSubmit} className="card-dashboard space-y-5" data-testid="register-form">
           {/* General error */}
           {errors.general && (
-            <div role="alert" aria-live="assertive" className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg">
+            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl" data-testid="register-error">
               {errors.general}
             </div>
           )}
 
-          {/* Submit button */}
+          {/* Role selection */}
+          <div>
+            <p className="block text-sm font-medium text-foreground mb-3">{t.roleLabel}</p>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Regular user */}
+              <button
+                type="button"
+                onClick={() => setRole('user')}
+                data-testid="role-user"
+                className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all ${
+                  role === 'user'
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground'
+                }`}>
+                  <ShoppingBag className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold ${role === 'user' ? 'text-primary' : 'text-foreground'}`}>
+                    {t.roleUser}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t.roleUserDesc}</p>
+                </div>
+              </button>
+
+              {/* Merchant */}
+              <button
+                type="button"
+                onClick={() => setRole('merchant')}
+                data-testid="role-merchant"
+                className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 text-center transition-all ${
+                  role === 'merchant'
+                    ? 'border-primary bg-primary/5 shadow-sm'
+                    : 'border-border hover:border-primary/40 hover:bg-muted/30'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  role === 'merchant' ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground'
+                }`}>
+                  <Store className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold ${role === 'merchant' ? 'text-primary' : 'text-foreground'}`}>
+                    {t.roleMerchant}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t.roleMerchantDesc}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Name fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
+                {t.firstName}
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  type="text"
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange('firstName')}
+                  className={`input-default pl-12 ${errors.firstName ? 'border-red-500' : ''}`}
+                  disabled={isSubmitting}
+                  data-testid="register-firstname-input"
+                />
+              </div>
+              {errors.firstName && <p className="mt-1 text-xs text-red-600">{errors.firstName}</p>}
+            </div>
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
+                {t.lastName}
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                value={formData.lastName}
+                onChange={handleChange('lastName')}
+                className={`input-default ${errors.lastName ? 'border-red-500' : ''}`}
+                disabled={isSubmitting}
+                data-testid="register-lastname-input"
+              />
+              {errors.lastName && <p className="mt-1 text-xs text-red-600">{errors.lastName}</p>}
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              {t.email}
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="email"
+                id="email"
+                value={formData.email}
+                onChange={handleChange('email')}
+                className={`input-default pl-12 ${errors.email ? 'border-red-500' : ''}`}
+                disabled={isSubmitting}
+                data-testid="register-email-input"
+              />
+            </div>
+            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+              {t.password}
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={handleChange('password')}
+                className={`input-default pl-12 ${errors.password ? 'border-red-500' : ''}`}
+                disabled={isSubmitting}
+                data-testid="register-password-input"
+              />
+            </div>
+            {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+          </div>
+
+          {/* Confirm password */}
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-2">
+              {t.confirmPassword}
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <input
+                type="password"
+                id="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange('confirmPassword')}
+                className={`input-default pl-12 ${errors.confirmPassword ? 'border-red-500' : ''}`}
+                disabled={isSubmitting}
+                data-testid="register-confirm-input"
+              />
+            </div>
+            {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
+          </div>
+
+          {/* Submit */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full btn-primary flex items-center justify-center gap-2"
+            data-testid="register-submit-btn"
           >
-            {isSubmitting ? "Inscription en cours..." : "S'inscrire"}
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {t.submitting}
+              </>
+            ) : (
+              <>
+                {t.submit}
+                <ArrowRight className="w-5 h-5" />
+              </>
+            )}
           </button>
 
-          {/* Link */}
-          <div className="text-center text-sm">
-            <Link href={`/${locale}/auth/login`} className="text-blue-600 dark:text-blue-400 hover:underline">
-              Déjà un compte ? Connectez-vous
+          {/* Login link */}
+          <p className="text-center text-sm text-muted-foreground">
+            {t.hasAccount}{' '}
+            <Link href={`/${locale}/auth/login`} className="text-primary font-medium hover:underline" data-testid="login-link">
+              {t.login}
             </Link>
-          </div>
+          </p>
         </form>
       </div>
     </div>
