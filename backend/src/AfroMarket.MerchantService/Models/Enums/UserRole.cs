@@ -1,4 +1,4 @@
-namespace AfroMarket.MerchantService.Models.Enums;
+﻿namespace AfroMarket.MerchantService.Models.Enums;
 
 public enum UserRole
 {

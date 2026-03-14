@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Helpers;
+﻿using AfroMarket.MerchantService.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AfroMarket.MerchantService.Models.Entities;

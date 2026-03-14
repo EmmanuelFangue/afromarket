@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Models.DTOs;
+﻿using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Enums;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Extensions;
@@ -206,6 +206,18 @@ public class BusinessController : ControllerBase
             _logger.LogError(ex, "Error deleting business {BusinessId}", id);
             return StatusCode(500, new { error = _localizer["Error.DeleteBusiness"].Value });
         }
+    }
+
+    /// <summary>
+    /// Récupère toutes les catégories disponibles
+    /// </summary>
+    [HttpGet("categories")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<CategoryResponse>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<CategoryResponse>>> GetCategories()
+    {
+        var categories = await _businessService.GetCategoriesAsync();
+        return Ok(categories);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Data;
+﻿using AfroMarket.MerchantService.Data;
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;
@@ -26,6 +26,19 @@ public class BusinessService : IBusinessService
         _logger = logger;
         _localizer = localizer;
         _searchClient = searchClient;
+    }
+
+    public async Task<List<CategoryResponse>> GetCategoriesAsync()
+    {
+        return await _context.Categories
+            .OrderBy(c => c.Slug)
+            .Select(c => new CategoryResponse
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Slug = c.Slug
+            })
+            .ToListAsync();
     }
 
     public async Task<BusinessResponse> CreateBusinessAsync(CreateBusinessRequest request, Guid ownerId)
@@ -57,8 +70,8 @@ public class BusinessService : IBusinessService
         {
             Id = Guid.NewGuid(),
             OwnerId = ownerId,
-            Name = request.Name,
-            Description = request.Description,
+            NameTranslations = JsonSerializer.Serialize(request.Name),
+            DescriptionTranslations = JsonSerializer.Serialize(request.Description),
             Status = BusinessStatus.Draft,
             CategoryId = request.CategoryId,
             AddressId = address.Id,
@@ -107,14 +120,14 @@ public class BusinessService : IBusinessService
         }
 
         // Mettre à jour les champs si fournis
-        if (!string.IsNullOrWhiteSpace(request.Name))
+        if (request.Name != null && request.Name.Count > 0)
         {
-            business.Name = request.Name;
+            business.NameTranslations = JsonSerializer.Serialize(request.Name);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.Description))
+        if (request.Description != null && request.Description.Count > 0)
         {
-            business.Description = request.Description;
+            business.DescriptionTranslations = JsonSerializer.Serialize(request.Description);
         }
 
         if (request.CategoryId.HasValue)

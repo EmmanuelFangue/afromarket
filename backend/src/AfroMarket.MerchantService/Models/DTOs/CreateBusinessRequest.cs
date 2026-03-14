@@ -1,17 +1,21 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AfroMarket.MerchantService.Resources;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
 public class CreateBusinessRequest
 {
-    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Name.Required")]
-    [StringLength(200, MinimumLength = 2, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Name.Length")]
-    public string Name { get; set; } = string.Empty;
+    /// <summary>
+    /// Nom multilingue : {"fr": "...", "en": "..."}
+    /// </summary>
+    [Required]
+    public Dictionary<string, string> Name { get; set; } = new();
 
-    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Description.Required")]
-    [StringLength(2000, MinimumLength = 10, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Description.Length")]
-    public string Description { get; set; } = string.Empty;
+    /// <summary>
+    /// Description multilingue : {"fr": "...", "en": "..."}
+    /// </summary>
+    [Required]
+    public Dictionary<string, string> Description { get; set; } = new();
 
     [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Category.Required")]
     public Guid CategoryId { get; set; }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -30,6 +30,7 @@ export default function MerchantDashboard() {
   const locale = pathname.split('/')[1] || 'fr';
   const [businesses, setBusinesses] = useState<MerchantBusiness[]>([]);
   const [loadingBiz, setLoadingBiz] = useState(true);
+  const [bizError, setBizError] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Models.DTOs;
+﻿using AfroMarket.MerchantService.Models.DTOs;
 
 namespace AfroMarket.MerchantService.Services;
 

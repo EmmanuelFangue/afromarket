@@ -1,4 +1,4 @@
-namespace AfroMarket.MerchantService.Models.DTOs;
+﻿namespace AfroMarket.MerchantService.Models.DTOs;
 
 public class AddressDto
 {

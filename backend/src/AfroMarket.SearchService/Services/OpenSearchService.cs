@@ -1,4 +1,4 @@
-using OpenSearch.Client;
+﻿using OpenSearch.Client;
 using OpenSearch.Net;
 using AfroMarket.SearchService.Models;
 

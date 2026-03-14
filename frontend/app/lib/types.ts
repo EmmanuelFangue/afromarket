@@ -1,4 +1,4 @@
-export type BusinessStatus = 'Draft' | 'PendingValidation' | 'Published' | 'Rejected' | 'Suspended';
+﻿export type BusinessStatus = 'Draft' | 'PendingValidation' | 'Published' | 'Rejected' | 'Suspended';
 
 export interface BusinessAddress {
   street: string;

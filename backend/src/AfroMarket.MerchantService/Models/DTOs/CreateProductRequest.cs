@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AfroMarket.MerchantService.Resources;
 
 namespace AfroMarket.MerchantService.Models.DTOs;

@@ -1,4 +1,4 @@
-import { SearchRequest, SearchResponse, Business, MerchantBusiness, PaginatedResult, Category, CreateBusinessRequest, ProductSearchResponse, ProductDetail, BusinessProductsResponse } from './types';
+﻿import { SearchRequest, SearchResponse, Business, MerchantBusiness, PaginatedResult, Category, CreateBusinessRequest, ProductSearchResponse, ProductDetail, BusinessProductsResponse } from './types';
 import { AuthTokens } from './auth-types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';

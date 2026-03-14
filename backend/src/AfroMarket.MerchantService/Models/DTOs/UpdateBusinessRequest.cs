@@ -1,15 +1,19 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AfroMarket.MerchantService.Resources;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
 public class UpdateBusinessRequest
 {
-    [StringLength(200, MinimumLength = 2, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Name.Length")]
-    public string? Name { get; set; }
+    /// <summary>
+    /// Nom multilingue : {"fr": "...", "en": "..."}
+    /// </summary>
+    public Dictionary<string, string>? Name { get; set; }
 
-    [StringLength(2000, MinimumLength = 10, ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Business.Description.Length")]
-    public string? Description { get; set; }
+    /// <summary>
+    /// Description multilingue : {"fr": "...", "en": "..."}
+    /// </summary>
+    public Dictionary<string, string>? Description { get; set; }
 
     public Guid? CategoryId { get; set; }
 

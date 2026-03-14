@@ -1,4 +1,4 @@
-import { LoginCredentials, AuthTokens, User, RegisterData } from './auth-types';
+﻿import { LoginCredentials, AuthTokens, User, RegisterData } from './auth-types';
 import { decodeJwt } from 'jose';
 
 const KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8080';

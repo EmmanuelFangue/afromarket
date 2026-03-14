@@ -1,4 +1,4 @@
-namespace AfroMarket.SearchService.Services;
+﻿namespace AfroMarket.SearchService.Services;
 
 public class IndexingBackgroundService : BackgroundService
 {

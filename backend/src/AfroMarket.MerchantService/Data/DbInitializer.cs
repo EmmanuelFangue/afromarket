@@ -1,4 +1,4 @@
-using AfroMarket.MerchantService.Models.Entities;
+﻿using AfroMarket.MerchantService.Models.Entities;
 using AfroMarket.MerchantService.Models.Enums;
 
 namespace AfroMarket.MerchantService.Data;

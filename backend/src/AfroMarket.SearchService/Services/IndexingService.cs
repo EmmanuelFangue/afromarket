@@ -1,4 +1,4 @@
-using AfroMarket.SearchService.Models;
+﻿using AfroMarket.SearchService.Models;
 
 namespace AfroMarket.SearchService.Services;
 

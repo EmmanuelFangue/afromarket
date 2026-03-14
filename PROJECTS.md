@@ -1,4 +1,4 @@
-
+﻿
 # Projet GitHub — AfroMarket
 
 - Board (Kanban): Backlog → In Progress → In Review → Done

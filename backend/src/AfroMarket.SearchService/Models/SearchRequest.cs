@@ -1,4 +1,4 @@
-namespace AfroMarket.SearchService.Models;
+﻿namespace AfroMarket.SearchService.Models;
 
 public class BusinessSearchRequest
 {
