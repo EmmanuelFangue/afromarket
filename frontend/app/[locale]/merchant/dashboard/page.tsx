@@ -41,8 +41,8 @@ export default function MerchantDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       getMyBusinesses()
-        .then(setBusinesses)
-        .catch(() => {})
+        .then(data => { setBusinesses(data); setBizError(false); })
+        .catch(() => setBizError(true))
         .finally(() => setLoadingBiz(false));
     }
   }, [isAuthenticated]);
@@ -83,6 +83,10 @@ export default function MerchantDashboard() {
           </div>
           {loadingBiz ? (
             <p className="text-gray-500 text-sm">Chargement...</p>
+          ) : bizError ? (
+            <div className="p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300">Impossible de charger vos commerces. Vérifiez que vous êtes connecté.</p>
+            </div>
           ) : businesses.length === 0 ? (
             <div className="text-center py-6">
               <p className="text-gray-500 dark:text-gray-400 mb-3">
