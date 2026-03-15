@@ -6,6 +6,7 @@ public class SearchResponse
     public long TotalResults { get; set; }
     public int Page { get; set; }
     public int PageSize { get; set; }
+    public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)TotalResults / PageSize) : 0;
     public Dictionary<string, List<FacetItem>> Facets { get; set; } = new();
 }
 

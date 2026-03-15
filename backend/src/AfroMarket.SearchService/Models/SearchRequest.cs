@@ -8,6 +8,8 @@ public class BusinessSearchRequest
     public GeoSearchParams? GeoSearch { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
+    // Allowed values: relevance | name_asc | name_desc | newest
+    public string Sort { get; set; } = "relevance";
 }
 
 public class GeoSearchParams
