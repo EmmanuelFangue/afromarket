@@ -69,16 +69,19 @@ function getBusinessDescription(biz: Business, locale: string): string {
 }
 
 interface PageProps {
-  params: { locale: string; id: string };
-  searchParams: { page?: string; sort?: string };
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 export default async function BusinessDetailPage({ params, searchParams }: PageProps) {
-  const locale = params.locale || 'fr';
-  const page = Number(searchParams?.page ?? 1);
-  const sort = searchParams?.sort ?? 'relevance';
+  const { locale: localeParam, id } = await params;
+  const sp = await searchParams;
 
-  const business = await fetchBusiness(params.id);
+  const locale = localeParam || 'fr';
+  const page = Number(sp?.page ?? 1);
+  const sort = sp?.sort ?? 'relevance';
+
+  const business = await fetchBusiness(id);
   if (!business) notFound();
 
   const initialProducts = await fetchProducts(business.id, page, sort);
