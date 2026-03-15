@@ -1,26 +1,51 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getBusinessById, getProductsByBusiness } from '../../../lib/api';
 import { Business, ProductDetail } from '../../../lib/types';
 import ContactForm from '../../../components/ContactForm';
+import { ArrowLeft, MapPin, Phone, Mail, Globe, Tag, Package, ExternalLink, Store } from 'lucide-react';
 
 export default function BusinessDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const locale = useLocale();
-  const t = useTranslations('businessDetails');
-  const tProduct = useTranslations('productDetails');
+  const pathname = usePathname();
+  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [products, setProducts] = useState<ProductDetail[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
+
+  const t = {
+    fr: {
+      backToSearch: 'Retour à la recherche',
+      contact: 'Contact',
+      website: 'Visiter le site web',
+      notFound: 'Commerce non trouvé',
+      loading: 'Chargement...',
+      error: 'Impossible de charger ce commerce',
+      products: { title: 'Produits proposés', noProducts: 'Aucun produit disponible pour ce commerce.', loading: 'Chargement des produits...' },
+      available: 'Disponible',
+      unavailable: 'Indisponible',
+      soldBy: 'Vendu par',
+    },
+    en: {
+      backToSearch: 'Back to search',
+      contact: 'Contact',
+      website: 'Visit website',
+      notFound: 'Business not found',
+      loading: 'Loading...',
+      error: 'Failed to load this business',
+      products: { title: 'Products offered', noProducts: 'No products available for this business.', loading: 'Loading products...' },
+      available: 'Available',
+      unavailable: 'Unavailable',
+      soldBy: 'Sold by',
+    }
+  }[locale];
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -32,13 +57,12 @@ export default function BusinessDetailPage() {
         const data = await getBusinessById(params.id as string, abortController.signal);
 
         if (!data) {
-          setError(t('notFound'));
+          setError(t.notFound);
           return;
         }
 
         setBusiness(data);
 
-        // Fetch products in parallel once we have the business id
         setProductsLoading(true);
         try {
           const prodData = await getProductsByBusiness(params.id as string, 1, 20, abortController.signal);
@@ -56,8 +80,7 @@ export default function BusinessDetailPage() {
         }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
-          console.error('Error fetching business:', err);
-          setError(t('error'));
+          setError(t.error);
         }
       } finally {
         if (!abortController.signal.aborted) {
@@ -70,37 +93,31 @@ export default function BusinessDetailPage() {
       fetchData();
     }
 
-    return () => {
-      abortController.abort();
-    };
-  }, [params.id, t]);
+    return () => abortController.abort();
+  }, [params.id]);
 
-  const getBusinessName = (business: Business): string => {
+  const getBusinessName = (biz: Business): string => {
     try {
-      const translations = typeof business.nameTranslations === 'string'
-        ? JSON.parse(business.nameTranslations)
-        : business.nameTranslations;
-      return translations[locale] || translations['fr'] || business.name || '';
+      const tr = typeof biz.nameTranslations === 'string' ? JSON.parse(biz.nameTranslations) : biz.nameTranslations;
+      return tr[locale] || tr['fr'] || biz.name || '';
     } catch {
-      return business.name || '';
+      return biz.name || '';
     }
   };
 
-  const getBusinessDescription = (business: Business): string => {
+  const getBusinessDescription = (biz: Business): string => {
     try {
-      const translations = typeof business.descriptionTranslations === 'string'
-        ? JSON.parse(business.descriptionTranslations)
-        : business.descriptionTranslations;
-      return translations[locale] || translations['fr'] || business.description || '';
+      const tr = typeof biz.descriptionTranslations === 'string' ? JSON.parse(biz.descriptionTranslations) : biz.descriptionTranslations;
+      return tr[locale] || tr['fr'] || biz.description || '';
     } catch {
-      return business.description || '';
+      return biz.description || '';
     }
   };
 
   const getProductTitle = (product: ProductDetail): string => {
     try {
-      const translations = JSON.parse(product.titleTranslations);
-      return translations[locale] || translations['fr'] || product.title || '';
+      const tr = JSON.parse(product.titleTranslations);
+      return tr[locale] || tr['fr'] || product.title || '';
     } catch {
       return product.title || '';
     }
@@ -108,7 +125,7 @@ export default function BusinessDetailPage() {
 
   const formatPrice = (price: number, currency: string): string => {
     try {
-      return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(price);
+      return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', { style: 'currency', currency }).format(price);
     } catch {
       return `${price} ${currency}`;
     }
@@ -116,15 +133,20 @@ export default function BusinessDetailPage() {
 
   const getFirstImageUrl = (product: ProductDetail): string | null => {
     if (!product.media || product.media.length === 0) return null;
-    const sorted = [...product.media].sort((a, b) => a.orderIndex - b.orderIndex);
-    return sorted[0].url;
+    return [...product.media].sort((a, b) => a.orderIndex - b.orderIndex)[0].url;
   };
 
   if (loading) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <div className="text-center py-12">
-          <div className="text-gray-600 dark:text-gray-400">{t('loading')}</div>
+      <div className="min-h-screen bg-background">
+        {/* Skeleton Hero */}
+        <div className="h-64 md:h-80 bg-stone-200 animate-pulse" />
+        <div className="max-w-4xl mx-auto px-4 -mt-24 relative z-10">
+          <div className="card-business p-8 animate-pulse space-y-4">
+            <div className="h-10 bg-stone-200 rounded-xl w-3/4" />
+            <div className="h-4 bg-stone-200 rounded-xl w-1/2" />
+            <div className="h-24 bg-stone-200 rounded-xl" />
+          </div>
         </div>
       </div>
     );
@@ -132,182 +154,225 @@ export default function BusinessDetailPage() {
 
   if (error || !business) {
     return (
-      <div className="w-full max-w-4xl mx-auto p-6">
-        <button
-          onClick={() => router.back()}
-          className="mb-6 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2"
-        >
-          ← {t('backToSearch')}
-        </button>
-        <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-6 rounded-lg">
-          {error || t('notFound')}
+      <div className="min-h-screen bg-background py-8">
+        <div className="max-w-4xl mx-auto px-4">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-6 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            {t.backToSearch}
+          </button>
+          <div className="card-dashboard text-center py-16">
+            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Store className="w-8 h-8 text-red-400" />
+            </div>
+            <p className="text-red-500">{error || t.notFound}</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  const businessName = getBusinessName(business);
+  const businessDescription = getBusinessDescription(business);
+
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
-      {/* Back button */}
-      <button
-        onClick={() => router.back()}
-        className="mb-6 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center gap-2"
-      >
-        ← {t('backToSearch')}
-      </button>
+    <div className="min-h-screen bg-background">
+      {/* Hero Banner */}
+      <div className="relative h-64 md:h-80 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231B4D3E' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+      </div>
 
-      {/* Business header */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8 mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-          {getBusinessName(business)}
-        </h1>
+      <div className="max-w-4xl mx-auto px-4 -mt-32 relative z-10 pb-12">
+        {/* Back button */}
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors drop-shadow"
+          data-testid="back-button"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          {t.backToSearch}
+        </button>
 
-        <div className="flex flex-wrap gap-2 mb-6">
-          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-            {business.categoryName}
-          </span>
-          <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
-            {business.city}
-          </span>
-        </div>
-
-        <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
-          {getBusinessDescription(business)}
-        </p>
-
-        {/* Contact section */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            {t('contact')}
-          </h2>
-
-          <div className="space-y-3">
-            {business.address && (
-              <div className="flex items-start gap-3">
-                <svg className="w-5 h-5 text-gray-500 dark:text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="text-gray-700 dark:text-gray-300">{business.address}</span>
-              </div>
-            )}
-
-            {business.phone && (
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <a href={`tel:${business.phone}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {business.phone}
-                </a>
-              </div>
-            )}
-
-            {business.email && (
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <a href={`mailto:${business.email}`} className="text-blue-600 dark:text-blue-400 hover:underline">
-                  {business.email}
-                </a>
-              </div>
-            )}
-
-            {business.website && (
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                </svg>
-                {business.website.match(/^https?:\/\//) ? (
-                  <a href={business.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">
-                    {t('website')}
-                  </a>
-                ) : (
-                  <span className="text-gray-600 dark:text-gray-400">{business.website}</span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Tags */}
-        {business.tags && business.tags.length > 0 && (
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-            <div className="flex flex-wrap gap-2">
-              {business.tags.map((tag, index) => (
-                <span key={index} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm">
-                  #{tag}
+        {/* Main Card */}
+        <div className="card-business p-8 mb-6 animate-fade-in" data-testid="business-card">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+            <div className="flex-1">
+              <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-3" data-testid="business-name">
+                {businessName}
+              </h1>
+              <div className="flex flex-wrap gap-2">
+                <span className="inline-flex items-center px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                  {business.categoryName}
                 </span>
-              ))}
+                <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-secondary/10 text-secondary-foreground rounded-full text-sm font-medium">
+                  <MapPin className="w-4 h-4" />
+                  {business.city}
+                </span>
+              </div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Products Section */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
-          {t('products.title')}
-        </h2>
+          {/* Description */}
+          {businessDescription && (
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+              {businessDescription}
+            </p>
+          )}
 
-        {productsLoading && (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            {t('products.loading')}
-          </div>
-        )}
-
-        {!productsLoading && products.length === 0 && (
-          <p className="text-gray-500 dark:text-gray-400">{t('products.noProducts')}</p>
-        )}
-
-        {!productsLoading && products.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => {
-              const imageUrl = getFirstImageUrl(product);
-              const title = getProductTitle(product);
-              return (
-                <Link
-                  key={product.id}
-                  href={`/${locale}/product/${product.id}`}
-                  className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+          {/* Contact Section */}
+          <div className="border-t border-border pt-6">
+            <h2 className="font-heading text-xl font-semibold text-foreground mb-4">{t.contact}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {business.address && (
+                <div className="flex items-start gap-3 p-4 bg-stone-50 rounded-xl">
+                  <MapPin className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-foreground text-sm">{business.address}</span>
+                </div>
+              )}
+              {business.phone && (
+                <a
+                  href={`tel:${business.phone}`}
+                  className="flex items-center gap-3 p-4 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors group"
+                  data-testid="business-phone"
                 >
-                  {imageUrl ? (
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 overflow-hidden">
-                      <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
-                    </div>
-                  ) : (
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-2">{title}</h3>
-                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                      {formatPrice(product.price, product.currency)}
-                    </p>
-                    <span className={`mt-2 inline-block text-xs px-2 py-0.5 rounded-full ${
-                      product.isAvailable
-                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                        : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
-                    }`}>
-                      {product.isAvailable ? tProduct('available') : tProduct('unavailable')}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
+                  <Phone className="w-5 h-5 text-primary group-hover:text-primary/80" />
+                  <span className="text-primary font-medium text-sm">{business.phone}</span>
+                </a>
+              )}
+              {business.email && (
+                <a
+                  href={`mailto:${business.email}`}
+                  className="flex items-center gap-3 p-4 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors group"
+                  data-testid="business-email"
+                >
+                  <Mail className="w-5 h-5 text-primary group-hover:text-primary/80" />
+                  <span className="text-primary font-medium text-sm">{business.email}</span>
+                </a>
+              )}
+              {business.website && business.website.match(/^https?:\/\//) && (
+                <a
+                  href={business.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-4 bg-stone-50 rounded-xl hover:bg-stone-100 transition-colors group"
+                  data-testid="business-website"
+                >
+                  <Globe className="w-5 h-5 text-primary group-hover:text-primary/80" />
+                  <span className="text-primary font-medium text-sm flex-1">{t.website}</span>
+                  <ExternalLink className="w-4 h-4 text-primary/60" />
+                </a>
+              )}
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Contact Form */}
-      <ContactForm
-        businessId={business.id}
-        businessName={getBusinessName(business)}
-      />
+          {/* Tags */}
+          {business.tags && business.tags.length > 0 && (
+            <div className="border-t border-border pt-6 mt-6">
+              <div className="flex flex-wrap gap-2">
+                {business.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm"
+                  >
+                    <Tag className="w-3 h-3" />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Products Section */}
+        <div className="card-dashboard mb-6" data-testid="products-section">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="font-heading text-xl font-semibold text-foreground">{t.products.title}</h2>
+          </div>
+
+          {productsLoading && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="rounded-2xl overflow-hidden border border-border animate-pulse">
+                  <div className="aspect-video bg-stone-200" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-stone-200 rounded w-3/4" />
+                    <div className="h-5 bg-stone-200 rounded w-1/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!productsLoading && products.length === 0 && (
+            <div className="text-center py-10">
+              <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Package className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground">{t.products.noProducts}</p>
+            </div>
+          )}
+
+          {!productsLoading && products.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {products.map((product) => {
+                const imageUrl = getFirstImageUrl(product);
+                const title = getProductTitle(product);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/${locale}/product/${product.id}`}
+                    className="group border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all bg-white"
+                    data-testid={`product-card-${product.id}`}
+                  >
+                    {/* Image */}
+                    {imageUrl ? (
+                      <div className="aspect-video bg-stone-100 overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    ) : (
+                      <div className="aspect-video bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center">
+                        <Package className="w-10 h-10 text-muted-foreground/40" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-foreground mb-1 line-clamp-2 text-sm">{title}</h3>
+                      <p className="font-bold text-primary text-lg">
+                        {formatPrice(product.price, product.currency)}
+                      </p>
+                      <span className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        product.isAvailable
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-stone-100 text-stone-600'
+                      }`}>
+                        {product.isAvailable ? t.available : t.unavailable}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Contact Form */}
+        <ContactForm businessId={business.id} businessName={businessName} />
+      </div>
     </div>
   );
 }

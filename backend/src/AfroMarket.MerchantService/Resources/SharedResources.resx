@@ -59,6 +59,23 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
 
+  <!-- Validation Messages - Auth -->
+  <data name="Auth.Email.Required" xml:space="preserve">
+    <value>L'email est requis</value>
+  </data>
+  <data name="Auth.Email.Invalid" xml:space="preserve">
+    <value>Le format de l'email est invalide</value>
+  </data>
+  <data name="Auth.Password.Required" xml:space="preserve">
+    <value>Le mot de passe est requis</value>
+  </data>
+  <data name="Auth.FirstName.Required" xml:space="preserve">
+    <value>Le prénom est requis</value>
+  </data>
+  <data name="Auth.LastName.Required" xml:space="preserve">
+    <value>Le nom est requis</value>
+  </data>
+
   <!-- Validation Messages - Business -->
   <data name="Business.Name.Required" xml:space="preserve">
     <value>Le nom du commerce est requis</value>
