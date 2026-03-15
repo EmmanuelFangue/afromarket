@@ -90,6 +90,7 @@ export interface SearchRequest {
   };
   page?: number;
   pageSize?: number;
+  sort?: string;
 }
 
 export interface FacetItem {
@@ -102,6 +103,7 @@ export interface SearchResponse {
   totalResults: number;
   page: number;
   pageSize: number;
+  totalPages: number;
   facets: {
     [key: string]: FacetItem[];
   };

@@ -25,6 +25,9 @@ public class Business
     public string Email { get; set; } = string.Empty;
     public string Website { get; set; } = string.Empty;
 
+    // Sortable name keyword field (populated from NameTranslations fr value)
+    public string NameKeyword { get; set; } = string.Empty;
+
     // Metadata
     public List<string> Tags { get; set; } = new();
     public bool IsPublished { get; set; } = true; // Always true from Published endpoint

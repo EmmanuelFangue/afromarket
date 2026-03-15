@@ -80,7 +80,7 @@ public class IndexingService
 
     private Business MapToSearchBusiness(BusinessDto dto)
     {
-        return new Business
+        var biz = new Business
         {
             Id = dto.Id.ToString(),
             NameTranslations = dto.NameTranslations,
@@ -104,6 +104,8 @@ public class IndexingService
             UpdatedAt = dto.UpdatedAt,
             PublishedAt = dto.PublishedAt
         };
+        biz.NameKeyword = biz.GetName("fr");
+        return biz;
     }
 
     public async Task InitialIndexProductsAsync()

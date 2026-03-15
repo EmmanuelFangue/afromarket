@@ -42,7 +42,8 @@ public class OpenSearchService : ISearchService
             .From((page - 1) * pageSize)
             .Size(pageSize)
             .Query(q => BuildQuery(q, request))
-            .Aggregations(a => BuildAggregations(a));
+            .Aggregations(a => BuildAggregations(a))
+            .Sort(s => BuildSort(s, request.Sort));
 
         var response = await _client.SearchAsync<Business>(searchDescriptor);
 
@@ -118,6 +119,17 @@ public class OpenSearchService : ISearchService
         return q.Bool(b => b.Must(queries.ToArray()));
     }
 
+    private SortDescriptor<Business> BuildSort(SortDescriptor<Business> s, string? sort)
+    {
+        return sort switch
+        {
+            "name_asc"  => s.Ascending(b => b.NameKeyword),
+            "name_desc" => s.Descending(b => b.NameKeyword),
+            "newest"    => s.Descending(b => b.PublishedAt),
+            _           => s.Descending(SortSpecialField.Score), // "relevance" default
+        };
+    }
+
     private AggregationContainerDescriptor<Business> BuildAggregations(AggregationContainerDescriptor<Business> a)
     {
         return a
@@ -191,7 +203,13 @@ public class OpenSearchService : ISearchService
         var existsResponse = await _client.Indices.ExistsAsync(IndexName);
         if (existsResponse.Exists)
         {
-            _logger.LogInformation("Index {IndexName} already exists", IndexName);
+            _logger.LogInformation("Index {IndexName} already exists — ensuring mapping is up to date", IndexName);
+            await _client.Indices.PutMappingAsync<Business>(m => m
+                .Index(IndexName)
+                .Properties(p => p
+                    .Keyword(k => k.Name(n => n.NameKeyword))
+                )
+            );
             return true;
         }
 
@@ -209,6 +227,7 @@ public class OpenSearchService : ISearchService
                     .Text(t => t.Name(n => n.DescriptionTranslations).Analyzer("standard"))
                     .Keyword(k => k.Name(n => n.CategoryId))
                     .Keyword(k => k.Name(n => n.CategoryName))
+                    .Keyword(k => k.Name(n => n.NameKeyword))
                     .Keyword(k => k.Name(n => n.City))
                     .Keyword(k => k.Name(n => n.Province))
                     .GeoPoint(g => g.Name(n => n.Location)) // CRITICAL for geo queries
