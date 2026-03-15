@@ -33,6 +33,13 @@ builder.Services.AddHttpClient<ISearchServiceClient, SearchServiceClient>(client
     client.Timeout = TimeSpan.FromSeconds(5);
 });
 
+// Register KeycloakAdminService for user registration
+builder.Services.AddHttpClient("KeycloakAdmin", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+builder.Services.AddScoped<IKeycloakAdminService, KeycloakAdminService>();
+
 // Configure Localization
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
