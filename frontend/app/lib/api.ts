@@ -224,6 +224,15 @@ export async function approveBusiness(id: string): Promise<MerchantBusiness> {
   return response.json();
 }
 
+export async function getAdminProductsByBusiness(businessId: string, pageSize = 5): Promise<BusinessProductsResponse> {
+  const params = new URLSearchParams({ businessId, page: '1', pageSize: String(pageSize) });
+  const response = await fetch(`${API_URL}/api/products?${params}`, {
+    headers: getAuthHeader(),
+  });
+  if (!response.ok) return { items: [], totalCount: 0, page: 1, pageSize, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+  return response.json();
+}
+
 export async function rejectBusiness(id: string, rejectionReason: string): Promise<MerchantBusiness> {
   const response = await fetch(`${API_URL}/api/business/${id}/reject`, {
     method: 'POST',
