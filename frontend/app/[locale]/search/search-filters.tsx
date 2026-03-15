@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { Category, FacetItem } from '../../lib/types';
@@ -48,23 +48,35 @@ export default function SearchFilters({
   const [sort, setSort] = useState(initialSort);
   const [showFilters, setShowFilters] = useState(false);
 
+  // Sync local state when the URL changes (e.g. via pagination Links in the Server Component)
+  useEffect(() => {
+    setQ(initialQ);
+    setCategory(initialCategory);
+    setCity(initialCity);
+    setSort(initialSort);
+  }, [initialQ, initialCategory, initialCity, initialSort]);
+
   const t = {
     fr: {
       placeholder: 'Rechercher un restaurant, une épicerie…',
       search: 'Rechercher',
-      filters: 'Filtres',
+      toggleFilters: 'Afficher les filtres',
       allCategories: 'Toutes les catégories',
       allCities: 'Toutes les villes',
-      sortLabel: 'Trier',
+      sortLabel: 'Trier les résultats',
+      categoryLabel: 'Filtrer par catégorie',
+      cityLabel: 'Filtrer par ville',
       clearFilters: 'Effacer les filtres',
     },
     en: {
       placeholder: 'Search for a restaurant, grocery…',
       search: 'Search',
-      filters: 'Filters',
+      toggleFilters: 'Show filters',
       allCategories: 'All categories',
       allCities: 'All cities',
-      sortLabel: 'Sort',
+      sortLabel: 'Sort results',
+      categoryLabel: 'Filter by category',
+      cityLabel: 'Filter by city',
       clearFilters: 'Clear filters',
     },
   }[locale];
@@ -116,7 +128,7 @@ export default function SearchFilters({
       {/* Search bar */}
       <form onSubmit={handleSubmit} className="flex gap-3">
         <div className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" aria-hidden="true" />
           <input
             type="text"
             value={q}
@@ -126,7 +138,8 @@ export default function SearchFilters({
             data-testid="search-input"
           />
         </div>
-        {/* Mobile filter toggle */}
+
+        {/* Mobile filter toggle — icon only, aria-label required */}
         <button
           type="button"
           onClick={() => setShowFilters((f) => !f)}
@@ -137,12 +150,15 @@ export default function SearchFilters({
           }`}
           data-testid="filters-toggle"
           aria-expanded={showFilters}
+          aria-label={t.toggleFilters}
         >
-          <SlidersHorizontal className="w-4 h-4" />
+          <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
         </button>
+
+        {/* Submit button — sr-only text keeps it accessible when icon-only on mobile */}
         <button type="submit" className="btn-primary" data-testid="search-submit">
-          <span className="hidden sm:inline">{t.search}</span>
-          <Search className="w-5 h-5 sm:hidden" />
+          <span className="sr-only sm:not-sr-only sm:inline">{t.search}</span>
+          <Search className="w-5 h-5 sm:hidden" aria-hidden="true" />
         </button>
       </form>
 
@@ -157,6 +173,7 @@ export default function SearchFilters({
           onChange={(e) => handleCategoryChange(e.target.value)}
           className="text-sm border border-border rounded-xl px-3 py-2 bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           data-testid="category-filter"
+          aria-label={t.categoryLabel}
         >
           <option value="">{t.allCategories}</option>
           {categories.map((cat) => (
@@ -166,13 +183,14 @@ export default function SearchFilters({
           ))}
         </select>
 
-        {/* City — only show if facets returned cities */}
+        {/* City — only shown when facets returned cities */}
         {cityFacets.length > 0 && (
           <select
             value={city}
             onChange={(e) => handleCityChange(e.target.value)}
             className="text-sm border border-border rounded-xl px-3 py-2 bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             data-testid="city-filter"
+            aria-label={t.cityLabel}
           >
             <option value="">{t.allCities}</option>
             {cityFacets.map((f) => (
@@ -186,12 +204,13 @@ export default function SearchFilters({
 
         {/* Sort */}
         <div className="flex items-center gap-2 ml-auto">
-          <SlidersHorizontal className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <SlidersHorizontal className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
           <select
             value={sort}
             onChange={(e) => handleSortChange(e.target.value)}
             className="text-sm border border-border rounded-xl px-3 py-2 bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             data-testid="sort-filter"
+            aria-label={t.sortLabel}
           >
             {(SORT_OPTIONS[locale] ?? SORT_OPTIONS['fr']).map(([val, label]) => (
               <option key={val} value={val}>
@@ -208,7 +227,7 @@ export default function SearchFilters({
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
             data-testid="clear-filters"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
             {t.clearFilters}
           </button>
         )}

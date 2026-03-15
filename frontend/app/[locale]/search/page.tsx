@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { MapPin, Search, ChevronRight, AlertCircle } from 'lucide-react';
 import SearchFilters from './search-filters';
 import { Category, SearchResponse, FacetItem } from '../../lib/types';
@@ -80,6 +81,18 @@ export default async function SearchPage({ params, searchParams }: PageProps) {
   const results = searchResult?.results ?? [];
   const totalResults = searchResult?.totalResults ?? 0;
   const totalPages = searchResult?.totalPages ?? Math.ceil(totalResults / PAGE_SIZE);
+
+  // Redirect to last page if the requested page exceeds available pages
+  if (searchResult !== null && totalPages > 0 && page > totalPages) {
+    const rp = new URLSearchParams();
+    if (q) rp.set('q', q);
+    if (category) rp.set('category', category);
+    if (city) rp.set('city', city);
+    if (sort !== 'relevance') rp.set('sort', sort);
+    rp.set('page', String(totalPages));
+    redirect(`/${locale}/search?${rp.toString()}`);
+  }
+
   const cityFacets: FacetItem[] = searchResult?.facets?.cities ?? [];
 
   const t = {

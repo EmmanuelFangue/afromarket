@@ -166,6 +166,10 @@ public class OpenSearchService : ISearchService
 
     public async Task<bool> IndexBusinessAsync(Business business)
     {
+        // Ensure NameKeyword is always populated regardless of caller payload
+        if (string.IsNullOrEmpty(business.NameKeyword))
+            business.NameKeyword = business.GetName("fr");
+
         var response = await _client.IndexAsync(business, i => i
             .Index(IndexName)
             .Id(business.Id)
@@ -204,12 +208,17 @@ public class OpenSearchService : ISearchService
         if (existsResponse.Exists)
         {
             _logger.LogInformation("Index {IndexName} already exists — ensuring mapping is up to date", IndexName);
-            await _client.Indices.PutMappingAsync<Business>(m => m
+            var putMappingResponse = await _client.Indices.PutMappingAsync<Business>(m => m
                 .Index(IndexName)
                 .Properties(p => p
                     .Keyword(k => k.Name(n => n.NameKeyword))
                 )
             );
+            if (!putMappingResponse.IsValid)
+            {
+                _logger.LogError("Failed to update mapping for index {IndexName}: {Error}", IndexName, putMappingResponse.DebugInformation);
+                return false;
+            }
             return true;
         }
 
