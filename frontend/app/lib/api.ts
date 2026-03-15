@@ -115,13 +115,15 @@ export async function getPublicProductById(
 export async function getProductsByBusiness(
   businessId: string,
   page: number = 1,
-  pageSize: number = 20,
-  signal?: AbortSignal
+  pageSize: number = 12,
+  signal?: AbortSignal,
+  sort: string = 'relevance'
 ): Promise<BusinessProductsResponse> {
   const params = new URLSearchParams({
     businessId,
     page: String(page),
     pageSize: String(pageSize),
+    sort,
   });
 
   const response = await fetch(`${API_URL}/api/products?${params}`, {

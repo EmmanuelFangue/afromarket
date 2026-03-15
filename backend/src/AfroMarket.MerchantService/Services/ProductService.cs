@@ -224,7 +224,8 @@ public class ProductService : IProductService
         int page = 1,
         int pageSize = 20,
         ProductStatus? statusFilter = null,
-        string? searchQuery = null)
+        string? searchQuery = null,
+        string? sort = null)
     {
         if (page < 1) page = 1;
         if (pageSize < 1 || pageSize > 100) pageSize = 20;
@@ -247,9 +248,17 @@ public class ProductService : IProductService
                 (p.SKU != null && p.SKU.ToLower().Contains(q)));
         }
 
+        query = sort switch
+        {
+            "name_asc"   => query.OrderBy(p => p.Title),
+            "name_desc"  => query.OrderByDescending(p => p.Title),
+            "price_asc"  => query.OrderBy(p => p.Price),
+            "price_desc" => query.OrderByDescending(p => p.Price),
+            _            => query.OrderByDescending(p => p.CreatedAt),
+        };
+
         var totalCount = await query.CountAsync();
         var products = await query
-            .OrderByDescending(p => p.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
