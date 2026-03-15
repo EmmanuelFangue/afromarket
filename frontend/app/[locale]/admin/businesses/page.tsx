@@ -81,15 +81,16 @@ export default function AdminBusinessesPage() {
       let data: PaginatedResult<MerchantBusiness>;
       if (tab === 'pending') {
         data = await getAdminPendingBusinesses(page, 20);
+        // Reuse totalCount from the main response — no extra call needed
+        setPendingCount(data.totalCount);
       } else {
         const status = tab === 'all' ? undefined : tab === 'published' ? 'Published' : 'Rejected';
-        data = await getAdminAllBusinesses(page, 20, status);
+        [data] = await Promise.all([
+          getAdminAllBusinesses(page, 20, status),
+          getAdminPendingBusinesses(1, 1).then(p => setPendingCount(p.totalCount)),
+        ]);
       }
       setResult(data);
-
-      // Get pending count for badge
-      const pending = await getAdminPendingBusinesses(1, 1);
-      setPendingCount(pending.totalCount);
     } catch {
       // ignore
     } finally {
