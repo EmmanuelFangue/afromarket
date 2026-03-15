@@ -146,7 +146,8 @@ export default function RegisterPage() {
       });
       router.push(role === 'merchant' ? `/${locale}/merchant/dashboard` : `/${locale}`);
     } catch (error) {
-      setErrors({ general: t.errors.registrationFailed });
+      const msg = error instanceof Error ? error.message : t.errors.registrationFailed;
+      setErrors({ general: msg });
       setIsSubmitting(false);
     }
   };

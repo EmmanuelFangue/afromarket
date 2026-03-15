@@ -50,29 +50,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function restoreSession() {
-    console.log('[AuthContext] Starting session restoration...');
     try {
       if (typeof window === 'undefined') {
-        console.log('[AuthContext] Server-side render, skipping restore');
         setIsLoading(false);
         return;
       }
 
       const stored = localStorage.getItem(STORAGE_KEY);
       if (!stored) {
-        console.log('[AuthContext] No stored session found');
         setIsLoading(false);
         return;
       }
 
       const tokens: AuthTokens = JSON.parse(stored);
-      console.log('[AuthContext] Found stored tokens, expires at:', new Date(tokens.expiresAt).toISOString());
 
       if (Date.now() >= tokens.expiresAt) {
-        console.log('[AuthContext] Token expired, attempting refresh...');
         try {
           const newTokens = await authApi.refreshAccessToken(tokens.refreshToken);
-          console.log('[AuthContext] Token refresh successful');
           saveTokens(newTokens);
           const refreshedUser = parseUserFromToken(newTokens.accessToken);
           setUser(refreshedUser);
@@ -83,7 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
       } else {
-        console.log('[AuthContext] Token still valid, restoring user');
         const restoredUser = parseUserFromToken(tokens.accessToken);
         setUser(restoredUser);
         scheduleTokenRefresh(tokens.expiresAt);
@@ -93,7 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       clearSession();
       setUser(null);
     } finally {
-      console.log('[AuthContext] Session restoration complete, isLoading = false');
       setIsLoading(false);
     }
   }
@@ -150,17 +142,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function parseUserFromToken(accessToken: string): User {
     const decoded = decodeJwt(accessToken);
 
-    // DEBUG — log the full JWT payload to identify where roles are stored in Keycloak
-    console.log('[AuthContext] Full JWT claims:', JSON.stringify(decoded, null, 2));
-
     // Keycloak can store roles in realm_access (realm-level) OR resource_access (client-level)
     const realmRoles: string[] = (decoded.realm_access as any)?.roles || [];
     const resourceRoles: string[] = Object.values(
       (decoded.resource_access as Record<string, { roles: string[] }>) || {}
     ).flatMap(r => r.roles || []);
     const roles = Array.from(new Set([...realmRoles, ...resourceRoles]));
-
-    console.log('[AuthContext] Parsed roles:', roles);
 
     return {
       id: decoded.sub as string,
@@ -173,15 +160,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function syncUserToBackend(accessToken: string) {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      console.log('[AuthContext] Syncing user to backend:', backendUrl);
       const response = await fetch(`${backendUrl}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
       });
-      if (response.ok) {
-        console.log('[AuthContext] User synced to backend database');
-      } else {
+      if (!response.ok) {
         console.error('[AuthContext] Sync failed with status:', response.status);
       }
     } catch (error) {
@@ -237,7 +221,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // If token is expired, refresh it
       if (Date.now() >= tokens.expiresAt) {
-        console.log('[AuthContext] Token expired, refreshing...');
         const newTokens = await authApi.refreshAccessToken(tokens.refreshToken);
         saveTokens(newTokens);
         const refreshedUser = parseUserFromToken(newTokens.accessToken);

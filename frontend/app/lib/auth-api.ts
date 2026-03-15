@@ -131,8 +131,6 @@ function parseTokenToUser(accessToken: string): User {
   ).flatMap(r => r.roles || []);
   const roles = Array.from(new Set([...realmRoles, ...resourceRoles]));
 
-  console.log('[auth-api] Parsed roles:', roles);
-
   return {
     id: decoded.sub as string,
     email: (decoded.email as string) || '',
