@@ -1,4 +1,4 @@
-﻿import { SearchRequest, SearchResponse, Business, MerchantBusiness, PaginatedResult, Category, CreateBusinessRequest, ProductSearchResponse, ProductDetail, BusinessProductsResponse } from './types';
+﻿import { SearchRequest, SearchResponse, Business, MerchantBusiness, PaginatedResult, Category, CreateBusinessRequest, ProductSearchResponse, ProductDetail, BusinessProductsResponse, AdminUser, AdminUsersResponse, UserRole } from './types';
 import { AuthTokens } from './auth-types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -245,6 +245,57 @@ export async function rejectBusiness(id: string, rejectionReason: string): Promi
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(errorText || 'Failed to reject business');
+  }
+  return response.json();
+}
+
+// ─── Admin Users ───────────────────────────────────────────────────────────────
+
+export interface AdminUsersParams {
+  search?: string;
+  role?: UserRole;
+  isEnabled?: boolean;
+  sort?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export async function getAdminUsers(params: AdminUsersParams = {}): Promise<AdminUsersResponse> {
+  const query = new URLSearchParams();
+  if (params.search) query.set('search', params.search);
+  if (params.role !== undefined) query.set('role', params.role);
+  if (params.isEnabled !== undefined) query.set('isEnabled', String(params.isEnabled));
+  if (params.sort) query.set('sort', params.sort);
+  query.set('page', String(params.page ?? 1));
+  query.set('pageSize', String(params.pageSize ?? 20));
+
+  const response = await fetch(`${API_URL}/api/admin/users?${query}`, {
+    headers: getAuthHeader(),
+  });
+  if (!response.ok) throw new Error('Failed to fetch users');
+  return response.json();
+}
+
+export async function enableUser(id: string): Promise<AdminUser> {
+  const response = await fetch(`${API_URL}/api/admin/users/${id}/enable`, {
+    method: 'POST',
+    headers: getAuthHeader(),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to enable user');
+  }
+  return response.json();
+}
+
+export async function disableUser(id: string): Promise<AdminUser> {
+  const response = await fetch(`${API_URL}/api/admin/users/${id}/disable`, {
+    method: 'POST',
+    headers: getAuthHeader(),
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || 'Failed to disable user');
   }
   return response.json();
 }

@@ -163,4 +163,30 @@ export interface BusinessProductsResponse {
   hasPreviousPage: boolean;
 }
 
+export type UserRole = 'Anonymous' | 'Merchant' | 'Admin';
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  preferredUsername?: string;
+  role: UserRole;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lastLoginAt?: string;
+  businessCount: number;
+}
+
+export interface AdminUsersResponse {
+  items: AdminUser[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 
