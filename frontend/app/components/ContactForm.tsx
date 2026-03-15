@@ -1,7 +1,8 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Send, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface ContactFormProps {
   businessId: string;
@@ -20,44 +21,42 @@ interface FormErrors {
   message?: string;
 }
 
+const inputCls = (err?: string) =>
+  `w-full h-12 px-4 bg-stone-50 border rounded-xl outline-none transition-all text-sm text-foreground placeholder:text-muted-foreground/60 ${
+    err
+      ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
+      : 'border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
+  }`;
+
+const textareaCls = (err?: string) =>
+  `w-full px-4 py-3 bg-stone-50 border rounded-xl outline-none transition-all resize-none text-sm text-foreground placeholder:text-muted-foreground/60 ${
+    err
+      ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
+      : 'border-stone-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
+  }`;
+
 export default function ContactForm({ businessId, businessName }: ContactFormProps) {
   const t = useTranslations('contactForm');
 
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    message: ''
-  });
-
+  const [formData, setFormData] = useState<FormData>({ name: '', email: '', message: '' });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = t('validation.nameRequired');
-    }
+    if (!formData.name.trim()) newErrors.name = t('validation.nameRequired');
 
     const trimmedEmail = formData.email.trim();
-    if (!trimmedEmail) {
-      newErrors.email = t('validation.emailRequired');
-    } else if (!validateEmail(trimmedEmail)) {
-      newErrors.email = t('validation.emailInvalid');
-    }
+    if (!trimmedEmail)              newErrors.email = t('validation.emailRequired');
+    else if (!validateEmail(trimmedEmail)) newErrors.email = t('validation.emailInvalid');
 
     const trimmedMessage = formData.message.trim();
-    if (!trimmedMessage) {
-      newErrors.message = t('validation.messageRequired');
-    } else if (trimmedMessage.length < 10) {
-      newErrors.message = t('validation.messageMinLength');
-    }
+    if (!trimmedMessage)             newErrors.message = t('validation.messageRequired');
+    else if (trimmedMessage.length < 10) newErrors.message = t('validation.messageMinLength');
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -65,35 +64,18 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
 
     try {
       // TODO: Replace with actual API call when messaging backend is ready
-      // Trim values before sending
-      const trimmedData = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        message: formData.message.trim(),
-        businessId,
-        businessName
-      };
-
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-
-      console.log('Contact form submitted:', trimmedData);
-
       setSubmitStatus('success');
       setFormData({ name: '', email: '', message: '' });
       setErrors({});
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -104,137 +86,121 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    // Clear error for this field when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-    // Clear submit status when user starts editing again
-    if (submitStatus !== 'idle') {
-      setSubmitStatus('idle');
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
+    if (submitStatus !== 'idle') setSubmitStatus('idle');
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-        {t('title')}
-      </h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-        {t('subtitle')}
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name field */}
+    <div className="card-business p-8 mb-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-start gap-4 mb-6">
+        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Send className="w-5 h-5 text-primary" />
+        </div>
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            {t('name')}
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={formData.name}
-            onChange={handleChange('name')}
-            placeholder={t('namePlaceholder')}
-            aria-invalid={!!errors.name}
-            aria-describedby={errors.name ? 'name-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-              errors.name
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
-            }`}
-            disabled={isSubmitting}
-          />
-          {errors.name && (
-            <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
-          )}
+          <h2 className="font-heading text-2xl font-semibold text-foreground">
+            {t('title')}
+          </h2>
+          <p className="text-muted-foreground mt-0.5">{t('subtitle')}</p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        {/* Name + Email — side by side on md+ */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="contact-name" className="block text-sm font-medium text-foreground mb-2">
+              {t('name')}
+            </label>
+            <input
+              type="text"
+              id="contact-name"
+              value={formData.name}
+              onChange={handleChange('name')}
+              placeholder={t('namePlaceholder')}
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? 'contact-name-error' : undefined}
+              className={inputCls(errors.name)}
+              disabled={isSubmitting}
+            />
+            {errors.name && (
+              <p id="contact-name-error" className="mt-1.5 text-xs text-red-600">{errors.name}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="contact-email" className="block text-sm font-medium text-foreground mb-2">
+              {t('email')}
+            </label>
+            <input
+              type="email"
+              id="contact-email"
+              value={formData.email}
+              onChange={handleChange('email')}
+              placeholder={t('emailPlaceholder')}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'contact-email-error' : undefined}
+              className={inputCls(errors.email)}
+              disabled={isSubmitting}
+            />
+            {errors.email && (
+              <p id="contact-email-error" className="mt-1.5 text-xs text-red-600">{errors.email}</p>
+            )}
+          </div>
         </div>
 
-        {/* Email field */}
+        {/* Message */}
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            {t('email')}
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={formData.email}
-            onChange={handleChange('email')}
-            placeholder={t('emailPlaceholder')}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-              errors.email
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
-            }`}
-            disabled={isSubmitting}
-          />
-          {errors.email && (
-            <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
-          )}
-        </div>
-
-        {/* Message field */}
-        <div>
-          <label
-            htmlFor="message"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
+          <label htmlFor="contact-message" className="block text-sm font-medium text-foreground mb-2">
             {t('message')}
           </label>
           <textarea
-            id="message"
+            id="contact-message"
             value={formData.message}
             onChange={handleChange('message')}
             placeholder={t('messagePlaceholder')}
             rows={5}
             aria-invalid={!!errors.message}
-            aria-describedby={errors.message ? 'message-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-colors ${
-              errors.message
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
-            }`}
+            aria-describedby={errors.message ? 'contact-message-error' : undefined}
+            className={textareaCls(errors.message)}
             disabled={isSubmitting}
           />
           {errors.message && (
-            <p id="message-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.message}</p>
+            <p id="contact-message-error" className="mt-1.5 text-xs text-red-600">{errors.message}</p>
           )}
         </div>
 
-        {/* Submit button */}
+        {/* Submit */}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100"
         >
-          {isSubmitting ? t('sending') : t('send')}
+          {isSubmitting
+            ? <><Loader2 className="w-4 h-4 animate-spin" />{t('sending')}</>
+            : <><Send className="w-4 h-4" />{t('send')}</>
+          }
         </button>
 
-        {/* Success message */}
+        {/* Status messages */}
         {submitStatus === 'success' && (
           <div
             role="status"
             aria-live="polite"
-            className="p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg"
+            className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm"
           >
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
             {t('success')}
           </div>
         )}
 
-        {/* Error message */}
         {submitStatus === 'error' && (
           <div
             role="alert"
             aria-live="assertive"
-            className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg"
+            className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm"
           >
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
             {t('error')}
           </div>
         )}
