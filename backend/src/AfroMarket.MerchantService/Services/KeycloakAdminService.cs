@@ -56,6 +56,31 @@ public class KeycloakAdminService : IKeycloakAdminService
         return userId;
     }
 
+    public async Task SetUserEnabledAsync(string userId, bool enabled, CancellationToken cancellationToken = default)
+    {
+        var adminToken = await GetAdminTokenAsync(cancellationToken);
+
+        var url = $"{ServerUrl}/admin/realms/{AppRealm}/users/{userId}";
+        var payload = JsonSerializer.Serialize(new { enabled });
+
+        var client = _httpClientFactory.CreateClient("KeycloakAdmin");
+        var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = new StringContent(payload, Encoding.UTF8, "application/json"),
+            Headers = { Authorization = new AuthenticationHeaderValue("Bearer", adminToken) }
+        };
+
+        var response = await client.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogError("Keycloak set-enabled={Enabled} failed for user {UserId}. Status: {Status}, Body: {Body}",
+                enabled, userId, response.StatusCode, body);
+            throw new KeycloakAdminException($"Failed to {(enabled ? "enable" : "disable")} user in identity provider.", (int)response.StatusCode);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------

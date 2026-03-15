@@ -21,14 +21,16 @@ public interface IProductService
     Task<ProductResponse?> GetProductByIdAsync(Guid productId);
 
     /// <summary>
-    /// Gets paginated products for a specific business with optional status filter and text search
+    /// Gets paginated products for a specific business with optional status filter, text search and sort.
+    /// Allowed sort values: relevance (default), name_asc, name_desc, price_asc, price_desc.
     /// </summary>
     Task<PaginatedResponse<ProductResponse>> GetProductsByBusinessAsync(
         Guid businessId,
         int page = 1,
         int pageSize = 20,
         ProductStatus? statusFilter = null,
-        string? searchQuery = null);
+        string? searchQuery = null,
+        string? sort = null);
 
     /// <summary>
     /// Deletes a product (only if Draft status)

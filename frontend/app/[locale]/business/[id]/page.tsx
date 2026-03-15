@@ -1,181 +1,97 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useParams, useRouter, usePathname } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getBusinessById, getProductsByBusiness } from '../../../lib/api';
-import { Business, ProductDetail } from '../../../lib/types';
+import { MapPin, Phone, Mail, Globe, Tag, ExternalLink, ArrowLeft } from 'lucide-react';
 import ContactForm from '../../../components/ContactForm';
-import { ArrowLeft, MapPin, Phone, Mail, Globe, Tag, Package, ExternalLink, Store } from 'lucide-react';
+import ProductsSection from './products-section';
+import { Business, BusinessProductsResponse } from '../../../lib/types';
 
-export default function BusinessDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const locale = (pathname.split('/')[1] || 'fr') as 'fr' | 'en';
+export const revalidate = 60;
 
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [products, setProducts] = useState<ProductDetail[]>([]);
-  const [productsLoading, setProductsLoading] = useState(false);
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-  const t = {
-    fr: {
-      backToSearch: 'Retour à la recherche',
-      contact: 'Contact',
-      website: 'Visiter le site web',
-      notFound: 'Commerce non trouvé',
-      loading: 'Chargement...',
-      error: 'Impossible de charger ce commerce',
-      products: { title: 'Produits proposés', noProducts: 'Aucun produit disponible pour ce commerce.', loading: 'Chargement des produits...' },
-      available: 'Disponible',
-      unavailable: 'Indisponible',
-      soldBy: 'Vendu par',
-    },
-    en: {
-      backToSearch: 'Back to search',
-      contact: 'Contact',
-      website: 'Visit website',
-      notFound: 'Business not found',
-      loading: 'Loading...',
-      error: 'Failed to load this business',
-      products: { title: 'Products offered', noProducts: 'No products available for this business.', loading: 'Loading products...' },
-      available: 'Available',
-      unavailable: 'Unavailable',
-      soldBy: 'Sold by',
-    }
-  }[locale];
-
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getBusinessById(params.id as string, abortController.signal);
-
-        if (!data) {
-          setError(t.notFound);
-          return;
-        }
-
-        setBusiness(data);
-
-        setProductsLoading(true);
-        try {
-          const prodData = await getProductsByBusiness(params.id as string, 1, 20, abortController.signal);
-          if (!abortController.signal.aborted) {
-            setProducts(prodData.items);
-          }
-        } catch (prodErr: any) {
-          if (prodErr.name !== 'AbortError') {
-            console.error('Error fetching products:', prodErr);
-          }
-        } finally {
-          if (!abortController.signal.aborted) {
-            setProductsLoading(false);
-          }
-        }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          setError(t.error);
-        }
-      } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    if (params.id) {
-      fetchData();
-    }
-
-    return () => abortController.abort();
-  }, [params.id]);
-
-  const getBusinessName = (biz: Business): string => {
-    try {
-      const tr = typeof biz.nameTranslations === 'string' ? JSON.parse(biz.nameTranslations) : biz.nameTranslations;
-      return tr[locale] || tr['fr'] || biz.name || '';
-    } catch {
-      return biz.name || '';
-    }
-  };
-
-  const getBusinessDescription = (biz: Business): string => {
-    try {
-      const tr = typeof biz.descriptionTranslations === 'string' ? JSON.parse(biz.descriptionTranslations) : biz.descriptionTranslations;
-      return tr[locale] || tr['fr'] || biz.description || '';
-    } catch {
-      return biz.description || '';
-    }
-  };
-
-  const getProductTitle = (product: ProductDetail): string => {
-    try {
-      const tr = JSON.parse(product.titleTranslations);
-      return tr[locale] || tr['fr'] || product.title || '';
-    } catch {
-      return product.title || '';
-    }
-  };
-
-  const formatPrice = (price: number, currency: string): string => {
-    try {
-      return new Intl.NumberFormat(locale === 'fr' ? 'fr-CA' : 'en-CA', { style: 'currency', currency }).format(price);
-    } catch {
-      return `${price} ${currency}`;
-    }
-  };
-
-  const getFirstImageUrl = (product: ProductDetail): string | null => {
-    if (!product.media || product.media.length === 0) return null;
-    return [...product.media].sort((a, b) => a.orderIndex - b.orderIndex)[0].url;
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        {/* Skeleton Hero */}
-        <div className="h-64 md:h-80 bg-stone-200 animate-pulse" />
-        <div className="max-w-4xl mx-auto px-4 -mt-24 relative z-10">
-          <div className="card-business p-8 animate-pulse space-y-4">
-            <div className="h-10 bg-stone-200 rounded-xl w-3/4" />
-            <div className="h-4 bg-stone-200 rounded-xl w-1/2" />
-            <div className="h-24 bg-stone-200 rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
+async function fetchBusiness(id: string): Promise<Business | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/business/${id}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const addr = data.address ?? {};
+    return {
+      ...data,
+      city: addr.city ?? '',
+      address: [addr.street, addr.city, addr.province].filter(Boolean).join(', '),
+      location: { lat: addr.latitude ?? 0, lon: addr.longitude ?? 0 },
+    } as Business;
+  } catch {
+    return null;
   }
+}
 
-  if (error || !business) {
-    return (
-      <div className="min-h-screen bg-background py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t.backToSearch}
-          </button>
-          <div className="card-dashboard text-center py-16">
-            <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Store className="w-8 h-8 text-red-400" />
-            </div>
-            <p className="text-red-500">{error || t.notFound}</p>
-          </div>
-        </div>
-      </div>
-    );
+async function fetchProducts(
+  businessId: string,
+  page: number,
+  sort: string
+): Promise<BusinessProductsResponse> {
+  try {
+    const params = new URLSearchParams({
+      businessId,
+      page: String(page),
+      pageSize: '12',
+      sort,
+    });
+    const res = await fetch(`${API_URL}/api/products?${params}`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return { items: [], totalCount: 0, page: 1, pageSize: 12, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
+    return res.json();
+  } catch {
+    return { items: [], totalCount: 0, page: 1, pageSize: 12, totalPages: 0, hasNextPage: false, hasPreviousPage: false };
   }
+}
 
-  const businessName = getBusinessName(business);
-  const businessDescription = getBusinessDescription(business);
+function getBusinessName(biz: Business, locale: string): string {
+  try {
+    const tr = typeof biz.nameTranslations === 'string' ? JSON.parse(biz.nameTranslations) : biz.nameTranslations;
+    return tr[locale] || tr['fr'] || biz.name || '';
+  } catch {
+    return biz.name || '';
+  }
+}
+
+function getBusinessDescription(biz: Business, locale: string): string {
+  try {
+    const tr = typeof biz.descriptionTranslations === 'string' ? JSON.parse(biz.descriptionTranslations) : biz.descriptionTranslations;
+    return tr[locale] || tr['fr'] || biz.description || '';
+  } catch {
+    return biz.description || '';
+  }
+}
+
+interface PageProps {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
+}
+
+export default async function BusinessDetailPage({ params, searchParams }: PageProps) {
+  const { locale: localeParam, id } = await params;
+  const sp = await searchParams;
+
+  const locale = localeParam || 'fr';
+  const page = Number(sp?.page ?? 1);
+  const sort = sp?.sort ?? 'relevance';
+
+  const business = await fetchBusiness(id);
+  if (!business) notFound();
+
+  const initialProducts = await fetchProducts(business.id, page, sort);
+
+  const businessName = getBusinessName(business, locale);
+  const businessDescription = getBusinessDescription(business, locale);
+
+  const t = locale === 'en'
+    ? { backToSearch: 'Back to search', contact: 'Contact', website: 'Visit website' }
+    : { backToSearch: 'Retour à la recherche', contact: 'Contact', website: 'Visiter le site web' };
 
   return (
     <div className="min-h-screen bg-background">
@@ -192,21 +108,24 @@ export default function BusinessDetailPage() {
 
       <div className="max-w-4xl mx-auto px-4 -mt-32 relative z-10 pb-12">
         {/* Back button */}
-        <button
-          onClick={() => router.back()}
+        <Link
+          href={`/${locale}/search`}
           className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors drop-shadow"
           data-testid="back-button"
         >
           <ArrowLeft className="w-4 h-4" />
           {t.backToSearch}
-        </button>
+        </Link>
 
         {/* Main Card */}
         <div className="card-business p-8 mb-6 animate-fade-in" data-testid="business-card">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
             <div className="flex-1">
-              <h1 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-3" data-testid="business-name">
+              <h1
+                className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-3"
+                data-testid="business-name"
+              >
                 {businessName}
               </h1>
               <div className="flex flex-wrap gap-2">
@@ -278,7 +197,7 @@ export default function BusinessDetailPage() {
           {business.tags && business.tags.length > 0 && (
             <div className="border-t border-border pt-6 mt-6">
               <div className="flex flex-wrap gap-2">
-                {business.tags.map((tag, index) => (
+                {business.tags.map((tag: string, index: number) => (
                   <span
                     key={index}
                     className="inline-flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm"
@@ -292,83 +211,14 @@ export default function BusinessDetailPage() {
           )}
         </div>
 
-        {/* Products Section */}
-        <div className="card-dashboard mb-6" data-testid="products-section">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Package className="w-5 h-5 text-primary" />
-            </div>
-            <h2 className="font-heading text-xl font-semibold text-foreground">{t.products.title}</h2>
-          </div>
-
-          {productsLoading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="rounded-2xl overflow-hidden border border-border animate-pulse">
-                  <div className="aspect-video bg-stone-200" />
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-stone-200 rounded w-3/4" />
-                    <div className="h-5 bg-stone-200 rounded w-1/3" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!productsLoading && products.length === 0 && (
-            <div className="text-center py-10">
-              <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Package className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">{t.products.noProducts}</p>
-            </div>
-          )}
-
-          {!productsLoading && products.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map((product) => {
-                const imageUrl = getFirstImageUrl(product);
-                const title = getProductTitle(product);
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/${locale}/product/${product.id}`}
-                    className="group border border-border rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all bg-white"
-                    data-testid={`product-card-${product.id}`}
-                  >
-                    {/* Image */}
-                    {imageUrl ? (
-                      <div className="aspect-video bg-stone-100 overflow-hidden">
-                        <img
-                          src={imageUrl}
-                          alt={title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                    ) : (
-                      <div className="aspect-video bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center">
-                        <Package className="w-10 h-10 text-muted-foreground/40" />
-                      </div>
-                    )}
-                    <div className="p-4">
-                      <h3 className="font-semibold text-foreground mb-1 line-clamp-2 text-sm">{title}</h3>
-                      <p className="font-bold text-primary text-lg">
-                        {formatPrice(product.price, product.currency)}
-                      </p>
-                      <span className={`mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        product.isAvailable
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : 'bg-stone-100 text-stone-600'
-                      }`}>
-                        {product.isAvailable ? t.available : t.unavailable}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        {/* Products Section — client component for sort + pagination */}
+        <ProductsSection
+          businessId={business.id}
+          initialData={initialProducts}
+          initialPage={page}
+          initialSort={sort}
+          locale={locale}
+        />
 
         {/* Contact Form */}
         <ContactForm businessId={business.id} businessName={businessName} />

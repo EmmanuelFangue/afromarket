@@ -22,6 +22,11 @@ public interface IKeycloakAdminService
         string? realmRole,
         Dictionary<string, string>? attributes = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Enables or disables a Keycloak user.
+    /// </summary>
+    Task SetUserEnabledAsync(string userId, bool enabled, CancellationToken cancellationToken = default);
 }
 
 public class KeycloakUserExistsException : Exception

@@ -212,7 +212,8 @@ public class ProductController : ControllerBase
         [FromQuery] Guid businessId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] ProductStatus? status = null)
+        [FromQuery] ProductStatus? status = null,
+        [FromQuery] string? sort = null)
     {
         try
         {
@@ -226,7 +227,7 @@ public class ProductController : ControllerBase
                 ? status
                 : ProductStatus.Active;
 
-            var result = await _productService.GetProductsByBusinessAsync(businessId, page, pageSize, effectiveStatus);
+            var result = await _productService.GetProductsByBusinessAsync(businessId, page, pageSize, effectiveStatus, sort: sort);
 
             return Ok(result);
         }

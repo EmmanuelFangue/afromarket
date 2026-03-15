@@ -15,6 +15,9 @@ public class User
     // Roles are managed in Keycloak, but we cache them here for queries
     public UserRole Role { get; set; } = UserRole.Merchant;
 
+    // Mirrors Keycloak's enabled flag — updated by AdminController on enable/disable actions
+    public bool IsEnabled { get; set; } = true;
+
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }

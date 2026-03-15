@@ -99,6 +99,7 @@ public class UserSyncService : IUserSyncService
                 LastName = lastNameClaim?.Value ?? "",
                 PreferredUsername = preferredUsernameClaim?.Value,
                 Role = DetermineUserRole(claimsPrincipal),
+                IsEnabled = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 LastLoginAt = DateTime.UtcNow
@@ -132,6 +133,7 @@ public class UserSyncService : IUserSyncService
 
             user.LastLoginAt = DateTime.UtcNow;
             user.UpdatedAt = DateTime.UtcNow;
+            user.IsEnabled = true;
 
             await _context.SaveChangesAsync();
         }

@@ -133,6 +133,12 @@ public class BusinessController : ControllerBase
                 return NotFound(new { error = $"Business with ID {id} not found" });
             }
 
+            // Anonymous callers may only view Published businesses
+            if (business.Status != BusinessStatus.Published && !(User.Identity?.IsAuthenticated ?? false))
+            {
+                return NotFound(new { error = $"Business with ID {id} not found" });
+            }
+
             return Ok(business);
         }
         catch (Exception ex)
