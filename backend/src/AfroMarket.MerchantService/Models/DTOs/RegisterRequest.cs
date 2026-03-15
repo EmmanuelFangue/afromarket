@@ -1,22 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using AfroMarket.MerchantService.Resources;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
 public class RegisterRequest
 {
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Auth.Email.Required")]
+    [EmailAddress(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Auth.Email.Invalid")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Auth.Password.Required")]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "First name is required")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Auth.FirstName.Required")]
     [MaxLength(100)]
     public string FirstName { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Last name is required")]
+    [Required(ErrorMessageResourceType = typeof(SharedResources), ErrorMessageResourceName = "Auth.LastName.Required")]
     [MaxLength(100)]
     public string LastName { get; set; } = string.Empty;
 
