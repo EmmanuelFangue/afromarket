@@ -7,6 +7,7 @@ public class ProductResponse
     public Guid Id { get; set; }
     public Guid BusinessId { get; set; }
     public string BusinessName { get; set; } = string.Empty;
+    public string BusinessCity { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string TitleTranslations { get; set; } = string.Empty;

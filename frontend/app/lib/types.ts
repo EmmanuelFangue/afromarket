@@ -141,6 +141,7 @@ export interface ProductDetail {
   id: string;
   businessId: string;
   businessName: string;
+  businessCity: string;
   title: string;
   description: string;
   titleTranslations: string;

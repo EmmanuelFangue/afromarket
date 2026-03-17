@@ -193,6 +193,19 @@ public class ProductController : ControllerBase
                 return NotFound(new { error = _localizer["Error.ProductNotFound"].Value });
             }
 
+            // Anonymous callers may only view products from Published businesses
+            if (!(User.Identity?.IsAuthenticated ?? false))
+            {
+                var businessStatus = await _context.Businesses
+                    .Where(b => b.Id == product.BusinessId)
+                    .Select(b => b.Status)
+                    .FirstOrDefaultAsync();
+                if (businessStatus != BusinessStatus.Published)
+                {
+                    return NotFound(new { error = _localizer["Error.ProductNotFound"].Value });
+                }
+            }
+
             return Ok(product);
         }
         catch (Exception ex)

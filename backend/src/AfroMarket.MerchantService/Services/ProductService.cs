@@ -207,7 +207,7 @@ public class ProductService : IProductService
     public async Task<ProductResponse?> GetProductByIdAsync(Guid productId)
     {
         var product = await _context.Products
-            .Include(p => p.Business)
+            .Include(p => p.Business).ThenInclude(b => b.Address)
             .Include(p => p.Media.OrderBy(m => m.OrderIndex))
             .FirstOrDefaultAsync(p => p.Id == productId);
 
@@ -405,6 +405,7 @@ public class ProductService : IProductService
             Id = product.Id,
             BusinessId = product.BusinessId,
             BusinessName = product.Business.Name,
+            BusinessCity = product.Business.Address?.City ?? string.Empty,
             Title = product.Title,
             Description = product.Description,
             TitleTranslations = product.TitleTranslations,
