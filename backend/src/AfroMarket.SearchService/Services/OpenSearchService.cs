@@ -37,11 +37,16 @@ public class OpenSearchService : ISearchService
         var page = Math.Max(1, request.Page);
         var pageSize = Math.Max(1, Math.Min(100, request.PageSize)); // Max 100 results per page
 
+        // If a text query is present, also resolve matching businesses via product index
+        IEnumerable<string> productBusinessIds = Enumerable.Empty<string>();
+        if (!string.IsNullOrWhiteSpace(request.Query))
+            productBusinessIds = await GetBusinessIdsFromProductSearchAsync(request.Query);
+
         var searchDescriptor = new SearchDescriptor<Business>()
             .Index(IndexName)
             .From((page - 1) * pageSize)
             .Size(pageSize)
-            .Query(q => BuildQuery(q, request))
+            .Query(q => BuildQuery(q, request, productBusinessIds))
             .Aggregations(a => BuildAggregations(a))
             .Sort(s => BuildSort(s, request.Sort));
 
@@ -63,29 +68,48 @@ public class OpenSearchService : ISearchService
         };
     }
 
-    private QueryContainer BuildQuery(QueryContainerDescriptor<Business> q, BusinessSearchRequest request)
+    private QueryContainer BuildQuery(QueryContainerDescriptor<Business> q, BusinessSearchRequest request, IEnumerable<string>? productBusinessIds = null)
     {
-        var queries = new List<QueryContainer>();
+        var must = new List<QueryContainer>();
 
-        // Full-text search in translations (FR + EN)
-        if (!string.IsNullOrWhiteSpace(request.Query))
+        // Text search: business fields OR product-matched businesses (either satisfies the query)
+        var hasTextQuery = !string.IsNullOrWhiteSpace(request.Query);
+        var hasProductMatches = productBusinessIds?.Any() == true;
+
+        if (hasTextQuery || hasProductMatches)
         {
-            queries.Add(q.MultiMatch(m => m
-                .Query(request.Query)
-                .Fields(f => f
-                    .Field(b => b.NameTranslations, 2.0)         // Boost x2
-                    .Field(b => b.DescriptionTranslations)
-                    .Field(b => b.Tags)
-                )
-                .Type(TextQueryType.BestFields)
-                .Fuzziness(Fuzziness.Auto)
-            ));
+            var shouldClauses = new List<QueryContainer>();
+
+            if (hasTextQuery)
+            {
+                shouldClauses.Add(q.MultiMatch(m => m
+                    .Query(request.Query)
+                    .Fields(f => f
+                        .Field(b => b.NameTranslations, 2.0)         // Boost x2
+                        .Field(b => b.DescriptionTranslations)
+                        .Field(b => b.Tags)
+                    )
+                    .Type(TextQueryType.BestFields)
+                    .Fuzziness(Fuzziness.Auto)
+                ));
+            }
+
+            if (hasProductMatches)
+            {
+                // Businesses whose products matched the query
+                shouldClauses.Add(q.Terms(t => t
+                    .Field(b => b.Id)
+                    .Terms(productBusinessIds!)
+                ));
+            }
+
+            must.Add(q.Bool(b => b.Should(shouldClauses.ToArray()).MinimumShouldMatch(1)));
         }
 
         // Category filter
         if (request.Categories?.Any() == true)
         {
-            queries.Add(q.Terms(t => t
+            must.Add(q.Terms(t => t
                 .Field(b => b.CategoryName)
                 .Terms(request.Categories)
             ));
@@ -94,7 +118,7 @@ public class OpenSearchService : ISearchService
         // City filter
         if (request.Cities?.Any() == true)
         {
-            queries.Add(q.Terms(t => t
+            must.Add(q.Terms(t => t
                 .Field(b => b.City)
                 .Terms(request.Cities)
             ));
@@ -103,7 +127,7 @@ public class OpenSearchService : ISearchService
         // Geo search
         if (request.GeoSearch != null)
         {
-            queries.Add(q.GeoDistance(g => g
+            must.Add(q.GeoDistance(g => g
                 .Field(b => b.Location)
                 .Location(request.GeoSearch.Lat, request.GeoSearch.Lon)
                 .Distance(request.GeoSearch.Distance)
@@ -111,12 +135,49 @@ public class OpenSearchService : ISearchService
         }
 
         // Only published businesses
-        queries.Add(q.Term(t => t
+        must.Add(q.Term(t => t
             .Field(b => b.IsPublished)
             .Value(true)
         ));
 
-        return q.Bool(b => b.Must(queries.ToArray()));
+        return q.Bool(b => b.Must(must.ToArray()));
+    }
+
+    private async Task<IEnumerable<string>> GetBusinessIdsFromProductSearchAsync(string query)
+    {
+        try
+        {
+            var response = await _client.SearchAsync<Product>(s => s
+                .Index(ProductIndexName)
+                .Size(50) // Up to 50 product hits → distinct businessIds
+                .Source(sf => sf.Includes(i => i.Field(p => p.BusinessId)))
+                .Query(q => q.MultiMatch(m => m
+                    .Query(query)
+                    .Fields(f => f
+                        .Field(p => p.TitleTranslations, 2.0)
+                        .Field(p => p.DescriptionTranslations)
+                    )
+                    .Type(TextQueryType.BestFields)
+                    .Fuzziness(Fuzziness.Auto)
+                ))
+            );
+
+            if (!response.IsValid)
+            {
+                _logger.LogWarning("Product-to-business resolution failed: {Error}", response.DebugInformation);
+                return Enumerable.Empty<string>();
+            }
+
+            return response.Hits
+                .Select(h => h.Source?.BusinessId ?? string.Empty)
+                .Where(id => !string.IsNullOrEmpty(id))
+                .Distinct();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Product-to-business resolution threw, query: {Query}", query);
+            return Enumerable.Empty<string>();
+        }
     }
 
     private SortDescriptor<Business> BuildSort(SortDescriptor<Business> s, string? sort)
