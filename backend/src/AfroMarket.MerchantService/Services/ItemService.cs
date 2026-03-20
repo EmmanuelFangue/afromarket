@@ -257,6 +257,30 @@ public class ItemService : IItemService
         };
     }
 
+    public async Task<ItemResponse> ChangeItemStatusAsync(Guid itemId, ItemStatus newStatus, Guid ownerId)
+    {
+        if (newStatus == ItemStatus.Draft)
+            throw new ArgumentException("Cannot revert an item to Draft status");
+
+        var item = await _context.Items
+            .Include(i => i.Business)
+            .FirstOrDefaultAsync(i => i.Id == itemId);
+
+        if (item == null)
+            throw new KeyNotFoundException(_localizer["Error.ItemNotFound"].Value);
+
+        if (item.Business.OwnerId != ownerId)
+            throw new UnauthorizedAccessException(_localizer["Error.Unauthorized"].Value);
+
+        item.Status = newStatus;
+        item.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Changed item {ItemId} status to {Status}", itemId, newStatus);
+
+        return await MapToResponseAsync(item);
+    }
+
     public async Task<bool> DeleteItemAsync(Guid itemId, Guid ownerId)
     {
         var item = await _context.Items

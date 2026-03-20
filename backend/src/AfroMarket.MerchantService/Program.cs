@@ -21,6 +21,7 @@ builder.Services.AddDbContext<MerchantDbContext>(options =>
 // Register application services
 builder.Services.AddScoped<IBusinessService, BusinessService>();
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IUserSyncService, UserSyncService>();
 
 // Configure Localization

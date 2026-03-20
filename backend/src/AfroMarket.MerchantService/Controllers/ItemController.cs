@@ -1,7 +1,9 @@
+using AfroMarket.MerchantService.Extensions;
 using AfroMarket.MerchantService.Models.DTOs;
 using AfroMarket.MerchantService.Models.Enums;
 using AfroMarket.MerchantService.Services;
 using AfroMarket.MerchantService.Resources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
@@ -31,6 +33,7 @@ public class ItemController : ControllerBase
     /// <param name="request">Les informations de l'article à créer</param>
     /// <returns>L'article créé</returns>
     [HttpPost]
+    [Authorize(Policy = "MerchantOnly")]
     [ProducesResponseType(typeof(ItemResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -38,9 +41,7 @@ public class ItemController : ControllerBase
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            // Pour l'instant, on utilise un GUID temporaire pour les tests
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var item = await _itemService.CreateItemAsync(request, ownerId);
 
@@ -79,6 +80,7 @@ public class ItemController : ControllerBase
     /// <param name="request">Les informations à mettre à jour</param>
     /// <returns>L'article mis à jour</returns>
     [HttpPut("{id}")]
+    [Authorize(Policy = "MerchantOnly")]
     [ProducesResponseType(typeof(ItemResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -87,8 +89,7 @@ public class ItemController : ControllerBase
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var item = await _itemService.UpdateItemAsync(id, request, ownerId);
 
@@ -190,6 +191,7 @@ public class ItemController : ControllerBase
     /// <param name="id">L'ID de l'article à supprimer</param>
     /// <returns>204 No Content si succès</returns>
     [HttpDelete("{id}")]
+    [Authorize(Policy = "MerchantOnly")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -197,8 +199,7 @@ public class ItemController : ControllerBase
     {
         try
         {
-            // TODO: Récupérer le vrai OwnerId depuis le token JWT authentifié
-            var ownerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var ownerId = User.GetUserId();
 
             var result = await _itemService.DeleteItemAsync(id, ownerId);
 
@@ -223,6 +224,42 @@ public class ItemController : ControllerBase
         {
             _logger.LogError(ex, "Error deleting item {ItemId}", id);
             return StatusCode(500, new { error = _localizer["Error.DeleteItem"].Value });
+        }
+    }
+
+    /// <summary>
+    /// Modifie le statut d'un article (Active ou Suspended uniquement)
+    /// </summary>
+    [HttpPatch("{id}/status")]
+    [Authorize(Policy = "MerchantOnly")]
+    [ProducesResponseType(typeof(ItemResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ItemResponse>> ChangeItemStatus(Guid id, [FromBody] ChangeItemStatusRequest request)
+    {
+        try
+        {
+            var ownerId = User.GetUserId();
+            var result = await _itemService.ChangeItemStatusAsync(id, request.Status, ownerId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { error = "Item not found" });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing status for item {ItemId}", id);
+            return StatusCode(500, new { error = "An error occurred while changing item status" });
         }
     }
 }

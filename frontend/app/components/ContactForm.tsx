@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { sendMessage } from '../lib/api';
 
 interface ContactFormProps {
   businessId: string;
@@ -74,20 +75,12 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
     setSubmitStatus('idle');
 
     try {
-      // TODO: Replace with actual API call when messaging backend is ready
-      // Trim values before sending
-      const trimmedData = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        message: formData.message.trim(),
+      await sendMessage({
         businessId,
-        businessName
-      };
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      console.log('Contact form submitted:', trimmedData);
+        senderName: formData.name.trim(),
+        senderEmail: formData.email.trim(),
+        content: formData.message.trim(),
+      });
 
       setSubmitStatus('success');
       setFormData({ name: '', email: '', message: '' });

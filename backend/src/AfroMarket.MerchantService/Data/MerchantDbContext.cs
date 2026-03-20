@@ -103,17 +103,26 @@ public class MerchantDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.BusinessId);
+            entity.HasIndex(e => e.ParentMessageId);
 
-            entity.Property(e => e.SenderEmail).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.SenderEmail).IsRequired().HasMaxLength(200);
             entity.Property(e => e.SenderName).IsRequired().HasMaxLength(200);
             entity.Property(e => e.Content).IsRequired().HasMaxLength(2000);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+            entity.Property(e => e.IsFromMerchant).HasDefaultValue(false);
 
-            // Relationship
+            // Business relationship
             entity.HasOne(e => e.Business)
                 .WithMany(b => b.Messages)
                 .HasForeignKey(e => e.BusinessId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Self-referencing threading relationship
+            entity.HasOne(e => e.ParentMessage)
+                .WithMany(e => e.Replies)
+                .HasForeignKey(e => e.ParentMessageId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Item configuration

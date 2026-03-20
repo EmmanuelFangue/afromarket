@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using AfroMarket.MerchantService.Models.Enums;
 
 namespace AfroMarket.MerchantService.Models.DTOs;
 
@@ -26,4 +27,9 @@ public class UpdateItemRequest
     public List<CreateMediaRequest>? MediaToAdd { get; set; }
     public List<Guid>? MediaToRemove { get; set; }
     public List<UpdateMediaOrderRequest>? MediaOrderUpdates { get; set; }
+}
+
+public class ChangeItemStatusRequest
+{
+    public ItemStatus Status { get; set; }
 }

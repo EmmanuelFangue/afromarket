@@ -30,6 +30,11 @@ public interface IItemService
         ItemStatus? statusFilter = null);
 
     /// <summary>
+    /// Changes item status (Active or Suspended only; merchant-owned items)
+    /// </summary>
+    Task<ItemResponse> ChangeItemStatusAsync(Guid itemId, ItemStatus newStatus, Guid ownerId);
+
+    /// <summary>
     /// Deletes an item (only if Draft status)
     /// </summary>
     Task<bool> DeleteItemAsync(Guid itemId, Guid ownerId);
