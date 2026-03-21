@@ -81,23 +81,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-heading font-bold text-2xl">A</span>
+            </div>
+          </div>
+          <h1 className="font-heading text-3xl font-bold text-center text-foreground">
             Connexion
           </h1>
-          <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-muted-foreground">
             Connectez-vous à votre compte
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-card border border-border p-8 rounded-2xl shadow-sm">
           {/* Email field */}
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Email
             </label>
@@ -109,15 +114,13 @@ export default function LoginPage() {
               placeholder="vous@exemple.com"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.email
-                  ? 'border-red-500 dark:border-red-400'
-                  : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.email ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
             {errors.email && (
-              <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p id="email-error" className="mt-1 text-sm text-destructive">
                 {errors.email}
               </p>
             )}
@@ -127,7 +130,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Mot de passe
             </label>
@@ -139,15 +142,13 @@ export default function LoginPage() {
               placeholder="••••••••"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.password
-                  ? 'border-red-500 dark:border-red-400'
-                  : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.password ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
             {errors.password && (
-              <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p id="password-error" className="mt-1 text-sm text-destructive">
                 {errors.password}
               </p>
             )}
@@ -158,7 +159,7 @@ export default function LoginPage() {
             <div
               role="alert"
               aria-live="assertive"
-              className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg"
+              className="p-4 bg-destructive/10 text-destructive rounded-xl"
             >
               {errors.general}
             </div>
@@ -168,7 +169,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isSubmitting ? "Connexion en cours..." : "Se connecter"}
           </button>
@@ -177,7 +178,7 @@ export default function LoginPage() {
           <div className="text-center text-sm">
             <Link
               href={`/${locale}/auth/register`}
-              className="text-blue-600 dark:text-blue-400 hover:underline"
+              className="text-primary hover:underline font-medium"
             >
               Pas de compte ? Inscrivez-vous
             </Link>

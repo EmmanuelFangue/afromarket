@@ -117,21 +117,26 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white">
+          <div className="flex justify-center mb-4">
+            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+              <span className="text-white font-heading font-bold text-2xl">A</span>
+            </div>
+          </div>
+          <h1 className="font-heading text-3xl font-bold text-center text-foreground">
             Inscription
           </h1>
-          <p className="mt-2 text-center text-gray-600 dark:text-gray-400">
+          <p className="mt-2 text-center text-muted-foreground">
             Créez votre compte AfroMarket
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6 bg-card border border-border p-8 rounded-2xl shadow-sm">
           {/* First Name */}
           <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1">
               Prénom
             </label>
             <input
@@ -142,17 +147,17 @@ export default function RegisterPage() {
               placeholder="Votre prénom"
               aria-invalid={!!errors.firstName}
               aria-describedby={errors.firstName ? 'firstName-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.firstName ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.firstName ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
-            {errors.firstName && <p id="firstName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.firstName}</p>}
+            {errors.firstName && <p id="firstName-error" className="mt-1 text-sm text-destructive">{errors.firstName}</p>}
           </div>
 
           {/* Last Name */}
           <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1">
               Nom
             </label>
             <input
@@ -163,17 +168,17 @@ export default function RegisterPage() {
               placeholder="Votre nom"
               aria-invalid={!!errors.lastName}
               aria-describedby={errors.lastName ? 'lastName-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.lastName ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.lastName ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
-            {errors.lastName && <p id="lastName-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.lastName}</p>}
+            {errors.lastName && <p id="lastName-error" className="mt-1 text-sm text-destructive">{errors.lastName}</p>}
           </div>
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
               Email
             </label>
             <input
@@ -184,17 +189,17 @@ export default function RegisterPage() {
               placeholder="vous@exemple.com"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? 'email-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.email ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.email ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
-            {errors.email && <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
+            {errors.email && <p id="email-error" className="mt-1 text-sm text-destructive">{errors.email}</p>}
           </div>
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
               Mot de passe
             </label>
             <input
@@ -205,17 +210,17 @@ export default function RegisterPage() {
               placeholder="••••••••"
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? 'password-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.password ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.password ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
-            {errors.password && <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
+            {errors.password && <p id="password-error" className="mt-1 text-sm text-destructive">{errors.password}</p>}
           </div>
 
           {/* Confirm Password */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-foreground mb-1">
               Confirmer le mot de passe
             </label>
             <input
@@ -226,17 +231,17 @@ export default function RegisterPage() {
               placeholder="••••••••"
               aria-invalid={!!errors.confirmPassword}
               aria-describedby={errors.confirmPassword ? 'confirmPassword-error' : undefined}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-                errors.confirmPassword ? 'border-red-500 dark:border-red-400' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+                errors.confirmPassword ? 'border-destructive' : 'border-border'
               }`}
               disabled={isSubmitting}
             />
-            {errors.confirmPassword && <p id="confirmPassword-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>}
+            {errors.confirmPassword && <p id="confirmPassword-error" className="mt-1 text-sm text-destructive">{errors.confirmPassword}</p>}
           </div>
 
           {/* General error */}
           {errors.general && (
-            <div role="alert" aria-live="assertive" className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg">
+            <div role="alert" aria-live="assertive" className="p-4 bg-destructive/10 text-destructive rounded-xl">
               {errors.general}
             </div>
           )}
@@ -245,14 +250,14 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isSubmitting ? "Inscription en cours..." : "S'inscrire"}
           </button>
 
           {/* Link */}
           <div className="text-center text-sm">
-            <Link href={`/${locale}/auth/login`} className="text-blue-600 dark:text-blue-400 hover:underline">
+            <Link href={`/${locale}/auth/login`} className="text-primary hover:underline font-medium">
               Déjà un compte ? Connectez-vous
             </Link>
           </div>

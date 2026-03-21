@@ -97,22 +97,20 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setFormData(prev => ({ ...prev, [field]: e.target.value }));
-    // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
-    // Clear submit status when user starts editing again
     if (submitStatus !== 'idle') {
       setSubmitStatus('idle');
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-8">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+    <div className="bg-card border border-border rounded-2xl shadow-sm p-8">
+      <h2 className="font-heading text-2xl font-bold text-card-foreground mb-2">
         {t('title')}
       </h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
+      <p className="text-muted-foreground mb-6">
         {t('subtitle')}
       </p>
 
@@ -121,7 +119,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             {t('name')}
           </label>
@@ -133,15 +131,13 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             placeholder={t('namePlaceholder')}
             aria-invalid={!!errors.name}
             aria-describedby={errors.name ? 'name-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-              errors.name
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
+            className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+              errors.name ? 'border-destructive' : 'border-border'
             }`}
             disabled={isSubmitting}
           />
           {errors.name && (
-            <p id="name-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
+            <p id="name-error" className="mt-1 text-sm text-destructive">{errors.name}</p>
           )}
         </div>
 
@@ -149,7 +145,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             {t('email')}
           </label>
@@ -161,15 +157,13 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             placeholder={t('emailPlaceholder')}
             aria-invalid={!!errors.email}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white transition-colors ${
-              errors.email
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
+            className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 transition-colors ${
+              errors.email ? 'border-destructive' : 'border-border'
             }`}
             disabled={isSubmitting}
           />
           {errors.email && (
-            <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+            <p id="email-error" className="mt-1 text-sm text-destructive">{errors.email}</p>
           )}
         </div>
 
@@ -177,7 +171,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
         <div>
           <label
             htmlFor="message"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-foreground mb-1"
           >
             {t('message')}
           </label>
@@ -189,15 +183,13 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
             rows={5}
             aria-invalid={!!errors.message}
             aria-describedby={errors.message ? 'message-error' : undefined}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none transition-colors ${
-              errors.message
-                ? 'border-red-500 dark:border-red-400'
-                : 'border-gray-300 dark:border-gray-600'
+            className={`w-full px-4 py-2 border rounded-xl bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring/20 resize-none transition-colors ${
+              errors.message ? 'border-destructive' : 'border-border'
             }`}
             disabled={isSubmitting}
           />
           {errors.message && (
-            <p id="message-error" className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.message}</p>
+            <p id="message-error" className="mt-1 text-sm text-destructive">{errors.message}</p>
           )}
         </div>
 
@@ -205,7 +197,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
         >
           {isSubmitting ? t('sending') : t('send')}
         </button>
@@ -215,7 +207,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
           <div
             role="status"
             aria-live="polite"
-            className="p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded-lg"
+            className="p-4 bg-success/10 text-success rounded-xl"
           >
             {t('success')}
           </div>
@@ -226,7 +218,7 @@ export default function ContactForm({ businessId, businessName }: ContactFormPro
           <div
             role="alert"
             aria-live="assertive"
-            className="p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg"
+            className="p-4 bg-destructive/10 text-destructive rounded-xl"
           >
             {t('error')}
           </div>

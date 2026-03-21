@@ -17,14 +17,14 @@ export default function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-1">
       <button
         onClick={() => switchLanguage('fr')}
         disabled={locale === 'fr' || isPending}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
           locale === 'fr'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ? 'bg-primary text-white'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         FR
@@ -32,10 +32,10 @@ export default function LanguageSwitcher() {
       <button
         onClick={() => switchLanguage('en')}
         disabled={locale === 'en' || isPending}
-        className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
           locale === 'en'
-            ? 'bg-blue-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+            ? 'bg-primary text-white'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
         } disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         EN

@@ -11,9 +11,9 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<number, { label: string; className: string }> = {
-  [ItemStatus.Draft]: { label: 'Brouillon', className: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' },
-  [ItemStatus.Active]: { label: 'Actif', className: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
-  [ItemStatus.Suspended]: { label: 'Suspendu', className: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' },
+  [ItemStatus.Draft]: { label: 'Brouillon', className: 'status-draft' },
+  [ItemStatus.Active]: { label: 'Actif', className: 'status-published' },
+  [ItemStatus.Suspended]: { label: 'Suspendu', className: 'status-suspended' },
 };
 
 export default function ProductsManager({ businessId, locale }: Props) {
@@ -48,7 +48,7 @@ export default function ProductsManager({ businessId, locale }: Props) {
         items: prev.items.map(i => i.id === id ? updated : i)
       } : prev);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Erreur lors de l\'activation');
+      setError(e instanceof Error ? e.message : "Erreur lors de l'activation");
     } finally {
       setActionId(null);
     }
@@ -87,7 +87,7 @@ export default function ProductsManager({ businessId, locale }: Props) {
   };
 
   if (loading && !result) {
-    return <div className="text-center py-12 text-gray-500">Chargement des produits...</div>;
+    return <div className="text-center py-12 text-muted-foreground">Chargement des produits...</div>;
   }
 
   const items = result?.items ?? [];
@@ -96,19 +96,19 @@ export default function ProductsManager({ businessId, locale }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-muted-foreground">
           {result?.totalCount ?? 0} produit{(result?.totalCount ?? 0) !== 1 ? 's' : ''}
         </p>
         <button
           onClick={() => router.push(`/${locale}/merchant/products/new`)}
-          className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 text-sm bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
         >
           + Ajouter un produit
         </button>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">
+        <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-sm text-destructive">
           {error}
           <button onClick={() => setError(null)} className="ml-2 underline">Fermer</button>
         </div>
@@ -116,37 +116,37 @@ export default function ProductsManager({ businessId, locale }: Props) {
 
       {items.length === 0 ? (
         <div className="py-16 text-center">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Aucun produit pour l'instant.</p>
+          <p className="text-muted-foreground mb-4">Aucun produit pour l'instant.</p>
           <button
             onClick={() => router.push(`/${locale}/merchant/products/new`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-2 bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors"
           >
             Ajouter votre premier produit
           </button>
         </div>
       ) : (
         <>
-          <div className="divide-y divide-gray-100 dark:divide-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
             {items.map(item => {
               const statusCfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG[ItemStatus.Draft];
               const isBusy = actionId === item.id;
               const thumb = item.media[0]?.url;
 
               return (
-                <div key={item.id} className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750">
+                <div key={item.id} className="flex items-center gap-4 p-4 bg-card hover:bg-muted/50 transition-colors">
                   {/* Thumbnail */}
-                  <div className="w-14 h-14 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
+                  <div className="w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
                     {thumb ? (
                       <img src={thumb} alt={item.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">N/A</div>
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">N/A</div>
                     )}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">{item.title}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="font-medium text-foreground truncate">{item.title}</p>
+                    <p className="text-sm text-muted-foreground">
                       {new Intl.NumberFormat('fr-CA', { style: 'currency', currency: item.currency }).format(item.price)}
                     </p>
                   </div>
@@ -162,7 +162,7 @@ export default function ProductsManager({ businessId, locale }: Props) {
                       <button
                         onClick={() => handleActivate(item.id)}
                         disabled={isBusy}
-                        className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1.5 text-xs bg-success text-white rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors"
                       >
                         Activer
                       </button>
@@ -171,7 +171,7 @@ export default function ProductsManager({ businessId, locale }: Props) {
                       <button
                         onClick={() => handleSuspend(item.id)}
                         disabled={isBusy}
-                        className="px-3 py-1.5 text-xs bg-orange-500 text-white rounded-md hover:bg-orange-600 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1.5 text-xs bg-warning text-white rounded-lg hover:bg-warning/90 disabled:opacity-50 transition-colors"
                       >
                         Suspendre
                       </button>
@@ -180,14 +180,14 @@ export default function ProductsManager({ businessId, locale }: Props) {
                       <button
                         onClick={() => handleActivate(item.id)}
                         disabled={isBusy}
-                        className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1.5 text-xs bg-success text-white rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors"
                       >
                         Réactiver
                       </button>
                     )}
                     <button
                       onClick={() => router.push(`/${locale}/merchant/products/${item.id}/edit`)}
-                      className="px-3 py-1.5 text-xs text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      className="px-3 py-1.5 text-xs text-foreground border border-border rounded-lg hover:bg-muted transition-colors"
                     >
                       Modifier
                     </button>
@@ -195,7 +195,7 @@ export default function ProductsManager({ businessId, locale }: Props) {
                       <button
                         onClick={() => handleDelete(item.id)}
                         disabled={isBusy}
-                        className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-50 transition-colors"
+                        className="px-3 py-1.5 text-xs text-destructive border border-destructive/30 rounded-lg hover:bg-destructive/10 disabled:opacity-50 transition-colors"
                       >
                         Supprimer
                       </button>
@@ -212,15 +212,15 @@ export default function ProductsManager({ businessId, locale }: Props) {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm border border-border rounded-xl disabled:opacity-50 hover:bg-muted transition-colors"
               >
                 Précédent
               </button>
-              <span className="px-4 py-2 text-sm text-gray-500">Page {page} / {totalPages}</span>
+              <span className="px-4 py-2 text-sm text-muted-foreground">Page {page} / {totalPages}</span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm border border-border rounded-xl disabled:opacity-50 hover:bg-muted transition-colors"
               >
                 Suivant
               </button>

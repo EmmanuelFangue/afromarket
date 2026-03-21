@@ -51,7 +51,7 @@ function DashboardContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Chargement...</div>
+        <div className="text-muted-foreground">Chargement...</div>
       </div>
     );
   }
@@ -71,12 +71,12 @@ function DashboardContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Tableau de bord</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <h1 className="font-heading text-2xl font-bold text-foreground">Tableau de bord</h1>
+          <p className="text-sm text-muted-foreground mt-1">
             Bienvenue, {user?.name || user?.email}
           </p>
         </div>
@@ -90,7 +90,7 @@ function DashboardContent() {
                 const b = businesses.find(b => b.id === e.target.value);
                 if (b) setSelectedBusiness(b);
               }}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm dark:text-white"
+              className="px-3 py-2 border border-border rounded-xl bg-input text-sm text-foreground"
             >
               {businesses.map(b => (
                 <option key={b.id} value={b.id}>{b.name}</option>
@@ -100,7 +100,7 @@ function DashboardContent() {
         )}
 
         {/* Tab navigation */}
-        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
+        <div className="border-b border-border mb-6">
           <nav className="-mb-px flex gap-1" aria-label="Onglets du tableau de bord">
             {tabs.map(tab => (
               <button
@@ -108,8 +108,8 @@ function DashboardContent() {
                 onClick={() => setTab(tab.id)}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400'
-                    : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:border-gray-300'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                 }`}
               >
                 {tab.label}
@@ -119,17 +119,17 @@ function DashboardContent() {
         </div>
 
         {/* Tab content */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-6">
           {loadingBusinesses ? (
-            <div className="text-center py-12 text-gray-500">Chargement...</div>
+            <div className="text-center py-12 text-muted-foreground">Chargement...</div>
           ) : businessError ? (
-            <div className="text-center py-12 text-red-600">{businessError}</div>
+            <div className="text-center py-12 text-destructive">{businessError}</div>
           ) : !selectedBusiness ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 dark:text-gray-400 mb-4">Vous n'avez pas encore de commerce.</p>
+              <p className="text-muted-foreground mb-4">Vous n'avez pas encore de commerce.</p>
               <button
                 onClick={() => router.push(`/${locale}/merchant/business/new`)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary"
               >
                 Créer mon commerce
               </button>
@@ -167,7 +167,7 @@ export default function MerchantDashboard() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-600 dark:text-gray-400">Chargement...</div>
+        <div className="text-muted-foreground">Chargement...</div>
       </div>
     }>
       <DashboardContent />
