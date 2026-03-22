@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Business, SearchResponse, SearchRequest } from '../lib/types';
@@ -24,7 +25,8 @@ export default function SearchComponent() {
   const tCommon = useTranslations('common');
   const tBusiness = useTranslations('business');
   const locale = useLocale();
-  const [query, setQuery] = useState('');
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get('q') || '');
   const [results, setResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -271,6 +273,19 @@ export default function SearchComponent() {
   useEffect(() => {
     fetchSuggestions(debouncedQuery);
   }, [debouncedQuery, fetchSuggestions]);
+
+  // Auto-search on mount if URL has ?q= or ?category= params
+  useEffect(() => {
+    const initialQ = searchParams.get('q') || '';
+    const initialCategory = searchParams.get('category') || '';
+    if (initialCategory) {
+      setSelectedCategories([initialCategory]);
+    }
+    if (initialQ || initialCategory) {
+      handleSearch(undefined, initialQ || undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Extract name/description from translations
   const getBusinessName = (business: Business): string => {
