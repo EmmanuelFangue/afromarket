@@ -119,6 +119,11 @@ export interface MessageDetail {
   isFromMerchant: boolean;
 }
 
+export interface Category {
+  id: string;
+  name: string;
+}
+
 export interface SearchRequest {
   query: string;
   categories?: string[];

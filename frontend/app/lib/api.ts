@@ -1,4 +1,4 @@
-import { SearchRequest, SearchResponse, Business, BusinessDetail, Item, PaginatedResult, MessageSummary, MessageDetail } from './types';
+import { SearchRequest, SearchResponse, Business, BusinessDetail, Item, PaginatedResult, MessageSummary, MessageDetail, Category } from './types';
 import { AuthTokens } from './auth-types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -21,6 +21,8 @@ function getAuthHeader(): HeadersInit {
   }
   return {};
 }
+
+// ─── Search ────────────────────────────────────────────────────────────
 
 export async function searchBusinesses(
   request: SearchRequest,
@@ -67,6 +69,16 @@ export async function getBusinessById(
 }
 
 // ─── Merchant: Business ────────────────────────────────────────────────
+
+export async function getCategories(): Promise<Category[]> {
+  try {
+    const response = await fetch(`${API_URL}/api/business/categories`);
+    if (!response.ok) return [];
+    return response.json();
+  } catch {
+    return [];
+  }
+}
 
 export async function getMyBusinesses(): Promise<BusinessDetail[]> {
   const response = await fetch(`${MERCHANT_API_URL}/api/business/my-businesses`, {

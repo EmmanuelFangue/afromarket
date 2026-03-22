@@ -14,8 +14,8 @@ import { useDebounce } from '../hooks/useDebounce';
 const MapView = dynamic(() => import('./MapView'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-96 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
-      <span className="text-gray-600 dark:text-gray-400">Loading map...</span>
+    <div className="w-full h-96 flex items-center justify-center bg-muted rounded-xl">
+      <span className="text-muted-foreground">Loading map...</span>
     </div>
   )
 });
@@ -211,14 +211,12 @@ export default function SearchComponent() {
       case 'ArrowDown':
         e.preventDefault();
         setSelectedSuggestionIndex(prev => {
-          // Wrap from -1 (no selection) to 0, or from last to first
           return (prev + 1) % suggestions.length;
         });
         break;
       case 'ArrowUp':
         e.preventDefault();
         setSelectedSuggestionIndex(prev => {
-          // From "no selection" (-1) or first item, wrap to last; otherwise move up
           if (prev <= 0) {
             return suggestions.length - 1;
           }
@@ -329,7 +327,7 @@ export default function SearchComponent() {
                 }
               }}
               placeholder={t('searchPlaceholder')}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-white"
+              className="input-default"
               role="combobox"
               aria-autocomplete="list"
               aria-expanded={showSuggestions}
@@ -347,16 +345,16 @@ export default function SearchComponent() {
                 ref={suggestionsRef}
                 id="autocomplete-listbox"
                 role="listbox"
-                className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+                className="absolute z-10 w-full mt-1 bg-card border border-border rounded-xl shadow-lg max-h-80 overflow-y-auto"
               >
                 {suggestionsLoading && (
-                  <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
+                  <div className="px-4 py-3 text-muted-foreground text-sm">
                     {t('autocomplete.loading')}
                   </div>
                 )}
 
                 {!suggestionsLoading && suggestions.length === 0 && debouncedQuery.trim() && (
-                  <div className="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
+                  <div className="px-4 py-3 text-muted-foreground text-sm">
                     {t('autocomplete.noSuggestions')}
                   </div>
                 )}
@@ -372,18 +370,18 @@ export default function SearchComponent() {
                         onClick={() => selectSuggestion(business)}
                         className={`px-4 py-3 cursor-pointer transition-colors ${
                           index === selectedSuggestionIndex
-                            ? 'bg-blue-50 dark:bg-blue-900'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                            ? 'bg-primary/10'
+                            : 'hover:bg-muted/50'
                         }`}
                       >
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                        <div className="font-medium text-foreground">
                           {getBusinessName(business)}
                         </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-2 mt-1">
-                          <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 rounded text-xs">
+                        <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                          <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs">
                             {business.categoryName}
                           </span>
-                          <span className="text-gray-500 dark:text-gray-400">{business.city}</span>
+                          <span className="text-muted-foreground">{business.city}</span>
                         </div>
                       </li>
                     ))}
@@ -395,7 +393,7 @@ export default function SearchComponent() {
           <button
             type="submit"
             disabled={loading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="btn-primary"
           >
             {loading ? tCommon('loading') : tCommon('search')}
           </button>
@@ -403,31 +401,31 @@ export default function SearchComponent() {
             type="button"
             onClick={handleNearMe}
             disabled={geoLoading}
-            className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-6 py-2 rounded-xl font-medium transition-colors ${
               coordinates
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-success text-white hover:bg-success/90'
+                : 'bg-muted text-foreground hover:bg-muted/80'
             } disabled:opacity-50`}
           >
             {geoLoading ? t('geolocation.detecting') : t('nearMe')}
           </button>
         </div>
 
-        {/* Location status and distance slider */}
+        {/* Location status and distance selector */}
         <div className="flex items-center gap-4">
           {coordinates && (
             <div className="flex items-center gap-4 flex-1">
-              <span className="text-sm text-green-600 font-medium">
+              <span className="text-sm text-success font-medium">
                 ✓ {t('geolocation.detected')}
               </span>
               <div className="flex items-center gap-2 flex-1">
-                <label className="text-sm text-gray-600 whitespace-nowrap">
+                <label className="text-sm text-muted-foreground whitespace-nowrap">
                   {t('distance')}:
                 </label>
                 <select
                   value={distance}
                   onChange={(e) => setDistance(e.target.value)}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1 border border-border rounded-lg text-sm bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 >
                   <option value="5km">5 km</option>
                   <option value="10km">10 km</option>
@@ -438,14 +436,14 @@ export default function SearchComponent() {
               <button
                 type="button"
                 onClick={clearLocation}
-                className="text-sm text-gray-500 hover:text-gray-700 underline"
+                className="text-sm text-muted-foreground hover:text-foreground underline"
               >
                 Clear
               </button>
             </div>
           )}
           {geoError && (
-            <div className="text-sm text-red-600">
+            <div className="text-sm text-destructive">
               {geoError.code === 1 && t('geolocation.permissionDenied')}
               {geoError.code === 2 && t('geolocation.unavailable')}
               {geoError.code === 3 && t('geolocation.error')}
@@ -456,12 +454,12 @@ export default function SearchComponent() {
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="mb-6 p-4 bg-primary/5 rounded-2xl border border-primary/20">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-semibold text-blue-900">{t('activeFilters')}</h4>
+            <h4 className="font-semibold text-primary">{t('activeFilters')}</h4>
             <button
               onClick={clearAllFilters}
-              className="text-sm text-blue-600 hover:text-blue-800 underline"
+              className="text-sm text-primary hover:text-primary/80 underline"
             >
               {t('clearAllFilters')}
             </button>
@@ -471,20 +469,20 @@ export default function SearchComponent() {
               <button
                 key={category}
                 onClick={() => toggleCategory(category)}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-primary text-white rounded-full text-sm hover:bg-primary/90 transition-colors"
               >
                 {category}
-                <span className="text-blue-200">×</span>
+                <span className="opacity-70">×</span>
               </button>
             ))}
             {selectedCities.map(city => (
               <button
                 key={city}
                 onClick={() => toggleCity(city)}
-                className="flex items-center gap-2 px-3 py-1 bg-green-600 text-white rounded-full text-sm hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-1 bg-success text-white rounded-full text-sm hover:bg-success/90 transition-colors"
               >
                 {city}
-                <span className="text-green-200">×</span>
+                <span className="opacity-70">×</span>
               </button>
             ))}
           </div>
@@ -492,7 +490,7 @@ export default function SearchComponent() {
       )}
 
       {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
+        <div className="mb-4 p-4 bg-destructive/10 text-destructive rounded-xl">
           {error}
         </div>
       )}
@@ -501,19 +499,19 @@ export default function SearchComponent() {
         <div className="space-y-6">
           {/* Results header with count and view toggle */}
           <div className="flex items-center justify-between">
-            <div className="text-gray-600 dark:text-gray-400">
+            <div className="text-muted-foreground">
               {t('resultsFound', { count: results.totalResults })}
               {coordinates && <span className="ml-2 text-sm">({t('nearMe')})</span>}
             </div>
 
             {/* View toggle buttons */}
-            <div className="flex gap-2 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+            <div className="flex gap-2 bg-muted p-1 rounded-xl">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -523,10 +521,10 @@ export default function SearchComponent() {
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   viewMode === 'map'
-                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                    ? 'bg-card text-primary shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -544,22 +542,26 @@ export default function SearchComponent() {
                 <Link
                   key={business.id}
                   href={`/${locale}/business/${business.id}`}
-                  className="block p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                  className="card-business group"
                 >
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{getBusinessName(business)}</h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-3">{getBusinessDescription(business)}</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                      {business.categoryName}
-                    </span>
-                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
-                      {business.city}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    <p>{business.address}</p>
-                    {business.phone && <p>{tBusiness('phone')}: {business.phone}</p>}
-                    {business.email && <p>{tBusiness('email')}: {business.email}</p>}
+                  <div className="p-6">
+                    <h3 className="font-heading text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors line-clamp-1">
+                      {getBusinessName(business)}
+                    </h3>
+                    <p className="text-muted-foreground mb-3 line-clamp-2">{getBusinessDescription(business)}</p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+                        {business.categoryName}
+                      </span>
+                      <span className="px-3 py-1 bg-success/10 text-success rounded-full text-sm">
+                        {business.city}
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p>{business.address}</p>
+                      {business.phone && <p>{tBusiness('phone')}: {business.phone}</p>}
+                      {business.email && <p>{tBusiness('email')}: {business.email}</p>}
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -576,11 +578,11 @@ export default function SearchComponent() {
 
           {/* Facets/Filters Section */}
           {results.facets && Object.keys(results.facets).length > 0 && (
-            <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">{t('filters')}</h3>
+            <div className="mt-8 p-6 bg-background rounded-2xl border border-border">
+              <h3 className="text-lg font-semibold mb-4 text-foreground">{t('filters')}</h3>
               {Object.entries(results.facets).map(([key, items]) => (
                 <div key={key} className="mb-4">
-                  <h4 className="font-medium mb-2 text-gray-900 dark:text-gray-100">
+                  <h4 className="font-medium mb-2 text-foreground">
                     {key === 'categories' ? t('categories') : key === 'cities' ? t('cities') : key}
                   </h4>
                   <div className="flex flex-wrap gap-2">
@@ -596,9 +598,9 @@ export default function SearchComponent() {
                           className={`px-3 py-1 rounded-full text-sm transition-colors ${
                             isSelected
                               ? key === 'categories'
-                                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                : 'bg-green-600 text-white hover:bg-green-700'
-                              : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                ? 'bg-primary text-white hover:bg-primary/90'
+                                : 'bg-success text-white hover:bg-success/90'
+                              : 'bg-card border border-border text-foreground hover:bg-muted'
                           }`}
                         >
                           {item.key} ({item.count})
